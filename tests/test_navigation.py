@@ -58,3 +58,25 @@ class NavigationTests(CatalogTestCase):
 
         with self.assertRaisesRegex(ValueError, "Navigation item label is required"):
             self.render_navigation('{% call nav_menu("Nav") %}{{ nav_item("") }}{% endcall %}')
+
+    def test_steps_navigation_keeps_current_completion_and_disabled_states_distinct(self) -> None:
+        output = self.render_navigation(
+            """
+            {% call nav_menu("Application steps", style="steps") %}
+              {{ nav_item("Details", href="/details", icon="folder-open", description="Details saved", completed=true) }}
+              {{ nav_item("Members", href="/members", icon="user", description="Choose members", active=true) }}
+              {{ nav_item("Submission", icon="pencil", description="Available later", disabled=true) }}
+            {% endcall %}
+            """
+        )
+
+        self.assertIn('class="nav nav-pills nav-steps flex-column"', output)
+        self.assertEqual(output.count('data-nav-completed="true"'), 1)
+        first_item = re.search(r'<li\b[^>]*>.*?</li>', output)
+        self.assertIsNotNone(first_item)
+        self.assertIn('<span class="visually-hidden">Completed</span>', first_item.group())
+        self.assertIn('class="nav-link-icon" aria-hidden="true"', output)
+        self.assertIn('href="/members" aria-current="page"', output)
+        self.assertIn('aria-disabled="true" tabindex="-1"', output)
+        self.assertIn('<span class="nav-link-description d-block small">Details saved</span>', first_item.group())
+        self.assertIn('<span class="nav-link-description d-block small">Choose members</span>', output)

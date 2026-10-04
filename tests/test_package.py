@@ -87,6 +87,7 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/themes/_standalone.scss",
     "scss/themes/_theme.scss",
     "scss/utilities/_background_color.scss",
+    "scss/utilities/_border.scss",
     "scss/utilities/_scroll_fade.scss",
     "scss/utilities/_scroll_fade_primitives.scss",
 }
@@ -246,10 +247,10 @@ class PackageMetadataTests(unittest.TestCase):
         )
         self.assertNotIn("workspaces", package)
 
-    def test_rc10_candidate_declares_the_state_artifact_surface(self) -> None:
+    def test_rc11_candidate_declares_the_state_artifact_surface(self) -> None:
         package = self._read_package()
 
-        self.assertEqual(package["version"], "1.0.0-rc.10")
+        self.assertEqual(package["version"], "1.0.0-rc.11")
         self.assertEqual(
             package["exports"]["./state.js"],
             "./dist/js/state.js",
@@ -358,7 +359,10 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(manifest["schemaVersion"], 1)
         self.assertEqual(
             manifest["package"],
-            {"name": "@wpmoo/ui", "version": "1.0.0-rc.10"},
+            {
+                "name": "@wpmoo/ui",
+                "version": self._read_package()["version"],
+            },
         )
         self.assertEqual(
             [entry["export"] for entry in manifest["artifacts"]],

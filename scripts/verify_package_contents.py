@@ -114,6 +114,7 @@ APPROVED_TARBALL_FILES = {
     "scss/themes/_standalone.scss",
     "scss/themes/_theme.scss",
     "scss/utilities/_background_color.scss",
+    "scss/utilities/_border.scss",
     "scss/utilities/_scroll_fade.scss",
     "scss/utilities/_scroll_fade_primitives.scss",
     "package.json",

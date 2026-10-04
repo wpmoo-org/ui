@@ -3,6 +3,29 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.0.0-rc.11 Entrypoints and Feature Freeze
+
+RC11 preserves the RC10 package exports, public Sass configuration and runtime
+contracts. Connected Steps navigation uses `nav_menu(style="steps")` and the
+item's independent `completed` state. Its public CSS hooks are `.nav-steps` and
+`data-nav-completed="true"`; the current route does not imply completion.
+
+The scoped `.border-dashed` utility changes only border style. Surfaces with
+borders declared on all four sides, such as Card or an element with `.border`,
+keep their border width, color and radius. A directional border alone does not
+meet that precondition; use `.border` first when a full outline is intended.
+Its Sass partial is packaged through the
+existing source glob and included by both full and scoped CSS entrypoints;
+there is no additional stylesheet or JavaScript entrypoint. The catalog groups
+Border and Scroll Fade under Utilities.
+
+The RC11 inventory is the current feature freeze for stable 1.0.0. Work toward
+that checkpoint is limited to necessary bug fixes, verification and release
+preparation; new capabilities belong to 1.1.0. Historical inventories stay
+unchanged as removal guards. Preview certification remains explicit until the
+separate certification gates are satisfied. Adapter release pins follow
+publication and their own consumer validation.
+
 ## 1.0.0-rc.10 Entrypoints
 
 RC10 preserves the RC9 state bootstrap and release manifest. It adds the public,

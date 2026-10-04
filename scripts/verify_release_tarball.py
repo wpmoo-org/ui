@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the RC10 package candidate from the bytes in its npm tarball.
+"""Verify the RC11 package candidate from the bytes in its npm tarball.
 
 The verifier deliberately does not extract the archive.  It validates one
 canonical member policy, reads only the required JSON/artifact members, and
@@ -20,7 +20,7 @@ from typing import Any
 
 
 PACKAGE_NAME = "@wpmoo/ui"
-PACKAGE_VERSION = "1.0.0-rc.10"
+PACKAGE_VERSION = "1.0.0-rc.11"
 MANIFEST_MEMBER = "package/dist/release-manifest.json"
 PACKAGE_JSON_MEMBER = "package/package.json"
 MANIFEST_LIMIT = 1 * 1024 * 1024

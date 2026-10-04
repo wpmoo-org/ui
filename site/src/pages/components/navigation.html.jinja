@@ -63,6 +63,22 @@
       preview_class="moo-example__preview--fit"
     ) }}
 
+    {% set steps %}
+      {% call nav_menu("Application steps", style="steps") %}
+        {{ nav_item("Details", href="#", icon="folder-open", description="Details saved", completed=true) }}
+        {{ nav_item("Members", href="#", icon="user", description="Choose your team", active=true) }}
+        {{ nav_item("Schedule", href="#", icon="calendar", description="Choose a date") }}
+        {{ nav_item("Submit", icon="send", description="Available after review", disabled=true) }}
+      {% endcall %}
+    {% endset %}
+    {{ render_component_example("navigation", "Navigation",
+      "steps",
+      "Steps",
+      "Connect 2rem icon frames in a vertical route menu. Completed steps use the theme's primary colors; the current page keeps its independent pill highlight. Supply an icon for each step and keep completion independent of availability.",
+      steps,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
     {% set underline %}
       {% call nav_menu("Project filters", style="underline") %}
         {{ nav_item("All", href="#", active=true) }}

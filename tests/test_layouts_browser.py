@@ -775,13 +775,21 @@ class LayoutBrowserTests(unittest.TestCase):
             localStorage.setItem(storageKey, 'collapsed');
           }
           window.__layoutCertificationFirstFrame = null;
-          requestAnimationFrame(() => {
+          const captureFirstFrame = () => {
             const root = document.querySelector('[data-sidebar-key="layout-certification-shell"]');
+            const sidebar = root?.querySelector(':scope > aside');
+            // A streamed response can expose the empty wrapper before its
+            // inline bootstrap and sidebar exist. Sample the first visible sidebar.
+            if (!sidebar || sidebar.getBoundingClientRect().height === 0) {
+              requestAnimationFrame(captureFirstFrame);
+              return;
+            }
             window.__layoutCertificationFirstFrame = {
               key: root?.dataset.sidebarKey || null,
               state: root?.dataset.sidebarState || null
             };
-          });
+          };
+          requestAnimationFrame(captureFirstFrame);
         """
         context, page, evidence = self._open(
             "layout-app", LAYOUT_CASES[0], init_script=init_script

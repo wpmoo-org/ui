@@ -85,6 +85,14 @@ def watch_sources(stop_event: threading.Event) -> None:
         # two saves), and dying here would silently stop every future
         # rebuild while the server keeps serving stale output.
         try:
+            # Equal-length edits within one second can reuse stale bytecode.
+            # Compile the current builder source instead of its cached module.
+            build_path = Path(catalog_build.__file__)
+            catalog_build.__dict__.pop("build", None)
+            exec(
+                compile(build_path.read_bytes(), str(build_path), "exec"),
+                catalog_build.__dict__,
+            )
             catalog_build.build()
         except Exception as error:  # noqa: BLE001 - report and keep watching
             print(f"Build failed, keeping last good output: {error}", flush=True)

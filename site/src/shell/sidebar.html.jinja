@@ -2,6 +2,7 @@
 {% from "includes/component-icons.html.jinja" import component_icons %}
 
 {% set utility_icons = {
+  "border": "square-dashed",
   "scroll-fade": "scroll"
 } %}
 
@@ -19,6 +20,7 @@
 {% set blocks_page = (sections | selectattr("slug", "equalto", "blocks") | list)[0] %}
 {% set resource_pages = sections | rejectattr("slug", "in", ["introduction", "installation", "layout", "components", "layouts", "blocks"]) | list %}
 {% set components_open = current_section == "components" %}
+{% set utilities_open = current_section == "utils" %}
 {% set examples_open = current_section == "examples" %}
 {% set charts_active = current_section == "sections" and current_slug == "charts" %}
 {% set home_active = current_section == "sections" and current_slug == "index" %}
@@ -38,23 +40,28 @@
   }) %}
 {% endfor %}
 
+{% set utility_children = [{
+  "label": "All Utilities",
+  "href": "utils/index.html",
+  "icon": "layout-grid",
+  "active": utilities_open and current_slug == "utilities"
+}] %}
+{% for utility in utilities %}
+  {% set _ = utility_children.append({
+    "label": utility.label,
+    "href": "utils/" ~ utility.slug ~ ".html",
+    "icon": utility_icons.get(utility.slug, "sparkles"),
+    "active": utilities_open and current_slug == utility.slug
+  }) %}
+{% endfor %}
+
 {% set catalog_items = [
   {"kind": "link", "label": "Examples", "href": "examples/index.html", "icon": "list-todo", "active": examples_open},
   {"kind": "submenu", "id": "shell-components-menu", "label": "Components", "icon": "component", "open": components_open, "active": components_open, "children": component_children},
   {"kind": "link", "label": blocks_page.label, "href": blocks_page.href, "icon": blocks_page.icon, "active": current_section == "blocks"},
-  {"kind": "link", "label": "Charts", "href": "charts/index.html", "icon": "chart-area", "active": charts_active}
+  {"kind": "link", "label": "Charts", "href": "charts/index.html", "icon": "chart-area", "active": charts_active},
+  {"kind": "submenu", "id": "shell-utilities-menu", "label": "Utilities", "icon": "sparkles", "open": utilities_open, "active": utilities_open, "children": utility_children}
 ] %}
-{#- One utility ships today; the entry links straight to it and keeps the
-    Catalog group's Utilities slot for later growth. #}
-{% for utility in utilities %}
-  {% set _ = catalog_items.append({
-    "kind": "link",
-    "label": "Utilities",
-    "href": "utils/" ~ utility.slug ~ ".html",
-    "icon": utility_icons.get(utility.slug, "sparkles"),
-    "active": current_section == "utils"
-  }) %}
-{% endfor %}
 
 {% set resource_items = [] %}
 {% for page in resource_pages %}

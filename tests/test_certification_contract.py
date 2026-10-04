@@ -1161,12 +1161,20 @@ class CertificationContractTests(unittest.TestCase):
             "./release-manifest.json",
         )
 
-    def test_rc10_api_freeze_matches_current_package_and_runtime_exports(self) -> None:
-        self.assertTrue((CERTIFICATION_ROOT / "api-freeze-1.0.0-rc.10.json").is_file())
+    def test_rc10_api_freeze_remains_a_historical_removal_guard(self) -> None:
         freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.10.json")
         package = self._read_json("package.json")
-        certification = self._read_json("certification.json")
         self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.10")
+        self.assertNotEqual(freeze["freezeVersion"], package["version"])
+        self.assertTrue(set(freeze["packageExports"]).issubset(package["exports"]))
+        self.assertTrue(set(freeze["packageFiles"]).issubset(package["files"]))
+
+    def test_rc11_api_freeze_matches_current_package_and_runtime_exports(self) -> None:
+        self.assertTrue((CERTIFICATION_ROOT / "api-freeze-1.0.0-rc.11.json").is_file())
+        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.11.json")
+        package = self._read_json("package.json")
+        certification = self._read_json("certification.json")
+        self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.11")
         self.assertEqual(package["version"], freeze["freezeVersion"])
         self.assertEqual(certification["coreVersion"], freeze["freezeVersion"])
         self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))

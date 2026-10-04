@@ -4259,6 +4259,182 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_navigation_steps_consume_host_border_color(self) -> None:
+        border_color = "rgb(23, 101, 173)"
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/navigation.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+                    rows = page.locator("#certification-navigation-steps").evaluate(
+                        """(nav, borderColor) => {
+                          nav.style.setProperty('--bs-border-color', borderColor);
+                          return [...nav.querySelectorAll('.nav-item')].map(item => {
+                            const frame = getComputedStyle(item.querySelector('.nav-link-icon'));
+                            return {
+                              connector: getComputedStyle(item, '::before').borderInlineStartColor,
+                              border: frame.borderColor,
+                              background: frame.backgroundColor,
+                              completed: item.dataset.navCompleted === 'true',
+                            };
+                          });
+                        }""",
+                        border_color,
+                    )
+                    self.assertEqual(len(rows), 4)
+                    for row in rows:
+                        self.assertEqual(row["connector"], border_color)
+                        self.assertEqual(
+                            row["border"],
+                            row["background"] if row["completed"] else border_color,
+                        )
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def test_navigation_descriptions_follow_enabled_and_disabled_colors(self) -> None:
+        cases = (
+            BrowserCase(
+                name=f"{size}-{theme}-{direction}",
+                viewport=viewport,
+                color_scheme=theme,
+                direction=direction,
+            )
+            for size, viewport in (
+                ("desktop", {"width": 1040, "height": 844}),
+                ("mobile", {"width": 390, "height": 844}),
+            )
+            for theme in ("light", "dark")
+            for direction in ("ltr", "rtl")
+        )
+        for case in cases:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/navigation.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+                    report = page.locator("#certification-navigation-steps").evaluate(
+                        """nav => {
+                          const probe = document.createElement('span');
+                          probe.style.color = 'var(--bs-nav-link-description-color)';
+                          nav.querySelector('.nav').append(probe);
+                          const enabledColor = getComputedStyle(probe).color;
+                          probe.remove();
+                          return {enabledColor, links: [...nav.querySelectorAll('.nav-link')].map(link => ({
+                            disabled: link.getAttribute('aria-disabled') === 'true',
+                            label: getComputedStyle(link).color,
+                            description: getComputedStyle(link.querySelector('.nav-link-description')).color,
+                          }))};
+                        }"""
+                    )
+                    self.assertEqual(len(report["links"]), 4)
+                    for link in report["links"]:
+                        self.assertEqual(
+                            link["description"],
+                            link["label"] if link["disabled"] else report["enabledColor"],
+                        )
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def test_navigation_steps_preserve_accepted_frames_connectors_and_completion(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/navigation.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+                    report = page.locator("#certification-navigation-steps").evaluate(
+                        """nav => {
+                          const owner = nav.closest('.moo-ui');
+                          const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+                          const probe = document.createElement('span');
+                          probe.style.color = getComputedStyle(owner).getPropertyValue('--moo-primary');
+                          owner.append(probe);
+                          const primary = getComputedStyle(probe).color;
+                          probe.remove();
+                          return {primary, rootSize, rows: [...nav.querySelectorAll('.nav-item')].map(item => {
+                            const link = item.querySelector('.nav-link');
+                            const icon = item.querySelector('.nav-link-icon');
+                            const frame = icon.getBoundingClientRect();
+                            const row = item.getBoundingClientRect();
+                            const line = getComputedStyle(item, '::before');
+                            const offset = parseFloat(line.insetInlineStart);
+                            return {
+                              width: frame.width, height: frame.height,
+                              iconCenter: frame.left + frame.width / 2,
+                              lineX: getComputedStyle(item).direction === 'rtl' ? row.right - offset : row.left + offset,
+                              lineTop: row.top + parseFloat(line.top),
+                              lineBottom: row.bottom - parseFloat(line.bottom),
+                              lineWidth: parseFloat(line.borderInlineStartWidth),
+                              frameCenterY: frame.top + frame.height / 2,
+                              background: getComputedStyle(icon).backgroundColor,
+                              current: link.getAttribute('aria-current'),
+                              completed: item.dataset.navCompleted === 'true',
+                            };
+                          })};
+                        }"""
+                    )
+                    self.assertEqual(len(report["rows"]), 4)
+                    for row in report["rows"]:
+                        self.assertAlmostEqual(row["width"], report["rootSize"] * 2, delta=0.5)
+                        self.assertAlmostEqual(row["height"], row["width"], delta=0.5)
+                        self.assertAlmostEqual(row["lineX"], row["iconCenter"], delta=1)
+                        self.assertGreater(row["lineWidth"], 0)
+                    rows = report["rows"]
+                    self.assertAlmostEqual(rows[0]["lineTop"], rows[0]["frameCenterY"], delta=1)
+                    self.assertAlmostEqual(rows[-1]["lineBottom"], rows[-1]["frameCenterY"], delta=1)
+                    for previous, following in zip(rows, rows[1:]):
+                        self.assertLessEqual(
+                            following["lineTop"] - previous["lineBottom"],
+                            max(previous["lineWidth"], following["lineWidth"]),
+                            "Adjacent connectors must meet without a visible gap",
+                        )
+                    self.assertEqual(rows[0]["background"], report["primary"])
+                    self.assertTrue(rows[0]["completed"])
+                    self.assertIsNone(rows[0]["current"])
+                    self.assertEqual(rows[1]["current"], "page")
+                    self.assertFalse(rows[1]["completed"])
+                    self.assertNotEqual(rows[1]["background"], report["primary"])
+                    details = page.locator("#certification-step-details")
+                    details.focus()
+                    details.press("Tab")
+                    expect(page.locator("#certification-step-members")).to_be_focused()
+                    page.locator("#certification-step-members").press("Tab")
+                    expect(page.locator("#certification-step-schedule")).to_be_focused()
+                    page.locator("#certification-step-schedule").press("Tab")
+                    expect(page.locator("#certification-step-submit")).not_to_be_focused()
+                    self.assertFalse(page.locator("#certification-navigation-steps").evaluate(
+                        "nav => [...nav.querySelectorAll('.nav-link')].includes(document.activeElement)"
+                    ))
+                    self.assertFalse(page.evaluate("document.documentElement.scrollWidth > document.documentElement.clientWidth"))
+                    self.assertEqual(run_axe(page), [])
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
     def test_separator_fixture_proves_orientation_and_decorative_contracts(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):

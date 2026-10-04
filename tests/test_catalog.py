@@ -2731,7 +2731,7 @@ class CatalogContractTests(CatalogTestCase):
         ]
         self.assert_page_actions_region(utility_header)
         self.assert_page_actions_region(utility)
-        self.assertIn('aria-label="Previous page: Charts"', utility)
+        self.assertIn('aria-label="Previous page: Border"', utility)
         self.assertIn('aria-label="Next page: Support &amp; Evidence"', utility)
 
         block = self.read_output("blocks/sidebar-floating.html")
@@ -2749,7 +2749,15 @@ class CatalogContractTests(CatalogTestCase):
 
         charts = self.read_output("charts.html")
         self.assertIn('aria-label="Previous page: Sidebar (Inset)"', charts)
-        self.assertIn('aria-label="Next page: Scroll Fade"', charts)
+        self.assertIn('aria-label="Next page: Utilities"', charts)
+
+        utilities = self.read_output("utils/index.html")
+        self.assertIn('aria-label="Previous page: Charts"', utilities)
+        self.assertIn('aria-label="Next page: Border"', utilities)
+
+        border = self.read_output("utils/border.html")
+        self.assertIn('aria-label="Previous page: Utilities"', border)
+        self.assertIn('aria-label="Next page: Scroll Fade"', border)
 
         support = self.read_output("support.html")
         self.assertIn('aria-label="Previous page: Scroll Fade"', support)
@@ -4214,7 +4222,19 @@ class CatalogContractTests(CatalogTestCase):
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 
         self.assertIn(f'id="release-{package["version"].replace(".", "-")}"', changelog)
-        self.assertIn(f"Release candidate v{package['version']}", changelog)
+        current_release = re.search(
+            rf'<article\b[^>]*aria-labelledby="release-{re.escape(package["version"].replace(".", "-"))}"[^>]*>'
+            r"(?P<body>.*?)</article>",
+            changelog,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(current_release)
+        active_release = current_release.group("body")
+        self.assertRegex(
+            active_release,
+            rf'<span\b[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>\s*v{re.escape(package["version"])}\s*</span>',
+        )
+        self.assertIn("preview", active_release)
         self.assertIn("Post-release", changelog)
         self.assertIn("PR #38 separated Core package outputs", changelog)
         self.assertNotIn("Phase 2 Evidence and Public Docs Boundary", changelog)
