@@ -4259,6 +4259,99 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_navigation_steps_consume_host_border_color(self) -> None:
+        border_color = "rgb(23, 101, 173)"
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/navigation.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+                    rows = page.locator("#certification-navigation-steps").evaluate(
+                        """(nav, borderColor) => {
+                          nav.style.setProperty('--bs-border-color', borderColor);
+                          return [...nav.querySelectorAll('.nav-item')].map(item => {
+                            const frame = getComputedStyle(item.querySelector('.nav-link-icon'));
+                            return {
+                              connector: getComputedStyle(item, '::before').borderInlineStartColor,
+                              border: frame.borderColor,
+                              background: frame.backgroundColor,
+                              completed: item.dataset.navCompleted === 'true',
+                            };
+                          });
+                        }""",
+                        border_color,
+                    )
+                    self.assertEqual(len(rows), 4)
+                    for row in rows:
+                        self.assertEqual(row["connector"], border_color)
+                        self.assertEqual(
+                            row["border"],
+                            row["background"] if row["completed"] else border_color,
+                        )
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def test_navigation_descriptions_follow_enabled_and_disabled_colors(self) -> None:
+        cases = (
+            BrowserCase(
+                name=f"{size}-{theme}-{direction}",
+                viewport=viewport,
+                color_scheme=theme,
+                direction=direction,
+            )
+            for size, viewport in (
+                ("desktop", {"width": 1040, "height": 844}),
+                ("mobile", {"width": 390, "height": 844}),
+            )
+            for theme in ("light", "dark")
+            for direction in ("ltr", "rtl")
+        )
+        for case in cases:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/navigation.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+                    report = page.locator("#certification-navigation-steps").evaluate(
+                        """nav => {
+                          const probe = document.createElement('span');
+                          probe.style.color = 'var(--bs-nav-link-description-color)';
+                          nav.querySelector('.nav').append(probe);
+                          const enabledColor = getComputedStyle(probe).color;
+                          probe.remove();
+                          return {enabledColor, links: [...nav.querySelectorAll('.nav-link')].map(link => ({
+                            disabled: link.getAttribute('aria-disabled') === 'true',
+                            label: getComputedStyle(link).color,
+                            description: getComputedStyle(link.querySelector('.nav-link-description')).color,
+                          }))};
+                        }"""
+                    )
+                    self.assertEqual(len(report["links"]), 4)
+                    for link in report["links"]:
+                        self.assertEqual(
+                            link["description"],
+                            link["label"] if link["disabled"] else report["enabledColor"],
+                        )
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
     def test_navigation_steps_preserve_accepted_frames_connectors_and_completion(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):

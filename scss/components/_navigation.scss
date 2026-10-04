@@ -1,7 +1,7 @@
 /* Navigation */
 $nav-step-icon-size: $spacer * 2 !default;
 $nav-step-gap: $spacer * 0.25 !default;
-$nav-step-border-color: var(--moo-border) !default;
+$nav-step-border-color: var(--bs-border-color) !default;
 $nav-step-completed-border-color: var(--moo-primary) !default;
 // Bootstrap secondary-color aliases the muted foreground, which fails 4.5:1
 // on the active pill (4.39:1 in the accepted light fixture). Nav link-color
@@ -17,6 +17,10 @@ $nav-link-description-color: color-mix(in srgb, var(--moo-muted-foreground) 95%,
 
 .nav-link-description {
   color: var(--bs-nav-link-description-color);
+}
+
+.nav-link.disabled .nav-link-description {
+  color: var(--bs-nav-link-disabled-color);
 }
 
 .nav-pills {

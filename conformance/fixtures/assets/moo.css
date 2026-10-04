@@ -4748,6 +4748,9 @@ label.btn {
   .nav-link-description {
     color: var(--bs-nav-link-description-color);
   }
+  .nav-link.disabled .nav-link-description {
+    color: var(--bs-nav-link-disabled-color);
+  }
   .nav-pills {
     --bs-nav-pills-border-radius: var(--bs-border-radius);
     --bs-nav-pills-link-active-color: var(--moo-foreground);
@@ -4790,7 +4793,7 @@ label.btn {
     z-index: 1;
     inset-inline-start: calc(var(--bs-nav-link-padding-x) + var(--bs-nav-step-icon-size) / 2);
     inset-block: calc(var(--bs-nav-step-gap) / -2);
-    border-inline-start: var(--bs-border-width) solid var(--moo-border);
+    border-inline-start: var(--bs-border-width) solid var(--bs-border-color);
     content: "";
     pointer-events: none;
   }
@@ -4811,7 +4814,7 @@ label.btn {
     block-size: var(--bs-nav-step-icon-size);
     color: var(--moo-foreground);
     background-color: var(--moo-muted-surface);
-    border: var(--bs-border-width) solid var(--moo-border);
+    border: var(--bs-border-width) solid var(--bs-border-color);
     border-radius: var(--bs-border-radius);
   }
   .nav-steps .nav-link.disabled .nav-link-icon {
