@@ -254,6 +254,7 @@ class CatalogBrowserTests(unittest.TestCase):
                                 shadow: getComputedStyle(content).boxShadow,
                                 ringColor, regularShadow, expectedRegularShadow,
                                 left: rect.left, right: rect.right, viewport: innerWidth,
+                                top: rect.top, bottom: rect.bottom, viewportHeight: innerHeight,
                               };
                             }
                             """
@@ -269,6 +270,8 @@ class CatalogBrowserTests(unittest.TestCase):
                         )
                         self.assertGreaterEqual(surface["left"], 4)
                         self.assertLessEqual(surface["right"], surface["viewport"] - 4)
+                        self.assertGreaterEqual(surface["top"], 4)
+                        self.assertLessEqual(surface["bottom"], surface["viewportHeight"] - 4)
                         search.press("Escape")
                         expect(page.locator("#catalog-command")).not_to_be_visible()
                         evidence.assert_clean()
