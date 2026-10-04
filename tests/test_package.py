@@ -247,10 +247,10 @@ class PackageMetadataTests(unittest.TestCase):
         )
         self.assertNotIn("workspaces", package)
 
-    def test_rc10_candidate_declares_the_state_artifact_surface(self) -> None:
+    def test_rc11_candidate_declares_the_state_artifact_surface(self) -> None:
         package = self._read_package()
 
-        self.assertEqual(package["version"], "1.0.0-rc.10")
+        self.assertEqual(package["version"], "1.0.0-rc.11")
         self.assertEqual(
             package["exports"]["./state.js"],
             "./dist/js/state.js",

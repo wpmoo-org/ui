@@ -16,6 +16,37 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
+        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-11">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v1.0.0-rc.11</span>
+            <span class="text-body-secondary">Connected steps and border utilities</span>
+          </div>
+          <h2 id="release-1-0-0-rc-11">Steps and Border Utilities</h2>
+          <p>
+            Navigation gains connected step icons and an independent completion
+            state. Completed icons use the primary surface while descriptions
+            remain muted, including on the active step.
+          </p>
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>The scoped <code>border-dashed</code> utility gives bordered components a dashed outline while preserving their width, color and radius.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>The Utilities archive lists Border and Scroll Fade, with an expandable navigation group and page links from Charts through each utility.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Fixed</span>
+              <span>The development preview rebuilds with the current builder after source edits, keeping archive layout and navigation in sync.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span>RC11 preserves the RC10 package entrypoints and begins the feature freeze for stable 1.0.0. Certification remains preview.</span>
+            </div>
+          </div>
+        </article>
+
         <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-10">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v1.0.0-rc.10</span>
@@ -610,6 +641,7 @@
     </article>
 
     {{ render_doc_toc([
+      {"id": "release-1-0-0-rc-11", "label": "v1.0.0-rc.11"},
       {"id": "release-1-0-0-rc-10", "label": "v1.0.0-rc.10"},
       {"id": "release-1-0-0-rc-9", "label": "v1.0.0-rc.9"},
       {"id": "release-1-0-0-rc-8", "label": "v1.0.0-rc.8"},
