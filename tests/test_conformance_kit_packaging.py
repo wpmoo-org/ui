@@ -84,6 +84,19 @@ class PackagingTests(unittest.TestCase):
             digest = hashlib.sha256(first).hexdigest()
             self.assertEqual(first_sidecar, f"{digest}  {archive_name}\n")
 
+    def test_documented_kit_checksum_matches_current_archive(self) -> None:
+        support = (ROOT / "SUPPORT.md").read_text(encoding="utf-8")
+        section = support.split("## Generic Host Conformance", 1)[1].split(
+            "## Reporting Problems", 1
+        )[0]
+        documented = re.search(r"SHA-256\s+`([0-9a-f]{64})`", section)
+        self.assertIsNotNone(documented, "document the kit's archive checksum")
+        self.assertEqual(
+            documented.group(1),
+            hashlib.sha256(self.archive).hexdigest(),
+            "the documented integrity check must accept the current kit",
+        )
+
     def test_symlinked_kit_content_is_rejected(self) -> None:
         probe = self.packaging.KIT_DIR / "fixtures" / "_symlink_probe.html"
         self.assertFalse(
