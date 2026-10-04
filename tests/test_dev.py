@@ -27,6 +27,64 @@ def load_dev_module():
 
 
 class DevRunnerTests(unittest.TestCase):
+    def test_watcher_reports_missing_build_entrypoint_and_recovers(self) -> None:
+        for entrypoint in ("", "def render_catalog():\n    pass\n"):
+            with self.subTest(entrypoint=entrypoint), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                snapshot = """from pathlib import Path
+ROOT = Path(__file__).resolve().parent
+def source_snapshot():
+    source = ROOT / 'build.py'
+    return ((str(source), source.stat().st_mtime_ns),)
+"""
+                build_source = """def build():
+    with (ROOT / 'calls.txt').open('a') as output:
+        output.write({value!r} + '\\n')
+"""
+                (root / "build.py").write_text(
+                    snapshot + build_source.format(value="stale"), encoding="utf-8"
+                )
+                driver = """import importlib.util
+import os
+from pathlib import Path
+import sys
+
+spec = importlib.util.spec_from_file_location('moo_dev', sys.argv[1])
+dev = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(dev)
+source = Path('build.py')
+initial_mtime_ns = source.stat().st_mtime_ns
+replacements = iter(sys.argv[2:])
+
+class SourceChanges:
+    calls = 0
+    def wait(self, timeout):
+        replacement = next(replacements, None)
+        if replacement is None:
+            return True
+        self.calls += 1
+        source.write_text(replacement, encoding='utf-8')
+        changed = initial_mtime_ns + self.calls * 1000000000
+        os.utime(source, ns=(changed, changed))
+        return False
+
+dev.watch_sources(SourceChanges())
+"""
+                result = subprocess.run(
+                    [
+                        sys.executable, "-c", driver, str(ROOT / "dev.py"),
+                        snapshot + entrypoint,
+                        snapshot + build_source.format(value="recovered"),
+                    ],
+                    cwd=root, check=False, capture_output=True, text=True, timeout=10,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(
+                    (root / "calls.txt").read_text(encoding="utf-8"), "recovered\n"
+                )
+                self.assertIn("Build failed, keeping last good output:", result.stdout)
+                self.assertEqual(result.stdout.count("Rebuilt Moo UI catalog."), 1)
+
     def test_watcher_rebuild_uses_updated_build_module(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

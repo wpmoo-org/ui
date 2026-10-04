@@ -88,6 +88,7 @@ def watch_sources(stop_event: threading.Event) -> None:
             # Equal-length edits within one second can reuse stale bytecode.
             # Compile the current builder source instead of its cached module.
             build_path = Path(catalog_build.__file__)
+            catalog_build.__dict__.pop("build", None)
             exec(
                 compile(build_path.read_bytes(), str(build_path), "exec"),
                 catalog_build.__dict__,
