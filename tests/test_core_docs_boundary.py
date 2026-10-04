@@ -449,9 +449,9 @@ class CoreDocsBoundaryTests(unittest.TestCase):
                 source = path.read_text(encoding="utf-8")
                 self.assertIn("site/static/images/", source)
 
-    def test_public_policy_docs_track_current_release_candidate_line(self) -> None:
+    def test_public_policy_docs_track_current_release_line(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(package["version"], "1.0.0-rc.11")
+        self.assertEqual(package["version"], "1.0.0")
 
         for relative in ("SUPPORT.md", "SECURITY.md"):
             with self.subTest(relative=relative):

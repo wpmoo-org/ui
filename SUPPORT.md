@@ -4,8 +4,9 @@ Moo UI Core is an open-source Bootstrap component system. This document defines
 the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
-Moo UI is currently in the `1.0.0-rc.11` release-candidate certification phase.
-Production certification is being introduced incrementally; a component's
+Moo UI `1.0.0` freezes the documented public package contract. Package stability
+and component certification are independent: the certification manifest remains
+`preview`. Production certification is introduced incrementally; a component's
 presence in the catalog does not by itself mean that it has completed
 certification.
 
@@ -111,7 +112,13 @@ UI's light and dark theme surfaces. Certification records the combinations
 actually reviewed. A component-specific limitation must be disclosed in the
 release attestation.
 
-## Versioning Before 1.0
+## Stable Versioning
+
+In the `1.x` line, compatible additions use minor releases and fixes use patch
+releases. Removing or incompatibly changing a documented public contract requires
+a new major release. Existing API inventories remain historical removal guards.
+
+## Historical Versioning Before 1.0
 
 Although Semantic Versioning permits greater instability during `0.x`, Moo UI
 uses a stricter policy:

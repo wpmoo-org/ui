@@ -3,6 +3,19 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.0.0 Stable Public Contract
+
+The stable package preserves RC11's exports, packed file inventory, public Sass
+configuration, CSS hooks and optional runtime lifecycle. The current inventory
+is `src/certification/api-freeze-1.0.0.json`; the RC11 inventory is unchanged as a
+historical removal guard. The version promotion adds no component or behavior.
+
+Compatible additions after this freeze belong to 1.1.0. Removing or incompatibly
+changing a documented public contract requires a new major release. Package
+stability does not promote component certification: the manifest remains
+`preview`, with manual accessibility and browser/device evidence still governed
+by SUPPORT.md. Consumer release pins follow publication and their own validation.
+
 ## 1.0.0-rc.11 Entrypoints and Feature Freeze
 
 RC11 preserves the RC10 package exports, public Sass configuration and runtime
@@ -19,7 +32,7 @@ existing source glob and included by both full and scoped CSS entrypoints;
 there is no additional stylesheet or JavaScript entrypoint. The catalog groups
 Border and Scroll Fade under Utilities.
 
-The RC11 inventory is the current feature freeze for stable 1.0.0. Work toward
+The RC11 inventory established the feature freeze for stable 1.0.0. Work toward
 that checkpoint is limited to necessary bug fixes, verification and release
 preparation; new capabilities belong to 1.1.0. Historical inventories stay
 unchanged as removal guards. Preview certification remains explicit until the
