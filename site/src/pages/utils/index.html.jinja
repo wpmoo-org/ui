@@ -1,0 +1,57 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/card.html.jinja" import card %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
+
+{% block title %}Utilities — Moo UI{% endblock %}
+
+{% block content %}
+  <div class="moo-doc-layout">
+    <article class="moo-doc-page">
+      {{ render_page_header(
+        "Utilities",
+        "Reusable styling helpers for borders, scroll boundaries and component composition.",
+        id="utilities",
+        actions=render_section_page_actions("utilities", site_pages, root_path)
+      ) }}
+
+      <section class="moo-catalog__dashboard" aria-label="Utilities">
+        <div class="moo-catalog__grid moo-catalog__grid--compact d-grid" id="utilities-grid">
+          {% for utility in utilities %}
+            {% call card(extra_class="h-100 moo-catalog__app-card overflow-hidden", body_class="d-grid gap-3") %}
+              <div class="d-flex align-items-start justify-content-between gap-3">
+                <span class="moo-catalog__app-icon" aria-hidden="true">
+                  {{ render_icon("sparkles", "inline-start") }}
+                </span>
+                {{ badge(utility.status | capitalize, variant="outline") }}
+              </div>
+              <div>
+                <h2 class="h5 mb-2">{{ utility.label }}</h2>
+                <p class="text-body-secondary mb-0">{{ utility.description }}</p>
+              </div>
+              <div>
+                {{ button(
+                  "Open",
+                  variant="outline",
+                  size="sm",
+                  element="a",
+                  href=site_href("utils/" ~ utility.slug ~ ".html", root_path),
+                  aria_label="Open " ~ utility.label
+                ) }}
+              </div>
+            {% endcall %}
+          {% endfor %}
+        </div>
+      </section>
+
+      {{ render_section_page_pagination("utilities", site_pages, root_path) }}
+    </article>
+
+    {{ render_doc_toc([
+      {"id": "utilities", "label": "Utilities"}
+    ]) }}
+  </div>
+{% endblock %}

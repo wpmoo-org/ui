@@ -2,7 +2,8 @@
   @import "../components";
   /* Focus and keyboard navigation */
   @import "../foundations/focus";
-  /* Scroll utilities */
+  /* Utilities */
+  @import "../utilities/border";
   @import "../utilities/scroll_fade";
   /* Application layout */
   @import "../layouts/app";

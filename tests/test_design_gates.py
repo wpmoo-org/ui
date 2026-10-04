@@ -510,6 +510,7 @@ console.log(JSON.stringify(Object.fromEntries(
             },
             {
                 "_background_color.scss",
+                "_border.scss",
                 "_scroll_fade.scss",
                 "_scroll_fade_primitives.scss",
             },
@@ -663,6 +664,7 @@ console.log(JSON.stringify(Object.fromEntries(
             [
                 "../components",
                 "../foundations/focus",
+                "../utilities/border",
                 "../utilities/scroll_fade",
                 "../layouts/app",
                 "../layouts/page_grid",

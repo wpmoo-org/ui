@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import os
 import threading
 import webbrowser
@@ -85,6 +86,7 @@ def watch_sources(stop_event: threading.Event) -> None:
         # two saves), and dying here would silently stop every future
         # rebuild while the server keeps serving stale output.
         try:
+            catalog_build = importlib.reload(catalog_build)
             catalog_build.build()
         except Exception as error:  # noqa: BLE001 - report and keep watching
             print(f"Build failed, keeping last good output: {error}", flush=True)

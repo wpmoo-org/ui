@@ -27,6 +27,60 @@ def load_dev_module():
 
 
 class DevRunnerTests(unittest.TestCase):
+    def test_watcher_rebuild_uses_updated_build_module(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            build_source = """from pathlib import Path
+ROOT = Path(__file__).resolve().parent
+def source_snapshot():
+    source = ROOT / 'build.py'
+    return ((str(source), source.stat().st_mtime_ns),)
+def build():
+    (ROOT / 'rendered.txt').write_text({value!r}, encoding='utf-8')
+"""
+            (root / "build.py").write_text(
+                build_source.format(value="old layout"), encoding="utf-8"
+            )
+            driver = """import importlib.util
+from pathlib import Path
+import sys
+
+spec = importlib.util.spec_from_file_location('moo_dev', sys.argv[1])
+dev = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(dev)
+replacement = sys.argv[2]
+
+class OneSourceChange:
+    calls = 0
+    def wait(self, timeout):
+        self.calls += 1
+        if self.calls == 1:
+            Path('build.py').write_text(replacement, encoding='utf-8')
+            return False
+        return True
+
+dev.watch_sources(OneSourceChange())
+"""
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    driver,
+                    str(ROOT / "dev.py"),
+                    build_source.format(value="current archive layout and navigation"),
+                ],
+                cwd=root,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(
+                (root / "rendered.txt").read_text(encoding="utf-8"),
+                "current archive layout and navigation",
+            )
+
     def test_help_lists_dev_server_options(self) -> None:
         result = subprocess.run(
             [sys.executable, "dev.py", "--help"],

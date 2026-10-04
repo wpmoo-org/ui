@@ -1,5 +1,10 @@
 [
   {
+    "slug": "border",
+    "label": "Border",
+    "status": "ready"
+  },
+  {
     "slug": "scroll-fade",
     "label": "Scroll Fade",
     "status": "ready"

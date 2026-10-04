@@ -1120,6 +1120,14 @@ def build_site_pages(
             "kind": "doc",
         }
     )
+    pages.append(
+        {
+            "slug": "utilities",
+            "label": "Utilities",
+            "href": "utils/index.html",
+            "kind": "doc",
+        }
+    )
     pages.extend(child_pages(utilities, "utils", "utility"))
 
     for section in sections:
@@ -1160,6 +1168,9 @@ def page_metadata(
         kind = "component"
         entry = _find_entry(catalog, slug)
         image = seo_image_src("components", slug)
+    elif path == "utils/index.html":
+        slug = "utilities"
+        entry = {"label": "Utilities"}
     elif path.startswith("utils/"):
         kind = "utility"
         entry = _find_entry(utilities, slug)

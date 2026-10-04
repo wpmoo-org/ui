@@ -1,0 +1,28 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "components/card.html.jinja" import card %}
+{% from "components/button.html.jinja" import button %}
+
+{% block title %}Border — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Border",
+    "Use a dashed outline for an available slot or an optional surface."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set available_slot %}
+      {% call card(size="sm", body_class="p-0", extra_class="p-0 border-dashed") %}
+        {{ button("Add item", variant="ghost", icon_start="plus", extra_class="w-100 justify-content-start p-3 rounded-4") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "available-slot",
+      "Dashed border",
+      "Add <code>border-dashed</code> to a bordered component. It changes only the border style; the component keeps its width, color and radius. The utility is scoped to a Moo UI owner.",
+      available_slot
+    ) }}
+  </div>
+{% endblock %}

@@ -16,15 +16,9 @@ class ScrollFadeTests(CatalogTestCase):
         utilities = json.loads(
             (ROOT / "site/src/registry/utilities.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(
+        self.assertIn(
+            {"slug": "scroll-fade", "label": "Scroll Fade", "status": "ready"},
             utilities,
-            [
-                {
-                    "slug": "scroll-fade",
-                    "label": "Scroll Fade",
-                    "status": "ready",
-                }
-            ],
         )
 
         index = self.read_output("components/index.html")
