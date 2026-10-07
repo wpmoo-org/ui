@@ -601,7 +601,7 @@ class CertificationContractTests(unittest.TestCase):
                 [component["slug"] for component in attestation["components"]],
                 [component["slug"] for component in inventory["components"]],
             )
-            self.assertEqual(len(attestation["components"]), 45)
+            self.assertEqual(len(attestation["components"]), 46)
             for component in attestation["components"]:
                 self.assertGreaterEqual(len(component["checks"]), 1)
             self.assertEqual(attestation["manualReviews"], [])
