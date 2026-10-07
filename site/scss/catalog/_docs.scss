@@ -390,41 +390,6 @@
   min-width: 0;
 }
 
-.moo-doc-toc__inner {
-  padding-inline-start: 1rem;
-  border-inline-start: var(--bs-border-width) solid var(--bs-border-color);
-}
-
-.moo-doc-toc__label {
-  margin-bottom: 0.5rem;
-  color: var(--bs-secondary-color);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.moo-doc-toc .nav {
-  --bs-nav-link-padding-x: 0;
-  --bs-nav-link-padding-y: 0.125rem;
-
-  gap: 0.125rem;
-}
-
-.moo-doc-toc .nav-link {
-  padding: var(--bs-nav-link-padding-y) var(--bs-nav-link-padding-x);
-  color: var(--bs-secondary-color);
-  font-size: 0.8125rem;
-  line-height: 1.6;
-}
-
-.moo-doc-toc .nav-link:hover {
-  color: var(--bs-body-color);
-}
-
-.moo-doc-toc .nav-link:is(.active, [aria-current="true"]) {
-  color: var(--moo-foreground);
-  font-weight: $font-weight-medium;
-}
-
 .moo-doc-callout {
   max-width: 48rem;
 }

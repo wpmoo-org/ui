@@ -15,7 +15,7 @@ class TableOfContentsTests(unittest.TestCase):
             **props,
         }
         template = create_environment().from_string(
-            '{% from "components/table_of_contents.html.jinja" import table_of_contents %}'
+            '{% from "components/toc.html.jinja" import table_of_contents %}'
             '{{ table_of_contents(**props) }}'
         )
         return " ".join(template.render(props=options).split())

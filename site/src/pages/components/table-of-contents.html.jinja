@@ -1,5 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/table_of_contents.html.jinja" import table_of_contents %}
+{% from "components/toc.html.jinja" import table_of_contents %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -53,6 +53,7 @@
   <p>Import <code>TableOfContents</code> from <code>@wpmoo/ui/table-of-contents.js</code> and call <code>TableOfContents.getOrCreateInstance(element)</code> for each supplied <code>[data-toc]</code> root. Use <code>refresh()</code> after replacing targets and <code>dispose()</code> when removing a view.</p>
   <p><code>content_id</code> limits resolution to an explicit content region inside the same Moo owner. <code>scroll_root_id</code> identifies the scrolling ancestor of that content. Omitted values use the nearest Moo owner and document scrolling. A missing scope leaves the native links available and skips tracking.</p>
   <p>The host owns fixed header geometry. With the App layout, place the compact navigation in the header above the scrolling main region, and supply that region's ID. For other layouts, a finite nonnegative <code>activationOffset</code> option sets the tracking line. The component does not change layout styles or override native scrolling.</p>
+  <p>For animated native fragment navigation, apply the Core <code>scroll-smooth</code> utility to the actual scroll container inside its Moo owner. The utility uses <code>scroll-behavior</code> and switches to immediate scrolling when the visitor prefers reduced motion. Links retain their native URL fragments and browser history.</p>
   <p>Two presentations can share section data with unique IDs and complementary Bootstrap visibility utilities. Ordinary aside content renders once and can stack below the article on narrow screens.</p>
 
   {{ render_reference("For the compact control's native behavior, see the", "https://getbootstrap.com/docs/5.3/components/dropdowns/", "Bootstrap Dropdown documentation") }}

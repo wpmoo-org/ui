@@ -1,4 +1,4 @@
-{% from "components/table_of_contents.html.jinja" import table_of_contents %}
+{% from "components/toc.html.jinja" import table_of_contents %}
 {% from "layouts/app.html.jinja" import app %}
 {% set sections = [
   {"target_id": "intro", "label": "Introduction"},
@@ -17,7 +17,7 @@
       </div>
     {% endif %}
   </header>
-  <main{% if nested | default(false) %} id="reader"{% endif %}>
+  <main{% if nested | default(false) %} id="reader" class="scroll-smooth"{% endif %}>
     <div class="container-xl py-4">
       {% if not nested | default(false) %}
         <div class="d-xl-none mb-4">{{ compact_toc() }}</div>

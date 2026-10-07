@@ -34,8 +34,8 @@ class ScrollFadeTests(CatalogTestCase):
         self.assertIn("Scroll Fade", utility)
         self.assertIn('data-moo-component-doc-layout', utility)
         self.assertIn('class="moo-doc-main"', utility)
-        self.assertIn('data-moo-component-toc', utility)
-        self.assertIn('aria-label="Utility examples"', utility)
+        self.assertIn('data-toc-scroll-root="main-content"', utility)
+        self.assertIn('aria-label="On this page"', utility)
 
     def test_scroll_fade_utility_contract_is_complete(self) -> None:
         result = self.run_build()

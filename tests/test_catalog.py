@@ -3287,12 +3287,12 @@ class CatalogContractTests(CatalogTestCase):
                 toc_parser = LinkParser()
                 toc_parser.feed(toc.group("body") if toc else "")
                 first_link = toc_parser.links[0]
-                self.assertIn("active", (first_link.get("class") or "").split())
-                self.assertEqual(first_link.get("aria-current"), "true")
+                self.assertIn("nav-link", (first_link.get("class") or "").split())
+                self.assertIn('data-toc-scroll-root="main-content"', toc.group("body"))
                 self.assertRegex(first_link.get("href") or "", r"^#[\w-]+$")
                 for target, label in links:
                     self.assertIn(f'href="#{target}"', page)
-                    self.assertIn(f">{label}</", page)
+                    self.assertRegex(page, rf">\s*{re.escape(label)}\s*</")
 
         for path in ("components/index.html", "blocks/index.html"):
             with self.subTest(path=path):
@@ -3303,7 +3303,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn('class="moo-doc-toc d-none d-xl-block"', page)
                 self.assertIn('aria-label="On this page"', page)
                 self.assertIn(f'href="#{target}"', page)
-                self.assertIn(f">{label}</", page)
+                self.assertRegex(page, rf"<span>\s*{re.escape(label)}\s*</span>")
 
         css = self.read_output("assets/css/catalog.css")
         self.assertIn(".moo-doc-layout", css)
@@ -3322,9 +3322,9 @@ class CatalogContractTests(CatalogTestCase):
             css,
             r"\.moo-doc-toc\s*\{\s*position: sticky;\s*top: var\(--moo-doc-toc-offset\);",
         )
-        self.assertIn('.moo-doc-toc .nav-link:is(.active, [aria-current="true"])', css)
-        self.assertIn("color: var(--moo-foreground)", css)
-        self.assertIn("font-weight: 500", css)
+        core_css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn("[data-toc][data-toc-marker]::after", core_css)
+        self.assertIn("var(--moo-toc-marker-offset)", core_css)
 
     def test_component_detail_pages_render_an_example_table_of_contents(self) -> None:
         result = self.run_build()
@@ -3334,7 +3334,7 @@ class CatalogContractTests(CatalogTestCase):
         component = self.read_output("components/accordion.html")
         self.assertIn('data-moo-component-doc-layout', component)
         toc = re.search(
-            r'(<aside\b[^>]*data-moo-component-toc[^>]*>)(?P<body>.*?)</aside>',
+            r'(<aside\b[^>]*class="moo-doc-toc[^"]*"[^>]*>)(?P<body>.*?)</aside>',
             component,
             re.S,
         )
@@ -3342,8 +3342,8 @@ class CatalogContractTests(CatalogTestCase):
         toc_opening_tag = toc.group(1) if toc else ""
         toc_body = toc.group("body") if toc else ""
         self.assertNotIn(" hidden", toc_opening_tag)
-        self.assertIn('data-moo-component-toc', component)
-        self.assertIn('aria-label="Component examples"', component)
+        self.assertIn('data-toc-content="main-content"', toc_body)
+        self.assertIn('aria-label="On this page"', toc_body)
         toc_parser = LinkParser()
         toc_parser.feed(toc_body)
         for target, label in (
@@ -3353,15 +3353,14 @@ class CatalogContractTests(CatalogTestCase):
         ):
             with self.subTest(target=target):
                 self.assertIn(f'href="#{target}"', toc_body)
-                self.assertIn(f">{label}</a>", toc_body)
+                self.assertRegex(toc_body, rf"<span>\s*{re.escape(label)}\s*</span>")
         usage_link = next(
             (link for link in toc_parser.links if link.get("href") == "#usage"),
             None,
         )
         self.assertIsNotNone(usage_link)
         usage_link = usage_link or {}
-        self.assertIn("active", (usage_link.get("class") or "").split())
-        self.assertEqual(usage_link.get("aria-current"), "true")
+        self.assertIn("nav-link", (usage_link.get("class") or "").split())
         self.assertIn('class="moo-doc-main"', component)
         self.assertIn('data-example="basic" aria-labelledby="basic"', component)
         self.assertIn('id="basic">Basic</h2>', component)
@@ -3371,15 +3370,6 @@ class CatalogContractTests(CatalogTestCase):
         components_index = self.read_output("components/index.html")
         self.assertNotIn('data-moo-component-toc', components_index)
         self.assertNotIn('data-moo-component-doc-layout', components_index)
-
-        preview = self.read_output("assets/js/catalog/toc.js")
-        self.assertIn("[data-moo-component-toc]", preview)
-        self.assertIn('root.querySelector(".moo-component-examples")', preview)
-        self.assertIn('child.matches?.("h2[id]")', preview)
-        self.assertIn('child.matches?.(".moo-example[aria-labelledby]")', preview)
-        self.assertIn("componentNav.appendChild(link)", preview)
-        self.assertIn('link.setAttribute("aria-current", "true")', preview)
-        self.assertIn('link.classList.toggle("active", active)', preview)
 
     def test_installation_page_uses_current_complete_adoption_paths(self) -> None:
         result = self.run_build()

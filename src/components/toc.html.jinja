@@ -26,7 +26,7 @@
     {% if content_id %}{% set metadata = dict(metadata, **{"toc-content": content_id}) %}{% endif %}
     {% if scroll_root_id %}{% set metadata = dict(metadata, **{"toc-scroll-root": scroll_root_id}) %}{% endif %}
     {% if presentation == "list" %}
-      {% call nav_menu(label, style="base", vertical=true, extra_class="small", id=id, data=metadata, heading=label, root_class=extra_class) %}
+      {% call nav_menu(label, style="base", extra_class="flex-column flex-nowrap gap-0 small p-0", id=id, data=metadata, heading=label, root_class=extra_class) %}
         {% for item in validated.items %}{{ nav_item(item.label | forceescape, href=item.fragment) }}{% endfor %}
       {% endcall %}
     {% else %}

@@ -352,6 +352,38 @@ class CatalogBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_catalog_uses_shared_toc_tracking_for_docs_and_component_examples(self) -> None:
+        for path in ("installation/", "components/accordion/"):
+            with self.subTest(path=path):
+                context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+                try:
+                    page = context.new_page()
+                    page.set_viewport_size({"width": 1440, "height": 900})
+                    evidence = BrowserEvidence(page)
+                    page.goto(f"{self.base_url}/site-dist/{path}")
+                    prepare_page(page, CERTIFICATION_CASES[0])
+                    toc = page.locator(".moo-doc-toc [data-toc]")
+                    expect(toc).to_have_count(1)
+                    links = toc.locator("a")
+                    hrefs = links.evaluate_all("links => links.map(link => link.getAttribute('href'))")
+                    self.assertGreater(len(hrefs), 2)
+                    self.assertEqual(len(hrefs), len(set(hrefs)))
+                    link = links.nth(1)
+                    href = link.get_attribute("href")
+                    link.click()
+                    expect(page).to_have_url(f"{self.base_url}/site-dist/{path}{href}")
+                    expect(link).to_have_attribute("aria-current", "location")
+                    expect(toc).to_have_attribute("data-toc-marker", "")
+                    marker_height = toc.evaluate("el => parseFloat(getComputedStyle(el, '::after').height)")
+                    text_height = link.locator("span").evaluate("el => el.offsetHeight")
+                    self.assertAlmostEqual(marker_height, text_height, delta=1)
+                    page.locator("#main-content").evaluate("el => { el.scrollTop = el.scrollHeight; }")
+                    expect(links.last).to_have_attribute("aria-current", "location")
+                    self.assertEqual(page.evaluate("window.scrollY"), 0)
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
     def test_form_preview_field_wrappers_center_token_width_controls(self) -> None:
         context = new_case_context(self.browser, CERTIFICATION_CASES[0])
         try:

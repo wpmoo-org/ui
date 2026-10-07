@@ -25,8 +25,8 @@ class TableOfContentsBrowserTests(unittest.TestCase):
         cls.browser = launch_certification_browser(cls.playwright)
         cls.addClassCleanup(cls.browser.close)
 
-    def open_example(self, viewport: dict[str, int] | None = None, fragment: str = "", **options: object):
-        context = self.browser.new_context(viewport=viewport or {"width": 390, "height": 844}, reduced_motion="reduce")
+    def open_example(self, viewport: dict[str, int] | None = None, fragment: str = "", reduced_motion: str = "reduce", **options: object):
+        context = self.browser.new_context(viewport=viewport or {"width": 390, "height": 844}, reduced_motion=reduced_motion)
         self.addCleanup(context.close)
         page = context.new_page()
         evidence = BrowserEvidence(page)
@@ -164,3 +164,168 @@ class TableOfContentsBrowserTests(unittest.TestCase):
         article = page.locator("#toc-article").bounding_box()
         aside = page.get_by_role("complementary", name="Page information").bounding_box()
         self.assertGreaterEqual(aside["x"], article["x"] + article["width"] - 1)
+
+    def test_outline_rail_covers_label_and_tracks_primary_in_both_directions(self) -> None:
+        for theme in ("light", "dark"):
+            for direction in ("ltr", "rtl"):
+                with self.subTest(theme=theme, direction=direction):
+                    page = self.open_example(
+                        nested=True,
+                        theme=theme,
+                        direction=direction,
+                        long_labels=True,
+                        viewport={"width": 1440, "height": 900},
+                        fragment="#intro",
+                    )
+                    list_root = page.locator("#toc-list")
+                    expect(list_root.locator('[aria-current="location"]')).to_have_text("Introduction")
+                    geometry = list_root.evaluate("""root => {
+                        const label = root.querySelector(':scope > span').getBoundingClientRect();
+                        const list = root.querySelector(':scope > .nav');
+                        const rail = root.getBoundingClientRect();
+                        const active = list.querySelector('[aria-current="location"]');
+                        const marker = active.getBoundingClientRect();
+                        const style = getComputedStyle(root);
+                        const activeStyle = getComputedStyle(active);
+                        const start = getComputedStyle(root).direction === 'rtl' ? 'right' : 'left';
+                        return {
+                            labelStart: label[start], railStart: rail[start], markerStart: marker[start],
+                            labelTop: label.top, railTop: rail.top,
+                            listBottom: list.getBoundingClientRect().bottom, railBottom: rail.bottom,
+                            railWidth: parseFloat(style.borderInlineStartWidth),
+                            markerWidth: parseFloat(getComputedStyle(root, "::after").borderInlineStartWidth),
+                            markerOffset: parseFloat(root.style.getPropertyValue('--moo-toc-marker-offset')),
+                            textOffset: active.offsetTop + active.querySelector('span').offsetTop,
+                            markerHeight: parseFloat(getComputedStyle(root, '::after').height),
+                            textHeight: active.querySelector('span').offsetHeight,
+                            gap: parseFloat(getComputedStyle(list).rowGap),
+                            rows: Array.from(list.children).map(row => {
+                                const link = row.querySelector("a");
+                                const linkStyle = getComputedStyle(link);
+                                const textHeight = link.querySelector("span").getBoundingClientRect().height;
+                                return {
+                                    rowHeight: row.getBoundingClientRect().height,
+                                    textHeight,
+                                    padding: parseFloat(linkStyle.paddingTop) + parseFloat(linkStyle.paddingBottom),
+                                    markerHeight: parseFloat(getComputedStyle(link, "::before").height),
+                                };
+                            }),
+                            overflow: list.scrollWidth - list.clientWidth,
+                        };
+                    }""")
+                    self.assertAlmostEqual(geometry["labelStart"], geometry["railStart"], delta=1)
+                    self.assertLessEqual(geometry["railTop"], geometry["labelTop"])
+                    self.assertGreaterEqual(geometry["railBottom"], geometry["listBottom"])
+                    self.assertAlmostEqual(geometry["markerStart"], geometry["railStart"], delta=1)
+                    self.assertGreater(geometry["railWidth"], 0)
+                    self.assertAlmostEqual(geometry["markerWidth"], geometry["railWidth"] * 2, delta=0.1)
+                    self.assertLessEqual(geometry["overflow"], 1)
+                    self.assertEqual(geometry["gap"], 0)
+                    self.assertAlmostEqual(geometry["markerOffset"], geometry["textOffset"], delta=1)
+                    self.assertAlmostEqual(geometry["markerHeight"], geometry["textHeight"], delta=1)
+                    for row in geometry["rows"]:
+                        self.assertAlmostEqual(row["rowHeight"], row["textHeight"] + row["padding"], delta=1)
+                        self.assertAlmostEqual(row["markerHeight"], row["textHeight"], delta=1)
+
+                    page.locator(".moo-ui").evaluate("owner => owner.style.setProperty('--moo-primary', 'rgb(41, 97, 208)')")
+                    page.wait_for_function("getComputedStyle(document.querySelector('#toc-list'), '::after').borderInlineStartColor === 'rgb(41, 97, 208)'")
+                    page.locator("#reader").evaluate("reader => { reader.scrollTop = reader.scrollHeight; }")
+                    active = list_root.locator('[aria-current="location"]')
+                    expect(active).to_have_text("Languages and localized content across every supported project")
+                    self.assertEqual(list_root.evaluate("el => getComputedStyle(el, '::after').borderInlineStartColor"), "rgb(41, 97, 208)")
+                    self.assertEqual(active.evaluate("el => getComputedStyle(el, '::before').borderInlineStartColor"), "rgba(0, 0, 0, 0)")
+                    self.assertAlmostEqual(list_root.evaluate("el => parseFloat(getComputedStyle(el, '::after').height)"), active.locator("span").evaluate("el => el.offsetHeight"), delta=1)
+                    self.assertEqual(list_root.locator('a[href="#intro"]').evaluate("el => getComputedStyle(el, '::before').borderInlineStartColor"), "rgba(0, 0, 0, 0)")
+
+    def test_shared_marker_slides_between_text_positions_and_respects_reduced_motion(self) -> None:
+        for motion in ("no-preference", "reduce"):
+            with self.subTest(motion=motion):
+                page = self.open_example(short=True, fragment="#intro", reduced_motion=motion, viewport={"width": 1440, "height": 1600})
+                result = page.evaluate("""async () => {
+                    const root = document.getElementById('toc-list');
+                    const read = () => new DOMMatrixReadOnly(getComputedStyle(root, '::after').transform).m42;
+                    const start = read();
+                    const link = root.querySelector('a[href="#languages"]');
+                    const end = link.offsetTop + link.querySelector('span').offsetTop;
+                    const duration = parseFloat(getComputedStyle(root, '::after').transitionDuration);
+                    const samples = [];
+                    link.click();
+                    while (samples.length < 60) {
+                        await new Promise(requestAnimationFrame);
+                        samples.push(read());
+                        if (root.querySelector('[aria-current="location"]') === link && Math.abs(samples.at(-1) - end) < 0.1) break;
+                    }
+                    return {start, end, duration, samples};
+                }""")
+                self.assertGreater(result["end"], result["start"])
+                self.assertAlmostEqual(result["samples"][-1], result["end"], delta=0.1)
+                intermediate = [value for value in result["samples"] if result["start"] + 0.1 < value < result["end"] - 0.1]
+                if motion == "no-preference":
+                    self.assertGreater(result["duration"], 0)
+                    self.assertTrue(intermediate, result)
+                else:
+                    self.assertEqual(result["duration"], 0)
+                    self.assertFalse(intermediate, result)
+
+    def test_marker_refreshes_after_hidden_list_is_resized_into_view(self) -> None:
+        page = self.open_example(short=True, fragment="#languages", viewport={"width": 1199, "height": 1600})
+        root = page.locator("#toc-list")
+        self.assertFalse(root.evaluate("el => el.hasAttribute('data-toc-marker')"))
+        page.set_viewport_size({"width": 1440, "height": 1600})
+        expect(root).to_have_attribute("data-toc-marker", "")
+        geometry = root.evaluate("""root => {
+            const active = root.querySelector('[aria-current="location"]');
+            const span = active.querySelector('span');
+            return {offset: parseFloat(root.style.getPropertyValue('--moo-toc-marker-offset')), expected: active.offsetTop + span.offsetTop, height: parseFloat(root.style.getPropertyValue('--moo-toc-marker-height')), expectedHeight: span.offsetHeight};
+        }""")
+        self.assertEqual(geometry["offset"], geometry["expected"])
+        self.assertEqual(geometry["height"], geometry["expectedHeight"])
+        page.set_viewport_size({"width": 1199, "height": 1600})
+        page.wait_for_function("!document.getElementById('toc-list').hasAttribute('data-toc-marker')")
+
+    def test_dispose_restores_authored_marker_properties_and_static_fallback(self) -> None:
+        page = self.open_example(short=True, fragment="#intro", viewport={"width": 1440, "height": 1600})
+        result = page.evaluate("""async () => {
+            const {default:Toc} = await import('/src/js/components/table-of-contents.js');
+            const root = document.getElementById('toc-list');
+            Toc.getInstance(root).dispose();
+            root.querySelector('a[href="#intro"]').classList.add('active');
+            const fallback = getComputedStyle(root.querySelector('.active'), '::before').borderInlineStartColor;
+            root.setAttribute('data-toc-marker', 'authored');
+            root.style.setProperty('--moo-toc-marker-offset', '17px', 'important');
+            root.style.setProperty('--moo-toc-marker-height', '9px');
+            const instance = new Toc(root);
+            const managed = root.getAttribute('data-toc-marker');
+            instance.dispose();
+            return {fallback, primary: getComputedStyle(root).getPropertyValue('--moo-primary').trim(), managed, restored: root.getAttribute('data-toc-marker'), offset: root.style.getPropertyValue('--moo-toc-marker-offset'), priority: root.style.getPropertyPriority('--moo-toc-marker-offset'), height: root.style.getPropertyValue('--moo-toc-marker-height')};
+        }""")
+        self.assertNotEqual(result["fallback"], "rgba(0, 0, 0, 0)")
+        self.assertEqual(result["managed"], "")
+        self.assertEqual(result["restored"], "authored")
+        self.assertEqual(result["offset"], "17px")
+        self.assertEqual(result["priority"], "important")
+        self.assertEqual(result["height"], "9px")
+
+    def test_smooth_native_fragments_respect_reduced_motion_and_history(self) -> None:
+        for motion, behavior in (("no-preference", "smooth"), ("reduce", "auto")):
+            with self.subTest(motion=motion):
+                page = self.open_example(nested=True, reduced_motion=motion, viewport={"width": 1440, "height": 900})
+                expect(page.locator("#reader")).to_have_css("scroll-behavior", behavior)
+                page.evaluate("""() => {
+                    window.tocScrollPositions = [];
+                    document.getElementById('reader').addEventListener('scroll', event => {
+                        window.tocScrollPositions.push(event.target.scrollTop);
+                    });
+                }""")
+                page.locator('#toc-list a[href="#languages"]').click()
+                expect(page).to_have_url(f"{self.base_url}/conformance/table-of-contents/index.html#languages")
+                expect(page.locator('#toc-list a[href="#languages"]')).to_have_attribute("aria-current", "location")
+                positions = page.evaluate("window.tocScrollPositions")
+                self.assertGreater(page.locator("#reader").evaluate("el => el.scrollTop"), 0)
+                if motion == "no-preference":
+                    self.assertGreater(len(set(positions)), 2)
+                    self.assertTrue(any(0 < position < positions[-1] for position in positions))
+                page.go_back()
+                expect(page).to_have_url(f"{self.base_url}/conformance/table-of-contents/index.html")
+                page.go_forward()
+                expect(page).to_have_url(f"{self.base_url}/conformance/table-of-contents/index.html#languages")

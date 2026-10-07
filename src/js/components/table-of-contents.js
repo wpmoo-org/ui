@@ -43,6 +43,14 @@ export default class TableOfContents {
     this._listeners = [];
     this._originalLinks = new Map();
     this._originalStatus = new Map();
+    this._originalMarker = {
+      attribute: element.getAttribute("data-toc-marker"),
+      properties: ["--moo-toc-marker-offset", "--moo-toc-marker-height"].map((name) => ({
+        name,
+        value: element.style.getPropertyValue(name),
+        priority: element.style.getPropertyPriority(name),
+      })),
+    };
     this._links = [];
     this._targets = [];
     this._frame = 0;
@@ -111,6 +119,13 @@ export default class TableOfContents {
       else link.setAttribute("aria-current", current);
     });
     this._originalStatus.forEach((text, node) => { node.textContent = text; });
+    const { attribute, properties } = this._originalMarker;
+    if (attribute === null) this._element.removeAttribute("data-toc-marker");
+    else this._element.setAttribute("data-toc-marker", attribute);
+    properties.forEach(({ name, value, priority }) => {
+      if (value) this._element.style.setProperty(name, value, priority);
+      else this._element.style.removeProperty(name);
+    });
     this._originalLinks.clear();
     this._originalStatus.clear();
     this._targets = [];
@@ -160,12 +175,28 @@ export default class TableOfContents {
   }
 
   _activate(active) {
+    let activeLink = null;
     this._links.forEach(({ link, id }) => {
       const current = active !== null && id === active.id;
       link.classList.toggle("active", current);
-      if (current) link.setAttribute("aria-current", "location");
-      else link.removeAttribute("aria-current");
+      if (current) {
+        link.setAttribute("aria-current", "location");
+        activeLink ||= link;
+      } else link.removeAttribute("aria-current");
     });
     if (this._status) this._status.textContent = active ? active.label : this._overview;
+    this._updateMarker(activeLink);
+  }
+
+  _updateMarker(link) {
+    const list = this._element.querySelector(":scope > .nav");
+    const text = link?.querySelector("span");
+    if (!list?.contains(link) || !text?.offsetHeight || !this._element.getClientRects().length) {
+      this._element.removeAttribute("data-toc-marker");
+      return;
+    }
+    this._element.style.setProperty("--moo-toc-marker-offset", `${link.offsetTop + text.offsetTop}px`);
+    this._element.style.setProperty("--moo-toc-marker-height", `${text.offsetHeight}px`);
+    this._element.setAttribute("data-toc-marker", "");
   }
 }

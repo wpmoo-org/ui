@@ -4,6 +4,7 @@
 {% from "shell/navbar.html.jinja" import render_catalog_overlays with context %}
 {% from "shell/sidebar.html.jinja" import render_catalog_sidebar with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 
 {% block critical_state_styles %}
   <link rel="preload" href="{{ root_path }}assets/js/catalog-theme-state.js?v={{ asset_version }}" as="script">
@@ -49,16 +50,7 @@
                 {% if has_example_toc or has_child_page_navigation %}
                     </div>
                     {% if has_example_toc %}
-                      <aside class="moo-doc-toc d-none d-xl-block" aria-label="On this page" data-moo-component-toc{% if example_toc_items | length == 0 %} hidden{% endif %}>
-                      <div class="moo-doc-toc__inner">
-                        <div class="moo-doc-toc__label">On this page</div>
-                        <nav class="nav flex-column" aria-label="{% if current_section == 'utils' %}Utility examples{% else %}Component examples{% endif %}" data-moo-component-toc-nav>
-                          {% for item in example_toc_items %}
-                            <a class="nav-link{% if loop.first %} active{% endif %}" href="#{{ item.id }}"{% if loop.first %} aria-current="true"{% endif %}>{{ item.label }}</a>
-                          {% endfor %}
-                        </nav>
-                      </div>
-                      </aside>
+                      {{ render_doc_toc(example_toc_items) }}
                     {% endif %}
                   </div>
                 {% endif %}

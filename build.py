@@ -130,7 +130,7 @@ MOO_MARKUP_EXTENSION_SOURCES = {
     "sheet": "src/components/sheet.html.jinja",
     "sidebar": "src/components/sidebar.html.jinja",
     "slider": "src/components/slider.html.jinja",
-    "table-of-contents": "src/components/table_of_contents.html.jinja",
+    "table-of-contents": "src/components/toc.html.jinja",
     "skeleton": "src/components/skeleton.html.jinja",
     "toast": "src/components/toast.html.jinja",
     "toggle-group": "src/components/toggle_group.html.jinja",
@@ -1566,11 +1566,11 @@ def load_product_facts() -> dict[str, object]:
 
 
 def _component_source_file(slug: str) -> Path:
-    source_file = SRC / "components" / f"{slug.replace('-', '_')}.html.jinja"
+    source_file = ROOT / MOO_MARKUP_EXTENSION_SOURCES.get(
+        slug, f"src/components/{slug.replace('-', '_')}.html.jinja"
+    )
     if source_file.exists():
         return source_file
-    if slug == "form":
-        return SRC / "components/field.html.jinja"
     raise RuntimeError(f"Missing component source for ownership derivation: {slug}")
 
 

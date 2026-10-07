@@ -8,23 +8,6 @@ export function initToc(root = document) {
   }
 
   const view = root.defaultView || root.ownerDocument?.defaultView;
-  const componentToc = root.querySelector("[data-moo-component-toc]");
-  const componentNav = componentToc?.querySelector("[data-moo-component-toc-nav]");
-  const componentExamples = root.querySelector(".moo-component-examples");
-  const componentSections = Array.from(componentExamples?.children ?? [])
-    .map((child) => {
-      if (child.matches?.("h2[id]")) {
-        return { titleId: child.getAttribute("id"), title: child };
-      }
-      if (child.matches?.(".moo-example[aria-labelledby]")) {
-        const titleId = child.getAttribute("aria-labelledby");
-        const title = titleId ? root.getElementById(titleId) : null;
-        return title ? { titleId, title } : null;
-      }
-      return null;
-    })
-    .filter(Boolean);
-  const generatedLinks = [];
   const listeners = [];
   const timers = new Set();
   const listen = (target, type, handler, options) => {
@@ -45,28 +28,11 @@ export function initToc(root = document) {
     timers.clear();
   };
 
-  if (componentToc && componentNav) {
-    const hasServerRenderedLinks = componentNav.children.length > 0;
-    if (!hasServerRenderedLinks && componentSections.length > 0) {
-      componentSections.forEach(({ titleId, title }) => {
-        if (!titleId || !title?.textContent?.trim()) {
-          return;
-        }
-        const link = root.createElement("a");
-        link.className = "nav-link";
-        link.href = `#${titleId}`;
-        link.textContent = title.textContent.trim();
-        componentNav.appendChild(link);
-        generatedLinks.push(link);
-      });
-    }
-    componentToc.hidden = componentNav.children.length === 0;
-  }
-
-  const links = Array.from(root.querySelectorAll(".moo-doc-toc .nav-link"));
-  const targets = links
+  const targets = Array.from(root.querySelectorAll(".moo-doc-toc [data-toc] .nav-link"))
     .map((link) => {
-      const id = link.getAttribute("href")?.slice(1);
+      const hash = link.getAttribute("href");
+      let id;
+      try { id = decodeURIComponent(hash?.slice(1) || ""); } catch { return null; }
       const target = id ? root.getElementById(id) : null;
       return target ? { link, target } : null;
     })
@@ -78,45 +44,8 @@ export function initToc(root = document) {
   const documentScroller =
     documentNode?.scrollingElement || documentNode?.documentElement;
   const ownsDocumentScroll = main === documentScroller;
-  let frame = 0;
-  let clickUntil = 0;
   let chartFrame = 0;
   let chartClickUntil = 0;
-
-  const activate = (activeLink) => {
-    targets.forEach(({ link }) => {
-      const active = link === activeLink;
-      link.classList.toggle("active", active);
-      if (active) {
-        link.setAttribute("aria-current", "true");
-      } else {
-        link.removeAttribute("aria-current");
-      }
-    });
-  };
-  const update = () => {
-    frame = 0;
-    if (targets.length === 0 || Date.now() < clickUntil) {
-      return;
-    }
-    const rootFontSize = parseFloat(view.getComputedStyle(root.documentElement).fontSize);
-    const offset = chartNav ? chartNav.getBoundingClientRect().bottom + rootFontSize * 2.25 : rootFontSize * 6;
-    const atEnd = main ? main.scrollTop + main.clientHeight >= main.scrollHeight - 1 : false;
-    let active = atEnd ? targets[targets.length - 1] : targets[0];
-    if (!atEnd) {
-      targets.forEach((item) => {
-        if (item.target.getBoundingClientRect().top <= offset + 1) {
-          active = item;
-        }
-      });
-    }
-    activate(active.link);
-  };
-  const requestUpdate = () => {
-    if (frame === 0) {
-      frame = view.requestAnimationFrame(update);
-    }
-  };
 
   const chartNav = root.querySelector("[data-moo-chart-template-nav]");
   const chartNavScroller = chartNav?.querySelector(".moo-chart-template-nav__list") ?? chartNav;
@@ -223,12 +152,7 @@ export function initToc(root = document) {
     if (updateHistory) {
       clearTimers();
     }
-    const tocItem = targetByHash.get(hash);
     const chartItem = chartTargetByHash.get(hash);
-    if (tocItem) {
-      clickUntil = Date.now() + 900;
-      activate(tocItem.link);
-    }
     if (chartItem) {
       chartClickUntil = Date.now() + 900;
       activateChartLink(chartItem.link);
@@ -248,21 +172,14 @@ export function initToc(root = document) {
     return navigateToHash(view.location.hash, behavior, false);
   };
 
-  if (targets.length > 0) {
-    targets.forEach(({ link }) => {
-      listen(link, "click", (event) => {
-        const hash = link.getAttribute("href");
-        if (!hash?.startsWith("#")) {
-          return;
-        }
-        event.preventDefault();
-        navigateToHash(hash, "smooth", true);
-      });
+  targets.forEach(({ link }) => {
+    listen(link, "click", (event) => {
+      const hash = link.getAttribute("href");
+      if (!hash?.startsWith("#")) return;
+      event.preventDefault();
+      navigateToHash(hash, "smooth", true);
     });
-    update();
-    listen(scrollHost.eventTarget, "scroll", requestUpdate, { passive: true });
-    listen(view, "resize", requestUpdate);
-  }
+  });
 
   if (chartTargets.length > 0) {
     chartTargets.forEach(({ link }) => {
@@ -286,7 +203,6 @@ export function initToc(root = document) {
         if (!ownsDocumentScroll) {
           resetWindowScroll();
         }
-        requestUpdate();
         requestChartNavUpdate();
       }
     });
@@ -304,14 +220,10 @@ export function initToc(root = document) {
     listeners.forEach(({ target, type, handler, options }) => {
       target.removeEventListener(type, handler, options);
     });
-    if (frame) {
-      view.cancelAnimationFrame(frame);
-    }
     if (chartFrame) {
       view.cancelAnimationFrame(chartFrame);
     }
     timers.forEach((id) => view.clearTimeout(id));
-    generatedLinks.forEach((link) => link.remove());
     states.delete(root);
   };
   states.set(root, dispose);

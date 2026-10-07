@@ -47,3 +47,39 @@ project environment.
 Real-device testing, a complete accessibility audit, the supported browser/
 Bootstrap matrix and immutable package/adapter intake are separate evidence.
 Historical stable freezes and previous acceptance records remain unchanged.
+
+## Subsequent requested list outline
+
+The maintainer later approved an exact three-rule Core CSS exception for a
+neutral inline-start rail below the label and a primary-token active segment.
+The renderer adds only native `p-0` to align the rail in RTL. The locally
+verified candidate and new package identities are recorded separately in the
+[Astro intake follow-up](../../../../docs/contracts/2026-10-07-astro-shared-toc-acceptance.md).
+The new browser geometry contract protects that explicit direction across
+both themes and directions, including primary customization during scrolling.
+It does not regenerate the historical image manifest or stable certification.
+
+
+## Accepted outline and sliding-marker follow-up
+
+The maintainer accepted the refined title/rail/text-height outline and sliding
+primary marker on 2026-10-07. One Core pseudo-element moves through Bootstrap's
+200-ms transition; reduced motion disables animation. The optional tracker
+restores authored marker state on disposal. Native fragment behavior is retained.
+Internal sources now use `toc.html.jinja` and `_toc.scss`; public names do not
+change. Thirty-one focused rendering/browser/Navigation/package methods pass,
+including intermediate motion positions, reduced motion, wrapped labels,
+LTR/RTL primary customization, responsive remeasurement and disposal restoration.
+The final private Core revision7 and Astro revision14 identities, user approval
+and gap-5 aside evidence are in the linked Astro intake follow-up. Historical
+stable certifications and their image manifest retain their original identity.
+
+
+The Moo UI catalog also consumes the same public macro and lazy tracker for
+ordinary docs, component examples and utility examples. Catalog-specific TOC
+colors, typography, rail and spacing CSS are removed; sticky column layout and
+existing host scroll/hash/history handling remain. Nine focused catalog methods
+pass, including native document/component tracking, initial hash alignment and
+minimum touch targets. The native 4173 preview confirms the shared 200-ms marker
+and zero list gap, with no warning/error logs. Its observed image is included in
+the Astro intake follow-up; no stable certification manifest was regenerated.
