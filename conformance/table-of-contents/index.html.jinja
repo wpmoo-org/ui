@@ -1,0 +1,84 @@
+{% from "components/table_of_contents.html.jinja" import table_of_contents %}
+{% from "layouts/app.html.jinja" import app %}
+{% set sections = [
+  {"target_id": "intro", "label": "Introduction"},
+  {"target_id": "content", "label": "Content and configuration"},
+  {"target_id": "languages", "label": "Languages and localized content across every supported project" if long_labels | default(false) else "Languages"}
+] %}
+{% macro compact_toc() -%}
+  {{ table_of_contents('toc-compact', sections, presentation='compact', content_id='toc-article', scroll_root_id='reader' if nested | default(false) else '') }}
+{%- endmacro %}
+{% macro toc_page() -%}
+  <header class="border-bottom bg-body position-relative z-1">
+    <div class="container-xl py-3">Moo UI · Table of contents</div>
+    {% if nested | default(false) %}
+      <div class="d-xl-none border-top">
+        <div class="container-xl py-2">{{ compact_toc() }}</div>
+      </div>
+    {% endif %}
+  </header>
+  <main{% if nested | default(false) %} id="reader"{% endif %}>
+    <div class="container-xl py-4">
+      {% if not nested | default(false) %}
+        <div class="d-xl-none mb-4">{{ compact_toc() }}</div>
+      {% endif %}
+      <div class="row g-4">
+        <article id="toc-article" class="col-12 col-xl-9">
+          <h1>Page sections</h1>
+          <p class="text-body-secondary">A shared table of contents with ordinary supplementary content.</p>
+          {% for section in sections %}
+            <h2 id="{{ section.target_id }}">{{ section.label }}</h2>
+            <p>The host supplies stable section IDs and plain-text labels. Moo UI supplies the navigation and optional current-section tracking.</p>
+            {% if not short | default(false) %}
+              {% for index in range(8) %}
+                <p>Keep authored content in its native framework. Place the compact navigation above the article on a narrow screen and the list in the side column on a wide screen. Normal supporting blocks continue below the article when the columns stack.</p>
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+        </article>
+        <aside class="col-12 col-xl-3" aria-label="Page information">
+          <div class="d-none d-xl-block mb-4">
+            {{ table_of_contents('toc-list', sections, content_id='toc-article', scroll_root_id='reader' if nested | default(false) else '') }}
+          </div>
+          <h2 class="h5">Useful information</h2>
+          <p>This is normal aside content. It remains open and follows the article on a narrow screen.</p>
+        </aside>
+      </div>
+    </div>
+  </main>
+{%- endmacro %}
+<!doctype html>
+<html lang="en" dir="{{ direction | default('ltr') }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Table of contents — independent Moo UI host</title>
+    <link rel="stylesheet" href="../../dist/assets/css/moo-ui.css">
+    <script defer src="../../vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="./init.js"></script>
+  </head>
+  <body>
+    <div class="moo-ui" data-bs-theme="{{ theme | default('light') }}">
+      {% if nested | default(false) %}
+        {% call(slot) app(navigation='none') %}
+          {% if slot == 'page' %}<div data-slot="page">{{ toc_page() }}</div>{% endif %}
+        {% endcall %}
+      {% else %}
+        {{ toc_page() }}
+      {% endif %}
+    </div>
+    {% if second_owner | default(false) %}
+      <div class="moo-ui container-xl py-4" data-bs-theme="dark">
+        {{ table_of_contents('other-toc', [{"target_id": "other-section", "label": "Independent section"}], presentation='compact', content_id='other-article') }}
+        <article id="other-article">
+          <h2 id="other-section">Independent section</h2>
+          <p>This content belongs to a separate Moo owner.</p>
+        </article>
+      </div>
+    {% endif %}
+    <section id="outside-content" class="container-xl py-3" aria-label="Independent host content"{% if short | default(false) or nested | default(false) %} hidden{% endif %}>
+      <h2 id="host-section">Host content</h2>
+      <p>This section does not belong to the Moo owner or its table of contents.</p>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "0.1",
+  "status": "preview",
+  "releaseClaim": "none",
+  "description": "Accepted independent HTML TOC preview and focused functional/geometry evidence. This record does not certify the whole Core profile or any host adapter.",
+  "components": [
+    {
+      "slug": "table-of-contents",
+      "tier": 3,
+      "profile": "t3-runtime-composite",
+      "status": "preview-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["accessibility", "host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_table_of_contents.py",
+        "tests/test_table_of_contents_browser.py",
+        "src/js/components/table-of-contents.js"
+      ],
+      "browserCases": ["desktop-light-ltr", "desktop-dark-rtl", "mobile-light-ltr", "mobile-dark-rtl"],
+      "bootstrapEvidence": [
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/dropdown.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_dropdown.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_nav.scss"
+      ],
+      "manualAcceptance": "src/certification/manual-acceptance/2026-10-07-table-of-contents.md",
+      "checks": {
+        "command": ".venv/bin/python -m unittest tests.test_table_of_contents tests.test_table_of_contents_browser -v",
+        "testsPassed": 20,
+        "testsFailed": 0,
+        "scope": "Rendering, native fragments/keyboard, lifecycle and accepted responsive geometry in the plain HTML host"
+      },
+      "limitations": [
+        "Preview acceptance is source-mode plain HTML evidence, not immutable-package or host-adapter certification.",
+        "The focused automated browser lane is Chromium with Bootstrap 5.3.3; real-device, broader accessibility and formal host-conformance evidence remain open."
+      ]
+    }
+  ]
+}

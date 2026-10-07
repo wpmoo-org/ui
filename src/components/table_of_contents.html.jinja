@@ -1,0 +1,42 @@
+{% from "components/navigation.html.jinja" import nav_menu, nav_item %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_menu, dropdown_item %}
+
+{% macro table_of_contents(id, items, presentation="list", label="On this page", overview_label="Overview", content_id="", scroll_root_id="", extra_class="") -%}
+  {% if id is not string or not id or id != id | trim or id.split() | length != 1 %}{{ fail("Invalid table of contents id") }}{% endif %}
+  {% if items is not sequence or items is string or items is mapping %}{{ fail("Table of contents items must be a sequence") }}{% endif %}
+  {% if presentation not in ["list", "compact"] %}{{ fail("Unknown table of contents presentation") }}{% endif %}
+  {% if label is not string or not label | trim or overview_label is not string or not overview_label | trim %}{{ fail("Table of contents labels must be nonempty strings") }}{% endif %}
+  {% for reference in [content_id, scroll_root_id] %}
+    {% if reference is not string or (reference and (reference != reference | trim or reference.split() | length != 1)) %}{{ fail("Invalid table of contents scope id") }}{% endif %}
+  {% endfor %}
+  {% if extra_class is not string %}{{ fail("Table of contents extra_class must be a string") }}{% endif %}
+  {% set validated = namespace(targets=[], items=[]) %}
+  {% for item in items %}
+    {% if item is not mapping or item.target_id is not defined or item.label is not defined %}{{ fail("Invalid table of contents item") }}{% endif %}
+    {% set target = item.target_id %}
+    {% if target is not string or not target or target != target | trim or target.split() | length != 1 %}{{ fail("Invalid table of contents target id") }}{% endif %}
+    {% if item.label is not string or not item.label | trim %}{{ fail("Table of contents item label must be a nonempty string") }}{% endif %}
+    {% if target in validated.targets %}{{ fail("Duplicate table of contents target id") }}{% endif %}
+    {% set validated.targets = validated.targets + [target] %}
+    {% set validated.items = validated.items + [{"label": item.label, "fragment": "#" ~ (target | urlencode | replace("/", "%2F"))}] %}
+  {% endfor %}
+  {% if validated.items %}
+    {% set metadata = {"toc": ""} %}
+    {% if content_id %}{% set metadata = dict(metadata, **{"toc-content": content_id}) %}{% endif %}
+    {% if scroll_root_id %}{% set metadata = dict(metadata, **{"toc-scroll-root": scroll_root_id}) %}{% endif %}
+    {% if presentation == "list" %}
+      {% call nav_menu(label, style="base", vertical=true, extra_class="small", id=id, data=metadata, heading=label, root_class=extra_class) %}
+        {% for item in validated.items %}{{ nav_item(item.label | forceescape, href=item.fragment) }}{% endfor %}
+      {% endcall %}
+    {% else %}
+      <nav id="{{ id | forceescape }}" aria-label="{{ label | forceescape }}"{% for key, value in metadata.items() %} data-{{ key }}="{{ value | forceescape }}"{% endfor %} class="dropdown d-flex align-items-center gap-2 w-100{% if extra_class %} {{ extra_class | forceescape }}{% endif %}">
+        {{ button(label | forceescape, variant="ghost", size="sm", dropdown=true, dropdown_caret=true, extra_class="flex-shrink-0") }}
+        <span data-toc-current class="small text-body-secondary text-truncate">{{ overview_label | forceescape }}</span>
+        {% call dropdown_menu(extra_class="w-100") %}
+          {% for item in validated.items %}{{ dropdown_item(item.label | forceescape, href=item.fragment, extra_class="text-wrap text-break") }}{% endfor %}
+        {% endcall %}
+      </nav>
+    {% endif %}
+  {% endif %}
+{%- endmacro %}

@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-07",
+  "scope": "Accepted independent source-mode appearance",
+  "sha256": {
+    "mobile-light-ltr-open.png": "a2e5e85116df79146b3cc9e969b362fde0d5df457ea38811a3990c30bf862a9f",
+    "mobile-dark-rtl-open.png": "b058aec745f2996033220ac8e7fbbdbb13bf4db75dee9ab4ae05e3c4d9cb96a9",
+    "mobile-dark-rtl-aside-after.png": "ee716555bda8bf707f335fdc0c484d3f0851309ee4880166318d2b70c0957cbb",
+    "desktop-light-ltr.png": "fda271c09f8ba40fafa16bcf39603b673f4a87a410f7d845fc5cf65dc7268967",
+    "desktop-dark-rtl.png": "ab5fd26275120f7e79d6ed05aeff718bf83506ada87a7aaefca8463863df11c4"
+  }
+}

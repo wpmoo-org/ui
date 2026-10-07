@@ -30,6 +30,7 @@ CORE_OUTPUTS = {
     "dist/js/sidebar.js",
     "dist/js/slider.js",
     "dist/js/sheet.js",
+    "dist/js/table-of-contents.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
     "dist/js/chart.js",
@@ -163,6 +164,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/sidebar.js",
             "js/slider.js",
             "js/sheet.js",
+            "js/table-of-contents.js",
             "js/moo-ui.js",
             "js/moo-ui.min.js",
             "js/chart.js",
@@ -451,12 +453,16 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
     def test_public_policy_docs_track_current_release_line(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(package["version"], "1.0.0")
+        self.assertEqual(package["version"], "1.1.0-dev.1")
+        published_version = package["version"]
+        if "-dev." in published_version:
+            freeze = json.loads((ROOT / "src/certification/api-freeze-1.0.0.json").read_text(encoding="utf-8"))
+            published_version = freeze["freezeVersion"]
 
         for relative in ("SUPPORT.md", "SECURITY.md"):
             with self.subTest(relative=relative):
                 source = (ROOT / relative).read_text(encoding="utf-8")
-                self.assertIn(package["version"], source)
+                self.assertIn(published_version, source)
                 self.assertNotIn("currently in the `0.x` development series", source)
                 self.assertNotIn("current `0.x` release line", source)
                 self.assertNotIn(

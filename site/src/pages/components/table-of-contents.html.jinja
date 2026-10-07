@@ -1,0 +1,59 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/table_of_contents.html.jinja" import table_of_contents %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% macro section_example(prefix, presentation="list", label="On this page", overview_label="Overview", labels=["Introduction", "Content and configuration", "Languages"]) -%}
+  {% set items = [
+    {"target_id": prefix ~ '-intro', "label": labels[0]},
+    {"target_id": prefix ~ '-content', "label": labels[1]},
+    {"target_id": prefix ~ '-languages', "label": labels[2]}
+  ] %}
+  <section id="{{ prefix }}-content-scope" class="w-100">
+    {{ table_of_contents(prefix ~ '-toc', items, presentation=presentation, label=label, overview_label=overview_label, content_id=prefix ~ '-content-scope', scroll_root_id='main-content', extra_class="mb-3") }}
+    {% for item in items %}
+      <h3 id="{{ item.target_id }}" class="h6">{{ item.label }}</h3>
+      <p class="small text-body-secondary">The host supplies this native heading and its stable fragment ID.</p>
+    {% endfor %}
+  </section>
+{%- endmacro %}
+
+{% block title %}Table of Contents — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header("Table of Contents", "Navigate sections of a document with a list or a compact control that shows the current section.") }}
+
+  <div class="moo-component-examples">
+    {% set intro %}{{ section_example('toc-intro') }}{% endset %}
+    {% set usage %}
+      <p>Supply ordered section IDs and plain-text labels. Moo UI renders native fragment links; the host owns headings, content and layout. Empty sections render nothing. A single section remains available.</p>
+      <p>Use the list beside a wide article or the compact presentation before narrow content. The compact menu spans its navigation row, wraps long labels and uses Bootstrap's Dropdown keyboard and dismissal behavior.</p>
+      <p>Initialize the optional <code>TableOfContents</code> module to synchronize the current section and active links. Importing the module alone does not initialize a document. For a JavaScript-disabled host, use the list.</p>
+    {% endset %}
+    {{ render_component_intro(intro, usage) }}
+
+    {% set list_example %}{{ section_example('toc-list-example') }}{% endset %}
+    {{ render_component_example("table-of-contents", "Table of Contents", "list", "Section list", "Keep native section links visible in a content aside. The host chooses its column, breakpoint and position.", list_example) }}
+
+    {% set compact_example %}{{ section_example('toc-compact-example', presentation='compact') }}{% endset %}
+    {{ render_component_example("table-of-contents", "Table of Contents", "compact", "Compact navigation", "Open the full-width menu to select a section. Overview is shown before the first tracked heading.", compact_example) }}
+
+    {% set arabic %}
+      {{ section_example('toc-arabic', presentation='compact', label='في هذه الصفحة', overview_label='نظرة عامة', labels=['مقدمة', 'المحتوى والإعدادات', 'اللغات']) }}
+    {% endset %}
+    {% set hebrew %}
+      {{ section_example('toc-hebrew', presentation='compact', label='בעמוד זה', overview_label='סקירה כללית', labels=['מבוא', 'תוכן והגדרות', 'שפות']) }}
+    {% endset %}
+    {% set english %}{{ section_example('toc-english', presentation='compact') }}{% endset %}
+    {{ render_rtl_example("table-of-contents", "Keep section labels readable and fragment navigation native in each direction.", arabic, hebrew, english) }}
+  </div>
+
+  <h2 id="runtime">Runtime and placement</h2>
+  <p>Import <code>TableOfContents</code> from <code>@wpmoo/ui/table-of-contents.js</code> and call <code>TableOfContents.getOrCreateInstance(element)</code> for each supplied <code>[data-toc]</code> root. Use <code>refresh()</code> after replacing targets and <code>dispose()</code> when removing a view.</p>
+  <p><code>content_id</code> limits resolution to an explicit content region inside the same Moo owner. <code>scroll_root_id</code> identifies the scrolling ancestor of that content. Omitted values use the nearest Moo owner and document scrolling. A missing scope leaves the native links available and skips tracking.</p>
+  <p>The host owns fixed header geometry. With the App layout, place the compact navigation in the header above the scrolling main region, and supply that region's ID. For other layouts, a finite nonnegative <code>activationOffset</code> option sets the tracking line. The component does not change layout styles or override native scrolling.</p>
+  <p>Two presentations can share section data with unique IDs and complementary Bootstrap visibility utilities. Ordinary aside content renders once and can stack below the article on narrow screens.</p>
+
+  {{ render_reference("For the compact control's native behavior, see the", "https://getbootstrap.com/docs/5.3/components/dropdowns/", "Bootstrap Dropdown documentation") }}
+{% endblock %}

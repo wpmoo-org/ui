@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.1",
   "status": "preview",
-  "coreVersion": "1.0.0",
+  "coreVersion": "1.1.0-dev.1",
   "bootstrap": {
     "canonicalVersion": "5.3.3",
     "targetRange": ">=5.3.0 <5.4",
@@ -28,6 +28,7 @@
       "./context-menu.js",
       "./datatable.js",
       "./slider.js",
+      "./table-of-contents.js",
       "./sheet.js",
       "./chart.js",
       "./chart.min.js",

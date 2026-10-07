@@ -7,6 +7,7 @@ import Datepicker, {
 } from "./components/datepicker.js";
 import Sidebar from "./components/sidebar.js";
 import Slider from "./components/slider.js";
+import TableOfContents from "./components/table-of-contents.js";
 import { initSheets } from "./components/sheet.js";
 
 async function loadChart() {
@@ -24,6 +25,7 @@ const MooUI = {
   MooDateRangePicker,
   Sidebar,
   Slider,
+  TableOfContents,
   initSheets,
 };
 
@@ -37,6 +39,7 @@ export {
   MooDateRangePicker,
   Sidebar,
   Slider,
+  TableOfContents,
   initSheets,
 };
 

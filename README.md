@@ -59,6 +59,9 @@ head before this stylesheet loads.
 
 ## Install
 
+Local development candidates use separate tarballs. Public install and license
+links refer to the published stable release.
+
 ```bash
 npm install @wpmoo/ui bootstrap
 ```

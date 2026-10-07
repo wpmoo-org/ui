@@ -1,4 +1,5 @@
 {% from "components/badge.html.jinja" import badge %}
+{% from "components/typography.html.jinja" import typography %}
 
 {% set nav_styles = {
   "base": "nav",
@@ -9,14 +10,28 @@
 
 {% set nav_directions = ["", "ltr", "rtl"] %}
 
-{% macro nav_menu(aria_label, style="pills", vertical=false, extra_class="", dir="") -%}
+{% macro nav_menu(aria_label, style="pills", vertical=false, extra_class="", dir="", id="", data={}, heading="", root_class="") -%}
   {% if not aria_label | trim %}{{ fail("Navigation aria_label is required") }}{% endif %}
   {% if style not in nav_styles %}{{ fail("Unknown navigation style: " ~ style) }}{% endif %}
   {% if dir not in nav_directions %}{{ fail("Unknown navigation direction: " ~ dir) }}{% endif %}
+  {% if id is not string or (id and (id != id | trim or id.split() | length != 1)) %}{{ fail("Invalid navigation id") }}{% endif %}
+  {% if data is not mapping %}{{ fail("Navigation data must be a mapping") }}{% endif %}
+  {% for key, value in data.items() %}
+    {% if key is not string or not key %}{{ fail("Invalid navigation data key") }}{% endif %}
+    {% for part in key.split("-") %}
+      {% if not part %}{{ fail("Invalid navigation data key") }}{% endif %}
+      {% for character in part %}
+        {% if character not in "abcdefghijklmnopqrstuvwxyz" %}{{ fail("Invalid navigation data key") }}{% endif %}
+      {% endfor %}
+    {% endfor %}
+    {% if value is not string and value is not number and value is not boolean and value is not none %}{{ fail("Navigation data values must be scalar") }}{% endif %}
+  {% endfor %}
+  {% if heading is not string or root_class is not string %}{{ fail("Navigation heading and root_class must be strings") }}{% endif %}
   {% set classes = nav_styles[style] %}
   {% if vertical and style != "steps" %}{% set classes = classes ~ " flex-column gap-1" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
-  <nav aria-label="{{ aria_label }}"{% if dir %} dir="{{ dir }}"{% endif %}>
+  <nav aria-label="{{ aria_label | forceescape }}"{% if dir %} dir="{{ dir }}"{% endif %}{% if id %} id="{{ id | forceescape }}"{% endif %}{% if root_class %} class="{{ root_class | forceescape }}"{% endif %}{% for key, value in data.items() %} data-{{ key }}="{{ value | forceescape }}"{% endfor %}>
+    {% if heading %}{{ typography(heading | forceescape, "section-label") }}{% endif %}
     <ul class="{{ classes }}">
       {{ caller() | trim | safe }}
     </ul>

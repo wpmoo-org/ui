@@ -66,6 +66,7 @@ CORE_JS_MODULES = (
     "combobox.js",
     "context-menu.js",
     "slider.js",
+    "table-of-contents.js",
 )
 BUNDLED_JS_MODULES = (
     "chart.js",
@@ -99,6 +100,7 @@ EVIDENCE_FILES = (
     "phase-2-evidence.json",
     "phase-3-evidence.json",
     "rc-3-evidence.json",
+    "2026-10-07-table-of-contents-evidence.json",
 )
 ACCEPTED_COMPONENT_EVIDENCE_STATUSES = {
     "preview-passed",
@@ -128,6 +130,7 @@ MOO_MARKUP_EXTENSION_SOURCES = {
     "sheet": "src/components/sheet.html.jinja",
     "sidebar": "src/components/sidebar.html.jinja",
     "slider": "src/components/slider.html.jinja",
+    "table-of-contents": "src/components/table_of_contents.html.jinja",
     "skeleton": "src/components/skeleton.html.jinja",
     "toast": "src/components/toast.html.jinja",
     "toggle-group": "src/components/toggle_group.html.jinja",

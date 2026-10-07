@@ -204,7 +204,7 @@ class CertificationContractTests(unittest.TestCase):
         inventory_slugs = {component["slug"] for component in inventory["components"]}
         registry_slugs = {component["slug"] for component in registry}
 
-        self.assertEqual(len(inventory["components"]), 45)
+        self.assertEqual(len(inventory["components"]), 46)
         self.assertEqual(inventory_slugs, registry_slugs)
         self.assertEqual(
             {component["slug"] for component in inventory["plannedComponents"]},
@@ -233,7 +233,7 @@ class CertificationContractTests(unittest.TestCase):
             for evidence_path in component["evidence"]:
                 self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
 
-        self.assertEqual(tier_counts, {0: 24, 1: 6, 2: 5, 3: 10})
+        self.assertEqual(tier_counts, {0: 24, 1: 6, 2: 5, 3: 11})
 
     def test_pilot_evidence_keeps_release_claims_honest(self) -> None:
         pilot = self._read_json("src/certification/pilot-evidence.json")
@@ -1178,15 +1178,21 @@ class CertificationContractTests(unittest.TestCase):
         self.assertTrue(set(freeze["packageFiles"]).issubset(package["files"]))
 
     def test_stable_api_freeze_matches_current_package_and_runtime_exports(self) -> None:
+        """The unchanged 1.0.0 inventory remains a removal guard for additive development."""
         self.assertTrue((CERTIFICATION_ROOT / "api-freeze-1.0.0.json").is_file())
         freeze = self._read_json("src/certification/api-freeze-1.0.0.json")
         package = self._read_json("package.json")
         certification = self._read_json("certification.json")
         self.assertEqual(freeze["freezeVersion"], "1.0.0")
-        self.assertEqual(package["version"], freeze["freezeVersion"])
-        self.assertEqual(certification["coreVersion"], freeze["freezeVersion"])
-        self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
-        self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
+        self.assertEqual(certification["coreVersion"], package["version"])
+        if package["version"] == freeze["freezeVersion"]:
+            self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
+            self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
+        else:
+            current_version = tuple(int(part) for part in package["version"].split("-")[0].split("."))
+            self.assertGreater(current_version, (1, 0, 0))
+            self.assertTrue(set(freeze["packageExports"]).issubset(package["exports"]))
+            self.assertTrue(set(freeze["packageFiles"]).issubset(package["files"]))
         self.assertEqual(certification["status"], "preview")
         rc11 = self._read_json("src/certification/api-freeze-1.0.0-rc.11.json")
         inventory_keys = set(rc11) - {"freezeVersion", "frozenAt", "description"}
@@ -1213,7 +1219,10 @@ class CertificationContractTests(unittest.TestCase):
             cwd=ROOT, capture_output=True, text=True, check=False, env=npm_env(),
         )
         self.assertEqual(imported.returncode, 0, imported.stderr)
-        self.assertEqual(set(aggregate["namedExports"]), set(json.loads(imported.stdout)))
+        expected_exports = set(aggregate["namedExports"])
+        if package["version"] != freeze["freezeVersion"]:
+            expected_exports.add("TableOfContents")
+        self.assertEqual(expected_exports, set(json.loads(imported.stdout)))
 
     def test_rc5_freeze_test_docstring_matches_enforced_equality(self) -> None:
         docstring = self.test_rc5_api_freeze_declaration_is_well_formed.__doc__ or ""
