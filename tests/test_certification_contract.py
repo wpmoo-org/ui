@@ -1196,9 +1196,9 @@ class CertificationContractTests(unittest.TestCase):
             [
                 "node", "--input-type=module", "--eval",
                 'import Toc from "./src/js/components/table-of-contents.js"; '
-                'const instance = Object.getOwnPropertyNames(Toc.prototype).filter(key => !key.startsWith("_")); '
-                'const statics = ["getInstance", "getOrCreateInstance"].filter(key => typeof Toc[key] === "function"); '
-                'process.stdout.write(JSON.stringify([...instance, ...statics]));',
+                + 'const instance = Object.getOwnPropertyNames(Toc.prototype).filter(key => !key.startsWith("_")); '
+                + 'const statics = ["getInstance", "getOrCreateInstance"].filter(key => typeof Toc[key] === "function"); '
+                + 'process.stdout.write(JSON.stringify([...instance, ...statics]));',
             ],
             cwd=ROOT, capture_output=True, text=True, check=False, env=npm_env(),
         )
