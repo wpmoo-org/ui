@@ -1032,7 +1032,7 @@ export default class MooDatepicker {
     this._popover.classList.remove("show");
     stopDatepickerPopoverPositioning(this);
     this._trigger.setAttribute("aria-expanded", "false");
-    if (returnFocus) this._trigger.focus();
+    if (returnFocus) this._trigger.focus({ preventScroll: true });
     dispatch(this._element, this._window, "hidden.moo.datepicker");
   }
 
@@ -1215,7 +1215,7 @@ export class MooDateRangePicker {
     this._popover.classList.remove("show");
     stopDatepickerPopoverPositioning(this);
     this._trigger.setAttribute("aria-expanded", "false");
-    if (returnFocus) this._trigger.focus();
+    if (returnFocus) this._trigger.focus({ preventScroll: true });
     dispatch(this._element, this._window, "hidden.moo.datepicker");
   }
 
