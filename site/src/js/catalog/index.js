@@ -161,7 +161,7 @@ export function initCatalog(root = document) {
     disposers,
     root,
     FEATURE_SELECTORS.tableOfContents,
-    () => import("../../../../src/js/components/table-of-contents.js"),
+    () => import("../../../../src/js/components/toc.js"),
     ({ default: TableOfContents }) => {
       const instances = Array.from(root.querySelectorAll("[data-toc]"))
         .map((element) => TableOfContents.getOrCreateInstance(element));

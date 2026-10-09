@@ -28,6 +28,7 @@
       "./context-menu.js",
       "./datatable.js",
       "./slider.js",
+      "./toc.js",
       "./table-of-contents.js",
       "./sheet.js",
       "./chart.js",

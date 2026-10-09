@@ -104,6 +104,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/datatable.js",
     "dist/js/slider.js",
     "dist/js/sheet.js",
+    "dist/js/toc.js",
     "dist/js/table-of-contents.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
@@ -131,6 +132,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./datatable.js": "./dist/js/datatable.js",
     "./slider.js": "./dist/js/slider.js",
     "./sheet.js": "./dist/js/sheet.js",
+    "./toc.js": "./dist/js/toc.js",
     "./table-of-contents.js": "./dist/js/table-of-contents.js",
     "./moo-ui.js": "./dist/js/moo-ui.js",
     "./moo-ui.min.js": "./dist/js/moo-ui.min.js",
@@ -480,6 +482,7 @@ class PackageMetadataTests(unittest.TestCase):
                 "datatable.js",
                 "slider.js",
                 "sheet.js",
+                "toc.js",
                 "table-of-contents.js",
                 "chart.js",
                 "datepicker.js",
@@ -670,6 +673,8 @@ import Sidebar from "@wpmoo/ui/sidebar.js";
 import ContextMenu from "@wpmoo/ui/context-menu.js";
 import DataTable from "@wpmoo/ui/datatable.js";
 import Slider from "@wpmoo/ui/slider.js";
+import Toc from "@wpmoo/ui/toc.js";
+import LegacyToc from "@wpmoo/ui/table-of-contents.js";
 import { initSheets } from "@wpmoo/ui/sheet.js";
 import MooUI, {
   loadChart as AggregateLoadChart,
@@ -702,6 +707,8 @@ if (
   ContextMenu.name !== "ContextMenu" ||
   DataTable.name !== "DataTable" ||
   Slider.name !== "MooSlider" ||
+  Toc !== LegacyToc ||
+  typeof Toc.getOrCreateInstance !== "function" ||
   typeof AggregateCombobox.getOrCreateInstance !== "function" ||
   typeof AggregateSidebar.getOrCreateInstance !== "function" ||
   typeof AggregateContextMenu.getOrCreateInstance !== "function" ||
@@ -939,6 +946,8 @@ for (const specifier of [
             "datatable.js",
             "sheet.js",
             "slider.js",
+            "toc.js",
+            "table-of-contents.js",
             "src/js/moo-ui.js",
             "chart.js",
             "datepicker.js",

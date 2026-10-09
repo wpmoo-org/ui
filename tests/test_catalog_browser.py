@@ -40,6 +40,39 @@ class CatalogBrowserTests(unittest.TestCase):
         cls.browser = launch_certification_browser(cls.playwright)
         cls.addClassCleanup(cls.browser.close)
 
+    def test_toc_document_preview_keeps_fragment_navigation_inside_its_frame(self) -> None:
+        context = self.browser.new_context(viewport={"width": 1540, "height": 1314})
+        self.addCleanup(context.close)
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        page.goto(f"{self.base_url}/site-dist/components/toc/index.html")
+        frame = page.frame_locator('iframe[data-moo-block-frame]')
+        expect(frame.locator('#demo-toc-list')).to_be_visible()
+        expect(frame.locator('#demo-toc-compact')).to_be_hidden()
+        expect(page.locator('iframe[data-moo-block-frame]')).to_have_count(1)
+        before = page.evaluate("() => ({url:location.href, y:scrollY, main:document.getElementById('main-content').scrollTop})")
+        for label, target in [('Languages', 'languages'), ('Navigation', 'navigation'), ('Introduction', 'introduction')]:
+            frame.locator('#demo-toc-list').get_by_role('link', name=label, exact=True).click()
+            expect(frame.locator(f'#demo-toc-list a[href="#{target}"]')).to_have_attribute('aria-current', 'location')
+            after = page.evaluate("() => ({url:location.href, y:scrollY, main:document.getElementById('main-content').scrollTop})")
+            self.assertEqual(after, before)
+        for label, width in [('Tablet', 768), ('Mobile', 390), ('Desktop', 1280)]:
+            page.get_by_role('button', name=f'{label} preview', exact=True).click()
+            expect(page.locator('iframe[data-moo-block-frame]')).to_have_attribute('width', str(width))
+            if width < 992:
+                expect(frame.locator('#demo-toc-list')).to_be_hidden()
+                expect(frame.locator('#demo-toc-compact')).to_be_visible()
+                frame.locator('#demo-toc-compact').get_by_role('button', name='On this page').click()
+                frame.locator('#demo-toc-compact').get_by_role('link', name='Languages', exact=True).click()
+                expect(frame.locator('#demo-toc-compact [data-toc-current]')).to_have_text('Languages')
+                expect(frame.locator('#demo-toc-compact .dropdown-menu')).to_be_hidden()
+            else:
+                expect(frame.locator('#demo-toc-list')).to_be_visible()
+                expect(frame.locator('#demo-toc-compact')).to_be_hidden()
+            after = page.evaluate("() => ({url:location.href, y:scrollY, main:document.getElementById('main-content').scrollTop})")
+            self.assertEqual(after, before)
+        evidence.assert_clean()
+
     def test_external_state_restores_the_first_content_frame_and_sidebar_reload(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):

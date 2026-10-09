@@ -37,7 +37,7 @@ not independent or accredited certification.
 - `@wpmoo/ui/context-menu.js`: optional Context Menu ESM lifecycle
 - `@wpmoo/ui/datatable.js`: optional DataTable ESM lifecycle
 - `@wpmoo/ui/sidebar.js`: optional Sidebar ESM lifecycle
-- `@wpmoo/ui/table-of-contents.js`: optional TableOfContents lifecycle and current-section tracking
+- `@wpmoo/ui/toc.js`: optional TableOfContents lifecycle and current-section tracking (`table-of-contents.js` remains a compatibility entrypoint)
 - `@wpmoo/ui/chart.js`: optional Chart ESM lifecycle (Chart.js 4.5.1 bundled)
 - `@wpmoo/ui/chart.min.js`: minified Chart bundle (artifact variant of chart.js)
 - `@wpmoo/ui/datepicker.js`: optional Datepicker ESM lifecycle (self-contained, no third-party runtime)
@@ -169,7 +169,7 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 - [Spinner](https://ui.wpmoo.org/components/spinner/)
 - [Switch](https://ui.wpmoo.org/components/switch/)
 - [Table](https://ui.wpmoo.org/components/table/)
-- [Table of Contents](https://ui.wpmoo.org/components/table-of-contents/)
+- [Table of Contents](https://ui.wpmoo.org/components/toc/)
 - [Tabs](https://ui.wpmoo.org/components/tabs/)
 - [Textarea](https://ui.wpmoo.org/components/textarea/)
 - [Toast](https://ui.wpmoo.org/components/toast/)

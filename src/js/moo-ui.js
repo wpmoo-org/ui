@@ -7,7 +7,7 @@ import Datepicker, {
 } from "./components/datepicker.js";
 import Sidebar from "./components/sidebar.js";
 import Slider from "./components/slider.js";
-import TableOfContents from "./components/table-of-contents.js";
+import TableOfContents from "./components/toc.js";
 import { initSheets } from "./components/sheet.js";
 
 async function loadChart() {

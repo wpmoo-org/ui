@@ -33,6 +33,7 @@ APPROVED_TARBALL_FILES = {
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/slider.js",
+    "dist/js/toc.js",
     "dist/js/table-of-contents.js",
     "dist/js/sheet.js",
     "dist/js/moo-ui.js",

@@ -32,6 +32,7 @@ export function initToc(root = document) {
   const targets = [
     ...root.querySelectorAll(".moo-doc-toc [data-toc] .nav-link"),
     ...root.querySelectorAll('#catalog-toc-compact a[href^="#"]'),
+    ...root.querySelectorAll('#toc-demo-page [data-toc] a[href^="#"]'),
   ]
     .map((link) => {
       const hash = link.getAttribute("href");

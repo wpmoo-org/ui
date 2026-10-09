@@ -1,7 +1,7 @@
 {
   "freezeVersion": "1.1.0",
   "frozenAt": "2026-10-09",
-  "description": "API inventory for the Moo UI 1.1.0 stable public contract. It preserves the 1.0.0 surface and adds the shared TableOfContents module and aggregate export. Component certification remains preview. The immutable 1.0.0 and release-candidate inventories remain removal guards; incompatible changes to a documented public contract require a major release.",
+  "description": "API inventory for the Moo UI 1.1.0 stable public contract. It preserves the 1.0.0 surface and adds the shared TableOfContents module and aggregate export. The preferred standalone entrypoint is toc.js; table-of-contents.js remains a compatibility re-export of the same constructor. Component certification remains preview. The immutable 1.0.0 and release-candidate inventories remain removal guards; incompatible changes to a documented public contract require a major release.",
   "packageExports": [
     "./moo-ui.css",
     "./moo-ui.min.css",
@@ -14,6 +14,7 @@
     "./context-menu.js",
     "./datatable.js",
     "./slider.js",
+    "./toc.js",
     "./table-of-contents.js",
     "./sheet.js",
     "./chart.js",
@@ -42,6 +43,7 @@
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/slider.js",
+    "dist/js/toc.js",
     "dist/js/table-of-contents.js",
     "dist/js/sheet.js",
     "dist/js/chart.js",
@@ -307,6 +309,19 @@
         "inputAttribute": "data-slider-input",
         "outputAttribute": "data-slider-output"
       }
+    },
+    {
+      "module": "toc.js",
+      "export": "./toc.js",
+      "source": "src/js/components/toc.js",
+      "defaultExport": "TableOfContents",
+      "lifecycle": [
+        "constructor",
+        "getInstance",
+        "getOrCreateInstance",
+        "refresh",
+        "dispose"
+      ]
     },
     {
       "module": "table-of-contents.js",
