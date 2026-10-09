@@ -33,11 +33,10 @@ jobs:
   ui-tests:
     name: ui-tests
     runs-on: ubuntu-latest
-    # Release-tier runs can exceed 25 minutes on a cold hosted runner once setup,
-    # browser install, full discovery, package verification, and rehearsal are
-    # included. Keep dev pushes capped below release, but give PR/main release
-    # audits enough room to finish with an actual pass/fail result.
-    timeout-minutes: 45
+    # Full discovery alone reached 44 minutes on a hosted runner. Leave room
+    # for setup, browser installation, build, package verification and rehearsal
+    # so release-tier runs can finish with an actual pass/fail result.
+    timeout-minutes: 90
 
     steps:
       - name: Check out repository
