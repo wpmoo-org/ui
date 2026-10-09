@@ -409,6 +409,7 @@ class MooCoreTests(CatalogTestCase):
                 "../foundations/focus",
                 "../utilities/border",
                 "../utilities/scroll_fade",
+                "../utilities/scroll_smooth",
                 "../layouts/app",
                 "../layouts/page_grid",
                 "../themes/forms",

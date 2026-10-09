@@ -14,6 +14,7 @@ import time
 from html import escape
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import unquote
 
 import sass
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
@@ -841,6 +842,24 @@ def example_toc_items(value: object) -> list[dict[str, str]]:
     return items
 
 
+def catalog_toc_items(value: object) -> list[dict[str, str]]:
+    parser = ComponentTocParser()
+    parser.feed(str(value))
+    outline = parser.by_id.get("catalog-toc-list")
+    if outline is None:
+        return []
+
+    items: list[dict[str, str]] = []
+    pending = list(outline.children)
+    while pending:
+        node = pending.pop(0)
+        href = node.attrs.get("href") or ""
+        if node.tag == "a" and node.has_class("nav-link") and href.startswith("#"):
+            items.append({"id": unquote(href[1:]), "label": node.text_content()})
+        pending[0:0] = node.children
+    return items
+
+
 def pretty_url(path: object) -> str:
     value = str(path).strip()
     if value in {"", "index.html", "./"}:
@@ -1289,6 +1308,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.filters["highlight_html"] = highlight_html
     environment.filters["slugify"] = slugify
     environment.filters["example_toc_items"] = example_toc_items
+    environment.filters["catalog_toc_items"] = catalog_toc_items
     environment.filters["absolutize_links"] = absolutize_links
     # A plain json.dumps for CodePen prefill payload fields, deliberately
     # NOT registered as tojson so Jinja's built-in (HTML-safe) tojson stays
@@ -1299,6 +1319,9 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.globals["site_href"] = site_href
     environment.globals["canonical_url"] = canonical_url
     environment.globals["fail"] = fail
+    environment.globals["acceptance_1_0_slugs"] = json.loads(
+        (SITE_REGISTRY / "acceptance-1.0-components.json").read_text(encoding="utf-8")
+    )
     environment.globals["component_preview_src"] = component_preview_src
     environment.globals["component_preview_absolute_src"] = component_preview_absolute_src
     environment.globals["block_preview_src"] = block_preview_src

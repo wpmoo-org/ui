@@ -112,6 +112,7 @@ body:has(.moo-catalog) {
   --moo-catalog-header-height: 4rem;
   --moo-catalog-header-bg-mix: 94%;
   --moo-catalog-header-backdrop-filter: blur(0.75rem);
+  --moo-catalog-toc-border-color: var(--bs-border-color);
   --moo-doc-lead-font-size: 1rem;
   --moo-doc-lead-line-height: 1.5;
   --moo-doc-body-font-size: 0.9375rem;
@@ -134,6 +135,7 @@ body:has(.moo-catalog) {
 
 @scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
   :scope .moo-catalog {
+    --moo-catalog-toc-border-color: var(--bs-dark);
     --moo-code-muted: #{$moo-catalog-code-muted-dark};
     --moo-code-keyword: #{$moo-catalog-code-keyword-dark};
     --moo-code-selector: #{$moo-catalog-code-selector-dark};
@@ -158,8 +160,10 @@ body:has(.moo-catalog) {
     background: var(--moo-catalog-sidebar-bg);
   }
 
-  :scope .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) {
-    background: var(--moo-catalog-sidebar-bg);
+  @include media-breakpoint-up(lg) {
+    :scope .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) {
+      background: var(--moo-catalog-sidebar-bg);
+    }
   }
 }
 
@@ -180,6 +184,11 @@ body:has(.moo-catalog) {
 
 .moo-catalog .moo-catalog__navbar {
   min-height: var(--moo-catalog-header-height);
+}
+
+.moo-catalog__toc-row {
+  --bs-border-color: var(--moo-catalog-toc-border-color);
+  border-top-width: calc(var(--bs-border-width) * 0.5) !important;
 }
 
 .moo-catalog__footer-inner {

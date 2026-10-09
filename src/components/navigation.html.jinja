@@ -10,7 +10,7 @@
 
 {% set nav_directions = ["", "ltr", "rtl"] %}
 
-{% macro nav_menu(aria_label, style="pills", vertical=false, extra_class="", dir="", id="", data={}, heading="", root_class="") -%}
+{% macro nav_menu(aria_label, style="pills", vertical=false, extra_class="", dir="", id="", data={}, heading="", root_class="", heading_class="") -%}
   {% if not aria_label | trim %}{{ fail("Navigation aria_label is required") }}{% endif %}
   {% if style not in nav_styles %}{{ fail("Unknown navigation style: " ~ style) }}{% endif %}
   {% if dir not in nav_directions %}{{ fail("Unknown navigation direction: " ~ dir) }}{% endif %}
@@ -27,22 +27,25 @@
     {% if value is not string and value is not number and value is not boolean and value is not none %}{{ fail("Navigation data values must be scalar") }}{% endif %}
   {% endfor %}
   {% if heading is not string or root_class is not string %}{{ fail("Navigation heading and root_class must be strings") }}{% endif %}
+  {% if heading_class is not string %}{{ fail("Navigation heading_class must be a string") }}{% endif %}
   {% set classes = nav_styles[style] %}
   {% if vertical and style != "steps" %}{% set classes = classes ~ " flex-column gap-1" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
   <nav aria-label="{{ aria_label | forceescape }}"{% if dir %} dir="{{ dir }}"{% endif %}{% if id %} id="{{ id | forceescape }}"{% endif %}{% if root_class %} class="{{ root_class | forceescape }}"{% endif %}{% for key, value in data.items() %} data-{{ key }}="{{ value | forceescape }}"{% endfor %}>
-    {% if heading %}{{ typography(heading | forceescape, "section-label") }}{% endif %}
+    {% if heading %}{{ typography(heading | forceescape, "section-label", extra_class=heading_class) }}{% endif %}
     <ul class="{{ classes }}">
       {{ caller() | trim | safe }}
     </ul>
   </nav>
 {%- endmacro %}
 
-{% macro nav_item(label, href="#", active=false, disabled=false, icon="", end_icon="", badge_label="", badge_variant="secondary", description="", completed=false, completed_label="Completed") -%}
+{% macro nav_item(label, href="#", active=false, disabled=false, icon="", end_icon="", badge_label="", badge_variant="secondary", description="", completed=false, completed_label="Completed", extra_class="") -%}
   {% if not label | trim %}{{ fail("Navigation item label is required") }}{% endif %}
+  {% if extra_class is not string %}{{ fail("Navigation item extra_class must be a string") }}{% endif %}
   {% set classes = "nav-link" %}
   {% if active %}{% set classes = classes ~ " active" %}{% endif %}
   {% if disabled %}{% set classes = classes ~ " disabled" %}{% endif %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ (extra_class | forceescape) %}{% endif %}
   <li class="nav-item"{% if completed %} data-nav-completed="true"{% endif %}>
     <a class="{{ classes }}"{% if not disabled %} href="{{ href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}{% if active %} aria-current="page"{% endif %}>
       {% if icon %}<span class="nav-link-icon" aria-hidden="true">{{ render_icon(icon, "inline-start") }}</span>{% endif %}

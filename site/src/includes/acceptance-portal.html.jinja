@@ -7,7 +7,9 @@
   {"slug": "iphone", "label": "iPhone"},
   {"slug": "android", "label": "Android"}
 ] %}
-{% set acceptance_total = catalog | length * ((acceptance_devices | length * 3) + 1) %}
+{# Historical 1.0 portals retain their original component cohort. #}
+{% set acceptance_catalog = catalog | selectattr("slug", "in", acceptance_1_0_slugs) | list %}
+{% set acceptance_total = acceptance_catalog | length * ((acceptance_devices | length * 3) + 1) %}
 
 <main class="moo-acceptance" id="main-content" tabindex="-1" data-moo-acceptance-portal data-moo-acceptance-key="{{ acceptance_key }}">
   <section class="moo-acceptance__panel" aria-labelledby="acceptance-title">
@@ -30,7 +32,7 @@
         <p class="moo-acceptance__export-status" aria-live="polite" data-moo-acceptance-export-status></p>
       </div>
 
-      {% for component in catalog %}
+      {% for component in acceptance_catalog %}
         <section class="moo-acceptance__component" aria-labelledby="acceptance-component-{{ component.slug }}">
           <div class="moo-acceptance__component-header">
             <h2 class="moo-acceptance__component-title" id="acceptance-component-{{ component.slug }}">{{ component.label }}</h2>

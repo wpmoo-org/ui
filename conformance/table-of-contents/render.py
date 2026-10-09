@@ -23,7 +23,9 @@ def main() -> None:
     template = create_environment().from_string(
         (directory / "index.html.jinja").read_text(encoding="utf-8")
     )
-    (directory / "index.html").write_text(template.render(**vars(args)) + "\n", encoding="utf-8")
+    rendered = template.render(**vars(args))
+    normalized = "\n".join(line.rstrip() for line in rendered.splitlines()) + "\n"
+    (directory / "index.html").write_text(normalized, encoding="utf-8")
 
 
 if __name__ == "__main__":

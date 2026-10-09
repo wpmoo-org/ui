@@ -1,20 +1,22 @@
-{% macro typography(content, variant, id="") -%}
+{% macro typography(content, variant, id="", extra_class="") -%}
+  {% if extra_class is not string %}{{ fail("Typography extra_class must be a string") }}{% endif %}
+  {% set utilities = " " ~ (extra_class | forceescape) if extra_class else "" %}
   {% if variant == "page-title" -%}
-    <h1 class="fw-semibold"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h1>
+    <h1 class="fw-semibold{{ utilities }}"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h1>
   {%- elif variant == "page-description" -%}
-    <p class="moo-page-description text-body-secondary mb-0">{{ content }}</p>
+    <p class="moo-page-description text-body-secondary mb-0{{ utilities }}">{{ content }}</p>
   {%- elif variant == "section-title" -%}
-    <h2 class="h3"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h2>
+    <h2 class="h3{{ utilities }}"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h2>
   {%- elif variant == "example-title" -%}
-    <h2 class="h4"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h2>
+    <h2 class="h4{{ utilities }}"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h2>
   {%- elif variant == "subsection-title" -%}
-    <h3 class="h6"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h3>
+    <h3 class="h6{{ utilities }}"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h3>
   {%- elif variant == "muted" -%}
-    <span class="text-body-secondary">{{ content }}</span>
+    <span class="text-body-secondary{{ utilities }}">{{ content }}</span>
   {%- elif variant == "section-label" -%}
-    <span class="small fw-semibold">{{ content }}</span>
+    <span class="small fw-semibold{{ utilities }}">{{ content }}</span>
   {%- elif variant == "inline-code" -%}
-    <code>{{ content }}</code>
+    <code{% if extra_class %} class="{{ extra_class | forceescape }}"{% endif %}>{{ content }}</code>
   {%- else -%}
     {{ fail("Unknown typography variant: " ~ variant) }}
   {%- endif %}

@@ -60,6 +60,24 @@ class TypographyTests(CatalogTestCase):
         ):
             self.render_typography('typography("Text", variant="typo")')
 
+    def test_typography_utilities_are_optional_and_attribute_escaped(self) -> None:
+        self.assertEqual(
+            self.render_typography('typography("Section", "section-label", extra_class="ps-3")'),
+            '<span class="small fw-semibold ps-3">Section</span>',
+        )
+        self.assertEqual(
+            self.render_typography('typography("Code", "inline-code", extra_class="text-break")'),
+            '<code class="text-break">Code</code>',
+        )
+        template = create_environment().from_string(
+            '{% from "components/typography.html.jinja" import typography %}'
+            '{{ typography("Section", "section-label", extra_class=utilities) }}'
+        )
+        output = template.render(utilities='ps-3" onmouseover="bad').strip()
+        self.assertIn('ps-3&#34; onmouseover=&#34;bad', output)
+        with self.assertRaisesRegex(ValueError, "Typography extra_class must be a string"):
+            template.render(utilities=[])
+
     def test_intro_uses_component_intro_with_typographic_roles(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
         intro_block = source[

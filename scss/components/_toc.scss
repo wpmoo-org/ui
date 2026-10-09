@@ -5,7 +5,7 @@
 
 [data-toc]:has(> .nav) {
   position: relative;
-  border-inline-start: var(--bs-border-width) solid var(--bs-border-color);
+  border-inline-start: calc(var(--bs-border-width) * 0.5) solid var(--bs-border-color);
 }
 
 [data-toc][data-toc-marker]::after {
@@ -14,7 +14,7 @@
   inset-block-start: 0;
   inset-inline-start: calc(var(--bs-border-width) * -1);
   block-size: var(--moo-toc-marker-height);
-  border-inline-start: calc(var(--bs-border-width) * 2) solid var(--moo-primary);
+  border-inline-start: calc(var(--bs-border-width) * 3) solid var(--moo-primary);
   transform: translateY(var(--moo-toc-marker-offset));
   pointer-events: none;
   @include transition($transition-base);
@@ -32,7 +32,7 @@
   position: absolute;
   inset-block: var(--bs-nav-link-padding-y);
   inset-inline-start: 0;
-  border-inline-start: calc(var(--bs-border-width) * 2) solid transparent;
+  border-inline-start: calc(var(--bs-border-width) * 3) solid transparent;
 }
 
 [data-toc] > .nav .nav-link.active {

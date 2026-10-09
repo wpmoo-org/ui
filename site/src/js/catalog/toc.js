@@ -28,7 +28,10 @@ export function initToc(root = document) {
     timers.clear();
   };
 
-  const targets = Array.from(root.querySelectorAll(".moo-doc-toc [data-toc] .nav-link"))
+  const targets = [
+    ...root.querySelectorAll(".moo-doc-toc [data-toc] .nav-link"),
+    ...root.querySelectorAll('#catalog-toc-compact a[href^="#"]'),
+  ]
     .map((link) => {
       const hash = link.getAttribute("href");
       let id;

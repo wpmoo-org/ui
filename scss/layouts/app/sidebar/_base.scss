@@ -40,10 +40,6 @@
   transition: background 0.15s ease;
 }
 
-.sidebar-rail:hover::after {
-  background: var(--moo-sidebar-border);
-}
-
 .wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar-inner {
   position: relative;
   height: 100%;

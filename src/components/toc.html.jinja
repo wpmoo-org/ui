@@ -26,12 +26,12 @@
     {% if content_id %}{% set metadata = dict(metadata, **{"toc-content": content_id}) %}{% endif %}
     {% if scroll_root_id %}{% set metadata = dict(metadata, **{"toc-scroll-root": scroll_root_id}) %}{% endif %}
     {% if presentation == "list" %}
-      {% call nav_menu(label, style="base", extra_class="flex-column flex-nowrap gap-0 small p-0", id=id, data=metadata, heading=label, root_class=extra_class) %}
-        {% for item in validated.items %}{{ nav_item(item.label | forceescape, href=item.fragment) }}{% endfor %}
+      {% call nav_menu(label, style="base", extra_class="flex-column flex-nowrap gap-0 small p-0", id=id, data=metadata, heading=label, root_class=extra_class, heading_class="ps-3") %}
+        {% for item in validated.items %}{{ nav_item(item.label | forceescape, href=item.fragment, extra_class="ps-3") }}{% endfor %}
       {% endcall %}
     {% else %}
       <nav id="{{ id | forceescape }}" aria-label="{{ label | forceescape }}"{% for key, value in metadata.items() %} data-{{ key }}="{{ value | forceescape }}"{% endfor %} class="dropdown d-flex align-items-center gap-2 w-100{% if extra_class %} {{ extra_class | forceescape }}{% endif %}">
-        {{ button(label | forceescape, variant="ghost", size="sm", dropdown=true, dropdown_caret=true, extra_class="flex-shrink-0") }}
+        {{ button(label | forceescape, variant="ghost", size="sm", dropdown=true, dropdown_caret=true, extra_class="flex-shrink-0 bg-body-secondary") }}
         <span data-toc-current class="small text-body-secondary text-truncate">{{ overview_label | forceescape }}</span>
         {% call dropdown_menu(extra_class="w-100") %}
           {% for item in validated.items %}{{ dropdown_item(item.label | forceescape, href=item.fragment, extra_class="text-wrap text-break") }}{% endfor %}

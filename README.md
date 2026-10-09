@@ -194,6 +194,10 @@ calm.
 
 ## Status And Support
 
+The current development snapshot is `1.1.0-dev.1`. It adds a shared Table of
+Contents component and is not published to npm; use the locally packed tarball
+when evaluating this snapshot.
+
 The stable public-contract release is `1.0.0`. Component certification remains
 `preview`, with its documented manual and browser/device limits. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on

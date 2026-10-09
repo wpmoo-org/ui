@@ -384,6 +384,45 @@ class CatalogBrowserTests(unittest.TestCase):
                 finally:
                     context.close()
 
+    def test_catalog_toc_presentation_follows_available_page_width(self) -> None:
+        for theme in ("light", "dark"):
+            with self.subTest(theme=theme):
+                case = replace(CERTIFICATION_CASES[0], color_scheme=theme)
+                context = new_case_context(self.browser, case)
+                context.add_init_script(
+                    "localStorage.setItem('moo-sidebar:catalog-shell', 'expanded');"
+                )
+                try:
+                    page = context.new_page()
+                    page.set_viewport_size({"width": 1159, "height": 900})
+                    evidence = BrowserEvidence(page)
+                    page.goto(f"{self.base_url}/site-dist/components/breadcrumb/")
+                    prepare_page(page, case)
+                    compact = page.locator("#catalog-toc-compact")
+                    outline = page.locator("#catalog-toc-list")
+                    expect(compact).to_be_visible()
+                    expect(outline).to_be_hidden()
+                    self.assertLess(page.locator("#main-content").evaluate("el => el.clientWidth"), 992)
+                    trigger = compact.locator("button")
+                    trigger.click()
+                    link = compact.locator("a").nth(1)
+                    href = link.get_attribute("href")
+                    label = link.inner_text()
+                    link.click()
+                    expect(page).to_have_url(f"{self.base_url}/site-dist/components/breadcrumb/{href}")
+                    expect(compact.locator("[data-toc-current]")).to_have_text(label)
+                    expect(trigger).to_have_attribute("aria-expanded", "false")
+
+                    page.get_by_role("button", name="Toggle sidebar").first.click()
+                    expect(outline).to_be_visible()
+                    expect(compact).to_be_hidden()
+                    self.assertGreaterEqual(page.locator("#main-content").evaluate("el => el.clientWidth"), 992)
+                    expect(outline.locator(f'a[href="{href}"]')).to_have_attribute("aria-current", "location")
+                    self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth - innerWidth"), 1)
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
     def test_form_preview_field_wrappers_center_token_width_controls(self) -> None:
         context = new_case_context(self.browser, CERTIFICATION_CASES[0])
         try:

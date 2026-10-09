@@ -661,7 +661,8 @@ class LayoutCatalogTests(CatalogTestCase):
         self.assertEqual(page.count('data-example="layout-app-example"'), 1)
         self.assertIn('id="layout-app-example-code"', page)
         self.assertIn('href="#app"', page)
-        self.assertIn('>App</a>', page)
+        toc_labels = {item["id"]: item["label"] for item in site_build.catalog_toc_items(page)}
+        self.assertEqual(toc_labels["app"], "App")
         self.assertIn('<h2 class="h3" id="page">Page</h2>', page)
         self.assertIn('href="#page"', page)
         self.assertNotIn('<h2 class="h3" id="sidebar">Sidebar</h2>', page)
@@ -716,6 +717,7 @@ class LayoutCatalogTests(CatalogTestCase):
         self.assertLess(section_starts["gutters"], section_starts["utilities"])
         self.assertLess(section_starts["utilities"], section_starts["z-index"])
         self.assertLess(section_starts["z-index"], section_starts["css-grid"])
+        toc_labels = {item["id"]: item["label"] for item in site_build.catalog_toc_items(page)}
 
         for slug, label in (
             ("gutters", "Gutters"),
@@ -725,7 +727,7 @@ class LayoutCatalogTests(CatalogTestCase):
         ):
             with self.subTest(slug=slug):
                 self.assertIn(f'href="#{slug}"', page)
-                self.assertIn(f'>{label}</a>', page)
+                self.assertEqual(toc_labels[slug], label)
 
         gutters_start = section_starts["gutters"]
         utilities_start = section_starts["utilities"]

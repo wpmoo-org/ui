@@ -192,6 +192,7 @@ class TableOfContentsBrowserTests(unittest.TestCase):
                             labelStart: label[start], railStart: rail[start], markerStart: marker[start],
                             labelTop: label.top, railTop: rail.top,
                             listBottom: list.getBoundingClientRect().bottom, railBottom: rail.bottom,
+                            baseBorderWidth: parseFloat(style.getPropertyValue('--bs-border-width')),
                             railWidth: parseFloat(style.borderInlineStartWidth),
                             markerWidth: parseFloat(getComputedStyle(root, "::after").borderInlineStartWidth),
                             markerOffset: parseFloat(root.style.getPropertyValue('--moo-toc-marker-offset')),
@@ -217,8 +218,12 @@ class TableOfContentsBrowserTests(unittest.TestCase):
                     self.assertLessEqual(geometry["railTop"], geometry["labelTop"])
                     self.assertGreaterEqual(geometry["railBottom"], geometry["listBottom"])
                     self.assertAlmostEqual(geometry["markerStart"], geometry["railStart"], delta=1)
-                    self.assertGreater(geometry["railWidth"], 0)
-                    self.assertAlmostEqual(geometry["markerWidth"], geometry["railWidth"] * 2, delta=0.1)
+                    # Chromium can round a fractional border to one CSS pixel.
+                    self.assertTrue(any(
+                        abs(geometry["railWidth"] - width) <= 0.1
+                        for width in (geometry["baseBorderWidth"] * 0.5, geometry["baseBorderWidth"])
+                    ), geometry)
+                    self.assertAlmostEqual(geometry["markerWidth"], geometry["baseBorderWidth"] * 3, delta=0.1)
                     self.assertLessEqual(geometry["overflow"], 1)
                     self.assertEqual(geometry["gap"], 0)
                     self.assertAlmostEqual(geometry["markerOffset"], geometry["textOffset"], delta=1)

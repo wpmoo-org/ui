@@ -58,6 +58,7 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/components/_tabs.scss",
     "scss/components/_textarea.scss",
     "scss/components/_toast.scss",
+    "scss/components/_toc.scss",
     "scss/components/_toggle_group.scss",
     "scss/components/_tooltip.scss",
     "scss/components/sidebar/_collapsed.scss",
@@ -90,6 +91,7 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/utilities/_border.scss",
     "scss/utilities/_scroll_fade.scss",
     "scss/utilities/_scroll_fade_primitives.scss",
+    "scss/utilities/_scroll_smooth.scss",
 }
 EXPECTED_PACKAGE_FILES = {
     "dist/assets/css/moo-ui.css",

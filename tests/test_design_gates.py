@@ -138,11 +138,15 @@ def approved_border_shorthand(value: str) -> bool:
     }
     color_tokens = {
         token for token in css_tokens | sass_tokens
-        if any(part in token for part in ("color", "-bg", "border"))
+        if (any(part in token for part in ("color", "-bg", "border"))
+            or token in MOO_THEME_TOKENS)
         and token not in width_tokens
     }
     has_style = " solid " in f" {clean} " or "--bs-border-style" in clean
-    return bool(width_tokens and color_tokens and has_style)
+    has_color = bool(color_tokens) or any(
+        word.lower() in {"transparent", "currentcolor"} for word in clean.split()
+    )
+    return bool(width_tokens and has_color and has_style)
 
 
 def approved_shared_value(prop: str, value: str) -> bool:
@@ -203,13 +207,13 @@ def approved_shared_value(prop: str, value: str) -> bool:
             )
         )
     if "border" in prop:
-        if prop.endswith("border-color") or prop == "border-color":
+        if prop.endswith("-color"):
             return approved_token_names(clean) or bool(
                 SASS_VAR.fullmatch(clean) and "color" in clean
             )
-        if prop.endswith("border-width") or prop == "border-width":
+        if prop.endswith("-width"):
             return semantic_tokens_only(clean, "width")
-        if prop.endswith("border-style") or prop == "border-style":
+        if prop.endswith("-style"):
             return clean in {"solid", "dashed", "dotted"} or clean == "var(--bs-border-style)"
         return approved_border_shorthand(clean)
     if "outline" in prop:
@@ -513,6 +517,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "_border.scss",
                 "_scroll_fade.scss",
                 "_scroll_fade_primitives.scss",
+                "_scroll_smooth.scss",
             },
         )
         self.assertEqual(
@@ -666,6 +671,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "../foundations/focus",
                 "../utilities/border",
                 "../utilities/scroll_fade",
+                "../utilities/scroll_smooth",
                 "../layouts/app",
                 "../layouts/page_grid",
                 "../themes/forms",
@@ -747,7 +753,9 @@ console.log(JSON.stringify(Object.fromEntries(
         source = """
         .bad {
           border-width: var(--moo-foreground);
+          border-inline-start-width: var(--moo-foreground);
           border-color: var(--project-color);
+          border: var(--bs-border-width) solid var(--moo-transparent-opacity);
           border-radius: var(--moo-border);
           box-shadow: var(--moo-border);
         }
@@ -757,7 +765,7 @@ console.log(JSON.stringify(Object.fromEntries(
             path.write_text(source, encoding="utf-8")
             offenders = shared_primitive_offenders((path,))
 
-        self.assertEqual(len(offenders), 4)
+        self.assertEqual(len(offenders), 6)
         self.assertTrue(any("border-width" in offender for offender in offenders))
         self.assertTrue(any("border-color" in offender for offender in offenders))
         self.assertTrue(any("border-radius" in offender for offender in offenders))
@@ -767,6 +775,8 @@ console.log(JSON.stringify(Object.fromEntries(
         source = """
         .good {
           border: var(--bs-border-width) solid var(--moo-border);
+          border-inline-start: calc(var(--bs-border-width) * 3) solid var(--moo-primary);
+          border-block-start: calc(var(--bs-border-width) * 0.5) solid transparent;
           border-radius: var(--bs-border-radius-lg);
           box-shadow: var(--bs-box-shadow-sm);
           background: color-mix(in srgb, var(--moo-surface) 80%, var(--bs-body-bg));

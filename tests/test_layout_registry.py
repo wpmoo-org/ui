@@ -142,6 +142,7 @@ COMPONENT_MACROS_BY_FILE = {
     "tabs.html.jinja": {"tabs"},
     "textarea.html.jinja": {"textarea"},
     "toast.html.jinja": {"toast_container", "toast", "toast_template"},
+    "toc.html.jinja": {"table_of_contents"},
     "toggle_group.html.jinja": {"toggle_group"},
     "tooltip.html.jinja": {"tooltip_trigger"},
     "typography.html.jinja": {"typography"},
@@ -231,21 +232,21 @@ class LayoutRegistryTests(unittest.TestCase):
                 with self.subTest(layout=entry["slug"], dependency=layout_slug):
                     self.assertIn(layout_slug, layout_by_slug)
 
-    def test_component_inventory_remains_the_exact_45_entry_baseline(self) -> None:
+    def test_component_inventory_includes_the_shared_toc(self) -> None:
         components = self._read_json(COMPONENT_REGISTRY)
         evidence_inventory = self._read_json(
             ROOT / "src/certification/evidence-inventory.json"
         )
 
-        self.assertEqual(len(components), 45)
-        self.assertEqual(len({entry["slug"] for entry in components}), 45)
-        self.assertEqual(len(evidence_inventory["components"]), 45)
+        self.assertEqual(len(components), 46)
+        self.assertEqual(len({entry["slug"] for entry in components}), 46)
+        self.assertEqual(len(evidence_inventory["components"]), 46)
         self.assertEqual(evidence_inventory["plannedComponents"], [])
         self.assertEqual(
             [entry["slug"] for entry in components],
             [entry["slug"] for entry in evidence_inventory["components"]],
         )
-        self.assertEqual(len(COMPONENT_SOURCE_FILES), 44)
+        self.assertEqual(len(COMPONENT_SOURCE_FILES), 45)
         self.assertIn("field.html.jinja", COMPONENT_SOURCE_FILES)
         self.assertIn("src/includes/field.html.jinja", COMPONENT_MACROS_BY_FILE)
         self.assertIn("form", COMPONENT_MACROS_BY_FILE["field.html.jinja"])

@@ -361,7 +361,7 @@
   padding-block: 3rem 5rem;
 }
 
-@include media-breakpoint-up(xl) {
+@container moo-page (min-width: #{breakpoint-min(lg)}) {
   .moo-doc-layout {
     grid-template-columns: minmax(0, 52rem) 12rem;
     gap: 4rem;
