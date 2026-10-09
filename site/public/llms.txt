@@ -15,6 +15,7 @@ implementation.
 ## Version And Support
 
 - stable package: `@wpmoo/ui@1.0.0`
+- Unpublished development snapshot: `@wpmoo/ui@1.1.0-dev.1` (local tarball only)
 - Bootstrap peer range: `>=5.3.0 <5.4`
 - Tested Bootstrap versions in the manifest: `5.3.0`, `5.3.3`, `5.3.8`
 - License: MIT for source code
@@ -52,6 +53,10 @@ not independent or accredited certification.
 - `@wpmoo/ui/scss/settings`: Moo UI settings aggregate for Bootstrap variable setup
 - `@wpmoo/ui/certification.json`: versioned support and evidence manifest
 - `@wpmoo/ui/package.json`: package metadata
+
+The development snapshot additionally exports `@wpmoo/ui/table-of-contents.js`
+for explicit TableOfContents lifecycle and includes it in the aggregate ESM.
+This additive module is not available from the stable 1.0.0 CDN links below.
 
 The npm package does not publish catalog templates, preview artwork, catalog
 JavaScript, or site assets. It ships Sass source files for the documented Sass
@@ -110,6 +115,9 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
   runtime
 - Sheet server-open marker: explicit `initSheets(root)` after Bootstrap Offcanvas
   is available on the document's window
+- Table of Contents (development snapshot): native fragment links and a
+  Bootstrap dropdown, with optional Moo UI ESM for current-section tracking
+  and explicit `refresh()` / `dispose()` lifecycle
 
 ## Documentation
 
@@ -165,6 +173,7 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 - [Spinner](https://ui.wpmoo.org/components/spinner/)
 - [Switch](https://ui.wpmoo.org/components/switch/)
 - [Table](https://ui.wpmoo.org/components/table/)
+- [Table of Contents](https://ui.wpmoo.org/components/table-of-contents/)
 - [Tabs](https://ui.wpmoo.org/components/tabs/)
 - [Textarea](https://ui.wpmoo.org/components/textarea/)
 - [Toast](https://ui.wpmoo.org/components/toast/)
@@ -183,7 +192,8 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 
 - Preserve Bootstrap behavior before adding custom behavior.
 - Use Moo UI ESM only for Combobox, Context Menu, DataTable, Sidebar, Chart,
-  Datepicker, Slider, Sheet initialization, or the documented aggregate `moo-ui.js` entrypoint.
+  Datepicker, Slider, Sheet initialization, Table of Contents in the development
+  snapshot, or the documented aggregate `moo-ui.js` entrypoint.
 - Do not invent public Sass APIs, undocumented JavaScript entrypoints, or
   certification claims.
 - Treat shadcn/ui as visual direction only; examples and implementation should

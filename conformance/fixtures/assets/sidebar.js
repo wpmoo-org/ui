@@ -1,5 +1,5 @@
 /*!
- * Moo UI sidebar.js v1.0.0 (https://wpmoo.org/)
+ * Moo UI sidebar.js v1.1.0-dev.1 (https://wpmoo.org/)
  * Copyright 2026 WPMoo Authors
  * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)
  */

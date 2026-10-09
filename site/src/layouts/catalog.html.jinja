@@ -4,6 +4,7 @@
 {% from "shell/navbar.html.jinja" import render_catalog_overlays with context %}
 {% from "shell/sidebar.html.jinja" import render_catalog_sidebar with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 
 {% block critical_state_styles %}
   <link rel="preload" href="{{ root_path }}assets/js/catalog-theme-state.js?v={{ asset_version }}" as="script">
@@ -14,6 +15,12 @@
 {% endblock %}
 
 {% block body %}
+  {% set has_example_toc = current_page_kind in ["component", "utility"] %}
+  {% set has_child_page_navigation = current_page_kind in ["component", "utility", "block"] %}
+  {% set child_page_navigation_items = site_pages %}
+  {% set content_html %}{% block content %}{% endblock %}{% endset %}
+  {% set example_toc_items = content_html | example_toc_items if has_example_toc else [] %}
+  {% set header_toc_items = example_toc_items if has_example_toc else content_html | catalog_toc_items %}
   <div class="moo-catalog" data-moo-shell="catalog">
     {% call(slot) app(
       navigation="sidebar",
@@ -30,14 +37,10 @@
         {% call(region) page(width="xl", header_width="fluid") %}
           {% if region == "header" %}
             {% include "shell/navbar.html.jinja" %}
+            {{ render_doc_toc(header_toc_items, presentation="compact") }}
           {% elif region == "main" %}
             <div class="row gx-0">
               <div class="col px-md-5">
-                {% set has_example_toc = current_page_kind in ["component", "utility"] %}
-                {% set has_child_page_navigation = current_page_kind in ["component", "utility", "block"] %}
-                {% set child_page_navigation_items = site_pages %}
-                {% set content_html %}{% block content %}{% endblock %}{% endset %}
-                {% set example_toc_items = content_html | example_toc_items if has_example_toc else [] %}
                 {% if has_example_toc or has_child_page_navigation %}
                   <div class="moo-doc-layout" data-moo-component-doc-layout>
                     <div class="moo-doc-main">
@@ -49,16 +52,7 @@
                 {% if has_example_toc or has_child_page_navigation %}
                     </div>
                     {% if has_example_toc %}
-                      <aside class="moo-doc-toc d-none d-xl-block" aria-label="On this page" data-moo-component-toc{% if example_toc_items | length == 0 %} hidden{% endif %}>
-                      <div class="moo-doc-toc__inner">
-                        <div class="moo-doc-toc__label">On this page</div>
-                        <nav class="nav flex-column" aria-label="{% if current_section == 'utils' %}Utility examples{% else %}Component examples{% endif %}" data-moo-component-toc-nav>
-                          {% for item in example_toc_items %}
-                            <a class="nav-link{% if loop.first %} active{% endif %}" href="#{{ item.id }}"{% if loop.first %} aria-current="true"{% endif %}>{{ item.label }}</a>
-                          {% endfor %}
-                        </nav>
-                      </div>
-                      </aside>
+                      {{ render_doc_toc(example_toc_items) }}
                     {% endif %}
                   </div>
                 {% endif %}

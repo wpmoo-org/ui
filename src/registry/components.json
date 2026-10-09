@@ -78,6 +78,12 @@
     "description": "Create compact, semantic navigation surfaces with Bootstrap-native nav patterns for app shells."
   },
   {
+    "slug": "table-of-contents",
+    "label": "Table of Contents",
+    "status": "ready",
+    "description": "Navigate document sections with list and compact presentations and optional current-section tracking."
+  },
+  {
     "slug": "separator",
     "label": "Separator",
     "status": "ready",

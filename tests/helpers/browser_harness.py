@@ -109,12 +109,28 @@ class BrowserEvidence:
     def __init__(self, page: Page) -> None:
         self.console_errors: list[str] = []
         self.page_errors: list[str] = []
-        page.on(
-            "console",
-            lambda message: self.console_errors.append(message.text)
-            if message.type in {"error", "warning"}
-            else None,
-        )
+        self.browser_diagnostics: list[str] = []
+
+        def record_console(message) -> None:
+            if message.type not in {"error", "warning"}:
+                return
+            browser = page.context.browser
+            if (
+                message.type == "warning"
+                and browser is not None
+                and browser.browser_type.name == "firefox"
+                and message.text.startswith(
+                    '[JavaScript Warning: "This site appears to use a scroll-linked positioning effect.'
+                )
+                and "https://firefox-source-docs.mozilla.org/performance/scroll-linked_effects.html"
+                in message.text
+                and message.text.endswith(f'{{file: "{page.url}" line: 0}}]')
+            ):
+                self.browser_diagnostics.append(message.text)
+                return
+            self.console_errors.append(message.text)
+
+        page.on("console", record_console)
         page.on("pageerror", lambda error: self.page_errors.append(str(error)))
 
     def assert_clean(self) -> None:

@@ -22,6 +22,7 @@ const FEATURE_SELECTORS = {
   datatable: ".datatable",
   datepicker: "[data-datepicker], [data-datepicker-range], [data-calendar]",
   slider: "[data-slider]",
+  tableOfContents: "[data-toc]",
   tasksExample: "[data-moo-example-tasks]",
   usersExample: "[data-moo-example-users]",
 };
@@ -152,6 +153,18 @@ export function initCatalog(root = document) {
       root.querySelectorAll("[data-slider]").forEach((element) => {
         instances.push(Slider.getOrCreateInstance(element));
       });
+      return () => instances.forEach((instance) => instance.dispose());
+    },
+  );
+
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.tableOfContents,
+    () => import("../../../../src/js/components/table-of-contents.js"),
+    ({ default: TableOfContents }) => {
+      const instances = Array.from(root.querySelectorAll("[data-toc]"))
+        .map((element) => TableOfContents.getOrCreateInstance(element));
       return () => instances.forEach((instance) => instance.dispose());
     },
   );

@@ -33,6 +33,7 @@ APPROVED_TARBALL_FILES = {
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/slider.js",
+    "dist/js/table-of-contents.js",
     "dist/js/sheet.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
@@ -82,6 +83,7 @@ APPROVED_TARBALL_FILES = {
     "scss/components/_spinner.scss",
     "scss/components/_switch.scss",
     "scss/components/_table.scss",
+    "scss/components/_toc.scss",
     "scss/components/_tabs.scss",
     "scss/components/_textarea.scss",
     "scss/components/_toast.scss",
@@ -117,6 +119,7 @@ APPROVED_TARBALL_FILES = {
     "scss/utilities/_border.scss",
     "scss/utilities/_scroll_fade.scss",
     "scss/utilities/_scroll_fade_primitives.scss",
+    "scss/utilities/_scroll_smooth.scss",
     "package.json",
 }
 

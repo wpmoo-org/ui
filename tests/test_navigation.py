@@ -59,6 +59,26 @@ class NavigationTests(CatalogTestCase):
         with self.assertRaisesRegex(ValueError, "Navigation item label is required"):
             self.render_navigation('{% call nav_menu("Nav") %}{{ nav_item("") }}{% endcall %}')
 
+    def test_heading_and_item_utilities_preserve_native_navigation(self) -> None:
+        output = self.render_navigation(
+            '{% call nav_menu("Sections", heading="On this page", heading_class="ps-3") %}'
+            '{{ nav_item("One", href="#one", extra_class="ps-3") }}{% endcall %}'
+        )
+        self.assertIn('<span class="small fw-semibold ps-3">On this page</span>', output)
+        self.assertIn('<a class="nav-link ps-3" href="#one">', output)
+        template = create_environment().from_string(
+            '{% from "components/navigation.html.jinja" import nav_item %}'
+            '{{ nav_item("One", extra_class=utilities) }}'
+        )
+        self.assertIn(
+            'ps-3&#34; onmouseover=&#34;bad',
+            template.render(utilities='ps-3" onmouseover="bad'),
+        )
+        with self.assertRaisesRegex(ValueError, "Navigation item extra_class must be a string"):
+            template.render(utilities=[])
+        with self.assertRaisesRegex(ValueError, "Navigation heading_class must be a string"):
+            self.render_navigation('{% call nav_menu("Sections", heading_class=[]) %}{% endcall %}')
+
     def test_steps_navigation_keeps_current_completion_and_disabled_states_distinct(self) -> None:
         output = self.render_navigation(
             """

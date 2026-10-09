@@ -1,0 +1,48 @@
+/* Table of contents */
+[data-toc] > .fw-semibold {
+  padding-inline-start: calc(#{$nav-link-padding-x} - var(--bs-border-width));
+}
+
+[data-toc]:has(> .nav) {
+  position: relative;
+  border-inline-start: calc(var(--bs-border-width) * 0.5) solid var(--bs-border-color);
+}
+
+[data-toc][data-toc-marker]::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: calc(var(--bs-border-width) * -1);
+  block-size: var(--moo-toc-marker-height);
+  border-inline-start: calc(var(--bs-border-width) * 3) solid var(--moo-primary);
+  transform: translateY(var(--moo-toc-marker-offset));
+  pointer-events: none;
+  @include transition($transition-base);
+}
+
+[data-toc] > .nav .nav-link {
+  display: flex;
+  position: relative;
+  margin-inline-start: calc(var(--bs-border-width) * -1);
+  color: var(--moo-muted-foreground);
+}
+
+[data-toc] > .nav .nav-link::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--bs-nav-link-padding-y);
+  inset-inline-start: 0;
+  border-inline-start: calc(var(--bs-border-width) * 3) solid transparent;
+}
+
+[data-toc] > .nav .nav-link.active {
+  color: var(--moo-foreground);
+}
+
+[data-toc] > .nav .nav-link.active::before {
+  border-inline-start-color: var(--moo-primary);
+}
+
+[data-toc][data-toc-marker] > .nav .nav-link.active::before {
+  border-inline-start-color: transparent;
+}

@@ -1,12 +1,26 @@
-{% macro render_doc_toc(items) -%}
-  <aside class="moo-doc-toc d-none d-xl-block" aria-label="On this page">
-    <div class="moo-doc-toc__inner">
-      <div class="moo-doc-toc__label">On this page</div>
-      <nav class="nav flex-column" aria-label="Page sections">
-        {% for item in items %}
-          <a class="nav-link{% if loop.first %} active{% endif %}" href="#{{ item.id }}"{% if loop.first %} aria-current="true"{% endif %}>{{ item.label }}</a>
-        {% endfor %}
-      </nav>
-    </div>
-  </aside>
+{% from "components/toc.html.jinja" import table_of_contents %}
+
+{% macro render_doc_toc(items, presentation="list") -%}
+  {% if presentation not in ["list", "compact"] %}{{ fail("Unknown catalog TOC presentation: " ~ presentation) }}{% endif %}
+  {% set prepared = namespace(items=[]) %}
+  {% for item in items %}
+    {% set prepared.items = prepared.items + [{"target_id": item.id, "label": item.label}] %}
+  {% endfor %}
+  {% if prepared.items %}
+    {% if presentation == "compact" %}
+      <div data-page-container>
+        <div data-page-hide-from="lg">
+          <div class="row moo-catalog__toc-row border-top">
+            <div class="col">
+              {{ table_of_contents("catalog-toc-compact", prepared.items, presentation="compact", content_id="main-content", scroll_root_id="main-content", extra_class="py-3") }}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <aside class="moo-doc-toc" data-page-show-from="lg" aria-label="On this page">
+        {{ table_of_contents("catalog-toc-list", prepared.items, content_id="main-content", scroll_root_id="main-content") }}
+      </aside>
+    {% endif %}
+  {% endif %}
 {%- endmacro %}

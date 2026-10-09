@@ -197,6 +197,28 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         cls.playwright_manager.__exit__(None, None, None)
         cls.server.__exit__(None, None, None)
 
+    def test_browser_evidence_rejects_application_warnings_and_errors(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        try:
+            page = context.new_page()
+            page.goto(
+                f"{self.base_url}/tests/fixtures/certification/navigation.html",
+                wait_until="networkidle",
+            )
+            evidence = BrowserEvidence(page)
+            page.evaluate(
+                """() => {
+                  console.warn('This site appears to use a scroll-linked positioning effect. Application warning probe');
+                  console.error('Application error probe');
+                }"""
+            )
+            self.assertEqual(len(evidence.console_errors), 2)
+            self.assertEqual(evidence.browser_diagnostics, [])
+            with self.assertRaisesRegex(AssertionError, "Application error probe"):
+                evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_nested_owners_keep_theme_direction_and_content_portals_local(self) -> None:
         context = new_case_context(self.browser, CERTIFICATION_CASES[0])
         context.add_init_script(
@@ -3347,8 +3369,10 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     expect(local).to_be_checked()
                     expect(cloud).not_to_be_checked()
                     expect(disabled).to_be_disabled()
-                    local.press("ArrowDown")
+                    # Use adjacent enabled options; native radio wrapping differs across engines.
+                    local.press("ArrowUp")
                     expect(cloud).to_be_checked()
+                    expect(cloud).to_be_focused()
                     expect(disabled).not_to_be_checked()
 
                     first_code = page.locator("#radio-category-acs")
@@ -3359,6 +3383,10 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     expect(next_code).to_be_checked()
                     expect(next_code).to_be_focused()
                     expect(first_code).not_to_be_checked()
+                    # Tab entry activates the native :focus-visible indicator.
+                    next_code.press("Tab")
+                    page.keyboard.press("Shift+Tab")
+                    expect(next_code).to_be_focused()
                     self.assertNotEqual(
                         page.locator('label[for="radio-category-art"]').evaluate(
                             "label => getComputedStyle(label).boxShadow"
@@ -4426,9 +4454,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     expect(page.locator("#certification-step-schedule")).to_be_focused()
                     page.locator("#certification-step-schedule").press("Tab")
                     expect(page.locator("#certification-step-submit")).not_to_be_focused()
-                    self.assertFalse(page.locator("#certification-navigation-steps").evaluate(
-                        "nav => [...nav.querySelectorAll('.nav-link')].includes(document.activeElement)"
-                    ))
+                    expect(page.locator("#certification-navigation-after-steps")).to_be_focused()
                     self.assertFalse(page.evaluate("document.documentElement.scrollWidth > document.documentElement.clientWidth"))
                     self.assertEqual(run_axe(page), [])
                     evidence.assert_clean()

@@ -58,6 +58,7 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/components/_tabs.scss",
     "scss/components/_textarea.scss",
     "scss/components/_toast.scss",
+    "scss/components/_toc.scss",
     "scss/components/_toggle_group.scss",
     "scss/components/_tooltip.scss",
     "scss/components/sidebar/_collapsed.scss",
@@ -90,6 +91,7 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/utilities/_border.scss",
     "scss/utilities/_scroll_fade.scss",
     "scss/utilities/_scroll_fade_primitives.scss",
+    "scss/utilities/_scroll_smooth.scss",
 }
 EXPECTED_PACKAGE_FILES = {
     "dist/assets/css/moo-ui.css",
@@ -102,6 +104,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/datatable.js",
     "dist/js/slider.js",
     "dist/js/sheet.js",
+    "dist/js/table-of-contents.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
     "dist/js/chart.js",
@@ -128,6 +131,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./datatable.js": "./dist/js/datatable.js",
     "./slider.js": "./dist/js/slider.js",
     "./sheet.js": "./dist/js/sheet.js",
+    "./table-of-contents.js": "./dist/js/table-of-contents.js",
     "./moo-ui.js": "./dist/js/moo-ui.js",
     "./moo-ui.min.js": "./dist/js/moo-ui.min.js",
     "./chart.js": "./dist/js/chart.js",
@@ -250,7 +254,7 @@ class PackageMetadataTests(unittest.TestCase):
     def test_stable_package_declares_the_state_artifact_surface(self) -> None:
         package = self._read_package()
 
-        self.assertEqual(package["version"], "1.0.0")
+        self.assertEqual(package["version"], "1.1.0-dev.1")
         self.assertEqual(
             package["exports"]["./state.js"],
             "./dist/js/state.js",
@@ -476,6 +480,7 @@ class PackageMetadataTests(unittest.TestCase):
                 "datatable.js",
                 "slider.js",
                 "sheet.js",
+                "table-of-contents.js",
                 "chart.js",
                 "datepicker.js",
             },
@@ -499,8 +504,14 @@ class PackageMetadataTests(unittest.TestCase):
     def test_published_notices_references_are_version_pinned_urls(self) -> None:
         package = self._read_package()
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        # Local development artifacts keep public install/licensing links on
+        # the frozen stable release rather than advertise an unpublished tag.
+        published_version = package["version"]
+        if "-dev." in published_version:
+            freeze = json.loads((ROOT / "src/certification/api-freeze-1.0.0.json").read_text(encoding="utf-8"))
+            published_version = freeze["freezeVersion"]
         expected_url = (
-            f"https://github.com/wpmoo-org/ui/blob/v{package['version']}/"
+            f"https://github.com/wpmoo-org/ui/blob/v{published_version}/"
             "THIRD_PARTY_NOTICES.md"
         )
         moving_branch_pattern = (
@@ -517,7 +528,7 @@ class PackageMetadataTests(unittest.TestCase):
                 self.assertNotRegex(document, moving_branch_pattern)
         llms = (ROOT / "site/public/llms.txt").read_text(encoding="utf-8")
         self.assertIn(
-            f"https://unpkg.com/@wpmoo/ui@{package['version']}/dist/assets/css/moo-ui.css",
+            f"https://unpkg.com/@wpmoo/ui@{published_version}/dist/assets/css/moo-ui.css",
             llms,
         )
         self.assertIn("Moo UI source code is MIT licensed.", readme)

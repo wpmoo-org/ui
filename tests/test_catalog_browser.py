@@ -352,6 +352,115 @@ class CatalogBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_catalog_uses_shared_toc_tracking_for_docs_and_component_examples(self) -> None:
+        for path in ("installation/", "components/accordion/"):
+            with self.subTest(path=path):
+                context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+                try:
+                    page = context.new_page()
+                    page.set_viewport_size({"width": 1440, "height": 900})
+                    evidence = BrowserEvidence(page)
+                    page.goto(f"{self.base_url}/site-dist/{path}")
+                    prepare_page(page, CERTIFICATION_CASES[0])
+                    toc = page.locator(".moo-doc-toc [data-toc]")
+                    expect(toc).to_have_count(1)
+                    links = toc.locator("a")
+                    hrefs = links.evaluate_all("links => links.map(link => link.getAttribute('href'))")
+                    self.assertGreater(len(hrefs), 2)
+                    self.assertEqual(len(hrefs), len(set(hrefs)))
+                    link = links.nth(1)
+                    href = link.get_attribute("href")
+                    link.click()
+                    expect(page).to_have_url(f"{self.base_url}/site-dist/{path}{href}")
+                    expect(link).to_have_attribute("aria-current", "location")
+                    expect(toc).to_have_attribute("data-toc-marker", "")
+                    marker_height = toc.evaluate("el => parseFloat(getComputedStyle(el, '::after').height)")
+                    text_height = link.locator("span").evaluate("el => el.offsetHeight")
+                    self.assertAlmostEqual(marker_height, text_height, delta=1)
+                    page.locator("#main-content").evaluate("el => { el.scrollTop = el.scrollHeight; }")
+                    expect(links.last).to_have_attribute("aria-current", "location")
+                    self.assertEqual(page.evaluate("window.scrollY"), 0)
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def test_catalog_toc_presentation_follows_available_page_width(self) -> None:
+        for theme in ("light", "dark"):
+            with self.subTest(theme=theme):
+                case = replace(CERTIFICATION_CASES[0], color_scheme=theme)
+                context = new_case_context(self.browser, case)
+                context.add_init_script(
+                    "localStorage.setItem('moo-sidebar:catalog-shell', 'expanded');"
+                )
+                try:
+                    page = context.new_page()
+                    page.set_viewport_size({"width": 1159, "height": 900})
+                    evidence = BrowserEvidence(page)
+                    page.goto(f"{self.base_url}/site-dist/components/breadcrumb/")
+                    prepare_page(page, case)
+                    compact = page.locator("#catalog-toc-compact")
+                    outline = page.locator("#catalog-toc-list")
+                    expect(compact).to_be_visible()
+                    expect(outline).to_be_hidden()
+                    self.assertLess(page.locator("#main-content").evaluate("el => el.clientWidth"), 992)
+                    trigger = compact.locator("button")
+                    trigger.click()
+                    link = compact.locator("a").nth(1)
+                    href = link.get_attribute("href")
+                    label = link.inner_text()
+                    link.click()
+                    expect(page).to_have_url(f"{self.base_url}/site-dist/components/breadcrumb/{href}")
+                    expect(compact.locator("[data-toc-current]")).to_have_text(label)
+                    expect(trigger).to_have_attribute("aria-expanded", "false")
+
+                    page.get_by_role("button", name="Toggle sidebar").first.click()
+                    expect(outline).to_be_visible()
+                    expect(compact).to_be_hidden()
+                    self.assertGreaterEqual(page.locator("#main-content").evaluate("el => el.clientWidth"), 992)
+                    expect(outline.locator(f'a[href="{href}"]')).to_have_attribute("aria-current", "location")
+                    self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth - innerWidth"), 1)
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def test_compact_toc_keyboard_selection_continues_from_the_selected_section(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        try:
+            page = context.new_page()
+            page.set_viewport_size({"width": 900, "height": 900})
+            page.emulate_media(reduced_motion="no-preference")
+            evidence = BrowserEvidence(page)
+            page.goto(f"{self.base_url}/site-dist/components/breadcrumb/")
+            prepare_page(page, CERTIFICATION_CASES[0])
+            compact = page.locator("#catalog-toc-compact")
+            expect(compact).to_be_visible()
+            trigger = compact.get_by_role("button", name="On this page")
+            trigger.press("ArrowDown")
+            compact.locator('a[href="#dropdown"]').press("Enter")
+            expect(page).to_have_url(f"{self.base_url}/site-dist/components/breadcrumb/#dropdown")
+            expect(trigger).to_have_attribute("aria-expanded", "false")
+            expect(compact.locator("[data-toc-current]")).to_have_text("Dropdown")
+
+            page.keyboard.press("Tab")
+            reading_position = page.evaluate("""
+                () => {
+                  const active = document.activeElement;
+                  const target = document.getElementById('dropdown');
+                  return {
+                    inContent: document.getElementById('main-content').contains(active),
+                    afterSection: Boolean(target.compareDocumentPosition(active) & Node.DOCUMENT_POSITION_FOLLOWING),
+                    windowScrollY: window.scrollY,
+                  };
+                }
+            """)
+            self.assertEqual(
+                reading_position,
+                {"inContent": True, "afterSection": True, "windowScrollY": 0},
+            )
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_form_preview_field_wrappers_center_token_width_controls(self) -> None:
         context = new_case_context(self.browser, CERTIFICATION_CASES[0])
         try:

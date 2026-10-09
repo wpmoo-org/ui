@@ -1,5 +1,5 @@
 /*!
- * Moo UI v1.0.0 (https://wpmoo.org/)
+ * Moo UI v1.1.0-dev.1 (https://wpmoo.org/)
  * Copyright 2026 WPMoo Authors
  * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)
  *
@@ -4826,6 +4826,53 @@ label.btn {
     border-color: var(--moo-primary);
   }
 
+  /* Table of contents */
+  [data-toc] > .fw-semibold {
+    padding-inline-start: calc(0.75rem - var(--bs-border-width));
+  }
+  [data-toc]:has(> .nav) {
+    position: relative;
+    border-inline-start: calc(var(--bs-border-width) * 0.5) solid var(--bs-border-color);
+  }
+  [data-toc][data-toc-marker]::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: calc(var(--bs-border-width) * -1);
+    block-size: var(--moo-toc-marker-height);
+    border-inline-start: calc(var(--bs-border-width) * 3) solid var(--moo-primary);
+    transform: translateY(var(--moo-toc-marker-offset));
+    pointer-events: none;
+    transition: all 0.2s ease-in-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-toc][data-toc-marker]::after {
+      transition: none;
+    }
+  }
+  [data-toc] > .nav .nav-link {
+    display: flex;
+    position: relative;
+    margin-inline-start: calc(var(--bs-border-width) * -1);
+    color: var(--moo-muted-foreground);
+  }
+  [data-toc] > .nav .nav-link::before {
+    content: "";
+    position: absolute;
+    inset-block: var(--bs-nav-link-padding-y);
+    inset-inline-start: 0;
+    border-inline-start: calc(var(--bs-border-width) * 3) solid transparent;
+  }
+  [data-toc] > .nav .nav-link.active {
+    color: var(--moo-foreground);
+  }
+  [data-toc] > .nav .nav-link.active::before {
+    border-inline-start-color: var(--moo-primary);
+  }
+  [data-toc][data-toc-marker] > .nav .nav-link.active::before {
+    border-inline-start-color: transparent;
+  }
+
   /* Skeleton */
   .skeleton {
     color: var(--moo-border);
@@ -8024,6 +8071,14 @@ label.btn {
       --moo-scroll-fade-e: var(--moo-scroll-fade-e-size);
     }
   }
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-smooth {
+      scroll-behavior: auto;
+    }
+  }
 
   /* Application layout */
   .sidebar {
@@ -8057,9 +8112,6 @@ label.btn {
     width: var(--bs-border-width);
     background: transparent;
     transition: background 0.15s ease;
-  }
-  .sidebar-rail:hover::after {
-    background: var(--moo-sidebar-border);
   }
   .wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar-inner {
     position: relative;
