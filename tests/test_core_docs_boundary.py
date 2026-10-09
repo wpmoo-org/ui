@@ -30,6 +30,7 @@ CORE_OUTPUTS = {
     "dist/js/sidebar.js",
     "dist/js/slider.js",
     "dist/js/sheet.js",
+    "dist/js/toc.js",
     "dist/js/table-of-contents.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
@@ -164,6 +165,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/sidebar.js",
             "js/slider.js",
             "js/sheet.js",
+            "js/toc.js",
             "js/table-of-contents.js",
             "js/moo-ui.js",
             "js/moo-ui.min.js",
@@ -453,7 +455,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
     def test_public_policy_docs_track_current_release_line(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(package["version"], "1.1.0-dev.1")
+        self.assertEqual(package["version"], "1.1.0")
         published_version = package["version"]
         if "-dev." in published_version:
             freeze = json.loads((ROOT / "src/certification/api-freeze-1.0.0.json").read_text(encoding="utf-8"))

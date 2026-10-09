@@ -67,6 +67,7 @@ CORE_JS_MODULES = (
     "combobox.js",
     "context-menu.js",
     "slider.js",
+    "toc.js",
     "table-of-contents.js",
 )
 BUNDLED_JS_MODULES = (
@@ -860,15 +861,22 @@ def catalog_toc_items(value: object) -> list[dict[str, str]]:
     return items
 
 
+PUBLIC_PAGE_ROUTES = {"components/table-of-contents.html": "components/toc.html"}
+PUBLIC_PRETTY_ROUTES = {
+    source.removesuffix(".html") + "/": target.removesuffix(".html") + "/"
+    for source, target in PUBLIC_PAGE_ROUTES.items()
+}
+
+
 def pretty_url(path: object) -> str:
     value = str(path).strip()
     if value in {"", "index.html", "./"}:
         return "./"
     if value.endswith("/index.html"):
-        return value[: -len("index.html")]
-    if value.endswith(".html"):
-        return value[: -len(".html")] + "/"
-    return value
+        value = value[: -len("index.html")]
+    elif value.endswith(".html"):
+        value = value[: -len(".html")] + "/"
+    return PUBLIC_PRETTY_ROUTES.get(value, value)
 
 
 def site_href(path: object, root_path: str = "") -> str:
@@ -886,6 +894,7 @@ def canonical_url(path: object) -> str:
 
 
 def pretty_output_path(path: Path) -> Path:
+    path = Path(PUBLIC_PAGE_ROUTES.get(path.as_posix(), path.as_posix()))
     if path.name == "index.html" or path.suffix != ".html":
         return path
     return path.with_suffix("") / "index.html"
@@ -2661,6 +2670,12 @@ def render_pages(
             asset_version=version,
         )
         output_file.write_text(rendered, encoding="utf-8")
+        if logical_relative.as_posix() in PUBLIC_PAGE_ROUTES:
+            # Preserve native fragments on old bookmarks; its canonical link
+            # and every catalog navigation link use the preferred route.
+            legacy_file = SITE_DIST / logical_relative.with_suffix("") / "index.html"
+            legacy_file.parent.mkdir(parents=True, exist_ok=True)
+            legacy_file.write_text(rendered, encoding="utf-8")
 
 
 @contextlib.contextmanager

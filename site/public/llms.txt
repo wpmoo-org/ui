@@ -2,7 +2,7 @@
 
 > Bootstrap markup. shadcn feel.
 
-Moo UI 1.0.0 is the stable public-contract release of a Bootstrap 5.3-native component system with a restrained,
+Moo UI 1.1.0 is the stable public-contract release of a Bootstrap 5.3-native component system with a restrained,
 shadcn-inspired visual language for server-rendered and Bootstrap-native apps.
 It is CSS-first, not JavaScript-free: Bootstrap owns native plugin behavior,
 while Moo UI adds optional, explicit ESM only for documented gaps.
@@ -14,8 +14,7 @@ implementation.
 
 ## Version And Support
 
-- stable package: `@wpmoo/ui@1.0.0`
-- Unpublished development snapshot: `@wpmoo/ui@1.1.0-dev.1` (local tarball only)
+- stable package: `@wpmoo/ui@1.1.0`
 - Bootstrap peer range: `>=5.3.0 <5.4`
 - Tested Bootstrap versions in the manifest: `5.3.0`, `5.3.3`, `5.3.8`
 - License: MIT for source code
@@ -38,6 +37,7 @@ not independent or accredited certification.
 - `@wpmoo/ui/context-menu.js`: optional Context Menu ESM lifecycle
 - `@wpmoo/ui/datatable.js`: optional DataTable ESM lifecycle
 - `@wpmoo/ui/sidebar.js`: optional Sidebar ESM lifecycle
+- `@wpmoo/ui/toc.js`: optional TableOfContents lifecycle and current-section tracking (`table-of-contents.js` remains a compatibility entrypoint)
 - `@wpmoo/ui/chart.js`: optional Chart ESM lifecycle (Chart.js 4.5.1 bundled)
 - `@wpmoo/ui/chart.min.js`: minified Chart bundle (artifact variant of chart.js)
 - `@wpmoo/ui/datepicker.js`: optional Datepicker ESM lifecycle (self-contained, no third-party runtime)
@@ -54,17 +54,13 @@ not independent or accredited certification.
 - `@wpmoo/ui/certification.json`: versioned support and evidence manifest
 - `@wpmoo/ui/package.json`: package metadata
 
-The development snapshot additionally exports `@wpmoo/ui/table-of-contents.js`
-for explicit TableOfContents lifecycle and includes it in the aggregate ESM.
-This additive module is not available from the stable 1.0.0 CDN links below.
-
 The npm package does not publish catalog templates, preview artwork, catalog
 JavaScript, or site assets. It ships Sass source files for the documented Sass
 entrypoints; undocumented internal partial paths are not separate public APIs.
 
 ## Installation Facts
 
-- Stable version-pinned CDN full stylesheet: `https://unpkg.com/@wpmoo/ui@1.0.0/dist/assets/css/moo-ui.css`
+- Stable version-pinned CDN full stylesheet: `https://unpkg.com/@wpmoo/ui@1.1.0/dist/assets/css/moo-ui.css`
 
 Full replacement:
 
@@ -115,7 +111,7 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
   runtime
 - Sheet server-open marker: explicit `initSheets(root)` after Bootstrap Offcanvas
   is available on the document's window
-- Table of Contents (development snapshot): native fragment links and a
+- Table of Contents: native fragment links and a
   Bootstrap dropdown, with optional Moo UI ESM for current-section tracking
   and explicit `refresh()` / `dispose()` lifecycle
 
@@ -173,7 +169,7 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 - [Spinner](https://ui.wpmoo.org/components/spinner/)
 - [Switch](https://ui.wpmoo.org/components/switch/)
 - [Table](https://ui.wpmoo.org/components/table/)
-- [Table of Contents](https://ui.wpmoo.org/components/table-of-contents/)
+- [Table of Contents](https://ui.wpmoo.org/components/toc/)
 - [Tabs](https://ui.wpmoo.org/components/tabs/)
 - [Textarea](https://ui.wpmoo.org/components/textarea/)
 - [Toast](https://ui.wpmoo.org/components/toast/)
@@ -192,8 +188,8 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 
 - Preserve Bootstrap behavior before adding custom behavior.
 - Use Moo UI ESM only for Combobox, Context Menu, DataTable, Sidebar, Chart,
-  Datepicker, Slider, Sheet initialization, Table of Contents in the development
-  snapshot, or the documented aggregate `moo-ui.js` entrypoint.
+  Datepicker, Slider, Sheet initialization, Table of Contents, or the documented
+  aggregate `moo-ui.js` entrypoint.
 - Do not invent public Sass APIs, undocumented JavaScript entrypoints, or
   certification claims.
 - Treat shadcn/ui as visual direction only; examples and implementation should

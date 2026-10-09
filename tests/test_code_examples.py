@@ -615,10 +615,12 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('aria-labelledby="usage"', template)
         self.assertIn('<h2 class="h4" id="usage">Usage</h2>', template)
 
-        # These pages own bespoke intro layouts instead of the shared
-        # render_component_intro surface. Removing an entry means the page
-        # adopted the shared macro.
-        excluded_component_intro_pages = {"chart", "datatable", "sidebar"}
+        # These pages use framed block previews or chart-specific layouts
+        # instead of the shared render_component_intro surface. Removing an
+        # entry means the page adopted the component intro macro.
+        excluded_component_intro_pages = {
+            "chart", "datatable", "sidebar", "table-of-contents",
+        }
         catalog = json.loads(
             (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
         )

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import subprocess
 import unittest
+from pathlib import Path
 
 from markupsafe import Markup
 
@@ -8,6 +10,19 @@ from build import create_environment
 
 
 class TableOfContentsTests(unittest.TestCase):
+    def test_short_runtime_entrypoint_preserves_the_existing_constructor(self) -> None:
+        result = subprocess.run(
+            [
+                "node", "--input-type=module", "--eval",
+                'import Toc from "./src/js/components/toc.js"; '
+                + 'import Legacy from "./src/js/components/table-of-contents.js"; '
+                + 'process.stdout.write(JSON.stringify(Toc === Legacy));',
+            ],
+            cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "true")
+
     def render_toc(self, **props: object) -> str:
         options = {
             "id": "page-toc",

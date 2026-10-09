@@ -1507,7 +1507,7 @@ class CatalogContractTests(CatalogTestCase):
             (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
         )
         expected = [
-            f"- [{item['label']}](https://ui.wpmoo.org/components/{item['slug']}/)"
+            f"- [{item['label']}]({site_build.canonical_url('components/' + item['slug'] + '.html')})"
             for item in sorted(
                 (item for item in catalog if item["status"] == "ready"),
                 key=lambda item: item["label"].casefold(),
@@ -3105,13 +3105,13 @@ class CatalogContractTests(CatalogTestCase):
                         preview_link, learn_more = popover_content_parser.links
                         self.assertEqual(
                             preview_link.get("href"),
-                            f"https://ui.wpmoo.org/components/{slug}/",
+                            site_build.canonical_url(f"components/{slug}.html"),
                         )
                         self.assertEqual(preview_link.get("target"), "_blank")
                         self.assertEqual(preview_link.get("rel"), "noopener noreferrer")
                         self.assertEqual(
                             learn_more.get("href"),
-                            f"https://ui.wpmoo.org/components/{slug}/",
+                            site_build.canonical_url(f"components/{slug}.html"),
                         )
                         self.assertEqual(learn_more.get("target"), "_blank")
                         self.assertEqual(learn_more.get("rel"), "noopener noreferrer")
@@ -3245,11 +3245,11 @@ class CatalogContractTests(CatalogTestCase):
                         preview_link, learn_more = popover_content_parser.links
                         self.assertEqual(
                             preview_link.get("href"),
-                            f"https://ui.wpmoo.org/components/{slug}/",
+                            site_build.canonical_url(f"components/{slug}.html"),
                         )
                         self.assertEqual(
                             learn_more.get("href"),
-                            f"https://ui.wpmoo.org/components/{slug}/",
+                            site_build.canonical_url(f"components/{slug}.html"),
                         )
 
     def test_compact_doc_toc_reuses_curated_labels_and_native_fragments(self) -> None:
@@ -3273,6 +3273,18 @@ class CatalogContractTests(CatalogTestCase):
         )
         with self.assertRaisesRegex(ValueError, "Unknown catalog TOC presentation"):
             template.render()
+
+    def test_toc_routes_resolve_to_the_short_canonical_address(self) -> None:
+        for route in (
+            "components/table-of-contents.html",
+            "components/table-of-contents/",
+            "components/table-of-contents/index.html",
+            "components/toc.html",
+            "components/toc/",
+        ):
+            with self.subTest(route=route):
+                self.assertEqual(site_build.site_href(route), "components/toc/")
+                self.assertEqual(site_build.canonical_url(route), "https://ui.wpmoo.org/components/toc/")
 
     def test_primary_docs_render_a_right_side_table_of_contents(self) -> None:
         result = self.run_build()
@@ -4034,7 +4046,7 @@ class CatalogContractTests(CatalogTestCase):
                     (ROOT / "site/src/pages/components" / f"{slug}.html.jinja").is_file()
                 )
                 self.assertTrue((DIST / "components" / slug / "index.html").is_file())
-                self.assertIn(f'href="../components/{slug}/"', components_index)
+                self.assertIn(f'href="{site_build.site_href("components/" + slug + ".html", "../")}"', components_index)
                 self.assertIn(component["label"], components_index)
                 if slug == "datatable":
                     self.assertIn(component["description"], components_index)

@@ -1,0 +1,116 @@
+{% extends "layouts/base.html.jinja" %}
+{% from "layouts/app.html.jinja" import app %}
+{% from "layouts/page.html.jinja" import page %}
+{% from "components/toc.html.jinja" import table_of_contents %}
+
+{% block title %}Table of Contents Preview — Moo UI{% endblock %}
+{% block font_preload %}{% endblock %}
+
+{% set sections = [
+  {"target_id": "introduction", "label": "Introduction"},
+  {"target_id": "content-and-configuration", "label": "Content and configuration"},
+  {"target_id": "languages", "label": "Languages"},
+  {"target_id": "navigation", "label": "Navigation"}
+] %}
+
+{% macro toc_demo() -%}
+  {% call(slot) app(navigation="none") %}
+    {% if slot == "page" %}
+      {% call(region) page(width="xl", header_width="fluid", id="toc-demo-page") %}
+        {% if region == "header" %}
+          <div class="d-flex align-items-center gap-3 py-3">
+            <strong class="small">Moo Starter</strong>
+            <span class="small text-body-secondary">Placement guide</span>
+          </div>
+          <div class="d-lg-none border-top py-3">
+            {{ table_of_contents("demo-toc-compact", sections, presentation="compact", content_id="demo-article", scroll_root_id="main-content") }}
+          </div>
+        {% elif region == "main" %}
+          <div class="row g-5 py-4">
+            <article class="col-12 col-lg-9" id="demo-article">
+              <h1 class="mb-3">Placement guide</h1>
+              <p class="text-body-secondary mb-4">Content placements and an independent aside.</p>
+
+              <section class="mb-5" aria-labelledby="introduction">
+                <h2 class="mb-3" id="introduction">Introduction</h2>
+                <p>A document can have an automatic table of contents beside its article. This guide brings together four parts of a small multilingual website: the article itself, the project configuration, the translated content and the navigation around it.</p>
+                <p>The article remains the main reading area. Its heading, description, paragraphs and lists come from the project's content file. Supporting information gives additional context without interrupting the reading order. Readers can begin with the article and find the supporting information afterwards on a narrow screen.</p>
+                <p>The table of contents serves a different purpose from the site menu. Its links point to headings on this page, while the site menu leads to other pages and archives. Following a heading leaves a URL fragment that can be copied and shared.</p>
+                <p>Read the guide from beginning to end or use the section links to move between topics. As each heading reaches the top of the reading area, the active indicator moves to the corresponding item.</p>
+              </section>
+
+              <section class="mb-5" aria-labelledby="content-and-configuration">
+                <h2 class="mb-3" id="content-and-configuration">Content and configuration</h2>
+                <p>The project owns this content. The package supplies the layout and reusable blocks. Authors can update the text without editing a template, and the site can change its layout without moving the article into a theme package.</p>
+                <p>Content and configuration answer different questions. The article describes the subject of the page. Configuration determines which navigation is available and where supporting blocks appear. Reusable information can be maintained separately and placed beside several articles.</p>
+                <p>A simple editing routine keeps the responsibilities clear:</p>
+                <ul>
+                  <li>Write the article and its description in the content file.</li>
+                  <li>Choose headings that describe each section clearly.</li>
+                  <li>Assign relevant categories and tags.</li>
+                  <li>Keep shared notices or contact information in reusable blocks.</li>
+                  <li>Use project preferences for layout choices that apply across the site.</li>
+                </ul>
+                <p>The aside contains the table of contents and a separate page-information block. Each has its own section, and the configured gap provides consistent space between them. Adding another supporting block preserves that rhythm without empty paragraphs or manual spacing.</p>
+              </section>
+
+              <section class="mb-5" aria-labelledby="languages">
+                <h2 class="mb-3" id="languages">Languages</h2>
+                <p>Each published translation uses its own headings and reusable content. Versions of the guide discuss the same subjects, while the article and section labels are written for their readers. A language switcher connects the corresponding published routes.</p>
+                <p>Translated headings may have different fragment identifiers. Generate section links from the current document's headings so that the table of contents follows the version being read. The navigation label and the overview label can be translated independently.</p>
+                <p>A longer section label should wrap naturally without pushing the article out of its column. On narrow screens, the compact menu uses the available row width and keeps the current section visible beside its trigger.</p>
+                <p>The same structure also supports right-to-left content. Logical spacing utilities follow the document direction, and native links continue to point to the same authored section identifiers.</p>
+              </section>
+
+              <section class="mb-5" aria-labelledby="navigation">
+                <h2 class="mb-3" id="navigation">Navigation</h2>
+                <p>Site navigation and article navigation remain independent. The site menu takes readers to another document. The table of contents moves within the current article and keeps their place visible while they read.</p>
+                <p>On a wide screen, the section list stays beside the article. Below the large breakpoint, a compact menu appears below the page header. The header remains available while the article scrolls, so readers can choose another section at any point.</p>
+                <p>Supporting content follows the article when the columns stack. It remains accessible without competing with the compact table of contents. The reading area uses the space left between the header and footer.</p>
+                <p>Try returning to Introduction, then switch between the desktop, tablet and mobile previews. Each mode displays the same document and section data. The active section stays synchronized when the visible presentation changes.</p>
+
+                <h3 class="h5 mt-4 mb-3">Choosing section headings</h3>
+                <p>A heading should help a reader predict what comes next. Use the words that describe the task or subject, and keep the same wording in the section list. A concise label can still be specific: Content and configuration tells readers more than a general label such as Details. The heading remains part of the article even when the navigation is hidden.</p>
+                <p>Choose a stable identifier when a section is first published. If its wording changes later, keeping the identifier preserves links shared in messages, bookmarks and other pages. The visible title and the URL fragment have separate responsibilities: one explains the content, and the other provides a reliable destination. Section labels can change without breaking a reader's saved link.</p>
+
+                <h3 class="h5 mt-4 mb-3">Following the reading position</h3>
+                <p>The active indicator follows the section at the top of the reading area. It changes when a reader scrolls naturally and when they follow a section link. The list and compact control describe the same position, so resizing the preview does not require selecting the section again. Move between Languages and Introduction to watch the indicator travel along the outline.</p>
+                <p>A fixed header sits outside the article's scrolling region. This leaves the navigation available without covering the target heading. The scrolling region owns the remaining page height, and the supplementary column remains alongside it on larger screens. The footer has its own place below the reading area and stays visible while the article moves between sections.</p>
+
+                <h3 class="h5 mt-4 mb-3">Moving between screen sizes</h3>
+                <p>Desktop readers have enough space for a persistent outline beside the text. The tablet preview uses the compact control in the header, giving the article the full reading width. Mobile uses the same control and allows longer labels to wrap in the menu. These presentations share the document and the current section; they offer different ways to reach the same content.</p>
+                <p>Supporting information stays in the document when the layout changes. On narrow screens, it follows the article rather than occupying a second reading column. Scroll to the end of the mobile preview to find the page-information section. Returning to a heading through the compact menu brings the article back into view while the header and footer keep their positions.</p>
+
+                <h3 class="h5 mt-4 mb-3">Keyboard navigation and shared links</h3>
+                <p>Native links remain usable with a keyboard. Tab reaches the section controls, and Enter follows the selected link. The compact control also uses the normal Dropdown keyboard behavior: open the menu, move between its options, choose a section, or close it with Escape. Focus and the active reading position serve different purposes, so each retains its own visible state.</p>
+                <p>The URL fragment identifies the selected destination. In the standalone document, a saved fragment can reopen the corresponding section, and browser history can return to an earlier destination. Within this preview, the document has its own history and scroll area. Exploring its section links leaves the surrounding documentation route, reading position and navigation controls available.</p>
+
+                <h3 class="h5 mt-4 mb-3">Keeping the document readable</h3>
+                <p>The table of contents is an aid for longer articles. The main text should still be understandable when read from beginning to end. Give each section enough context, keep paragraphs focused on one idea, and use lists where readers benefit from a sequence. The outline then becomes a useful map of content that already has a clear reading order.</p>
+                <p>Readers who prefer reduced motion can move directly to a destination without animated scrolling. The same section links and current-section information remain available. Test both the reading flow and the section controls when publishing a guide, and check the narrow layout with realistic text so that long labels and supporting information receive the space they need.</p>
+              </section>
+            </article>
+            <aside class="col-12 col-lg-3" aria-label="Page information">
+              <div class="sticky-top d-flex flex-column gap-5">
+                <section class="d-none d-lg-block" aria-label="Article sections">
+                  {{ table_of_contents("demo-toc-list", sections, content_id="demo-article", scroll_root_id="main-content") }}
+                </section>
+                <section class="mb-5" aria-labelledby="demo-information">
+                  <h4 class="h5" id="demo-information">Page information</h4>
+                  <p>This guide uses a reusable supporting block. It appears beside the article on a wide screen and follows it when the columns stack.</p>
+                  <p class="mb-0">Section links keep their native fragments and browser history.</p>
+                </section>
+              </div>
+            </aside>
+          </div>
+        {% elif region == "footer" %}
+          <div class="py-3 small text-body-secondary">Moo Starter · Placement guide</div>
+        {% endif %}
+      {% endcall %}
+    {% endif %}
+  {% endcall %}
+{%- endmacro %}
+
+{% block body %}
+  {{ toc_demo() }}
+{% endblock %}
