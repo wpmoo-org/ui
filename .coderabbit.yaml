@@ -10,14 +10,15 @@ tone_instructions: >-
   a public contract.
 
 reviews:
-  # Assertive = wide net. Humans and Claude filter the output; CodeRabbit
-  # is the layer that must not stay quiet.
+  # Keep detailed reviews while suppressing routine PR commentary.
   profile: assertive
   # Formally request changes on findings; auto-approve once all CodeRabbit
   # comments are resolved and checks pass. Merging still requires a human.
   request_changes_workflow: true
-  high_level_summary: true
-  review_status: true
+  high_level_summary: false
+  review_status: false
+  in_progress_fortune: false
+  poem: false
 
   # Review only owned sources. Build output, vendored trees, and
   # byte-identical conformance copies are noise; their origins (scss/,
