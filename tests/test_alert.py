@@ -33,6 +33,24 @@ class AlertTests(CatalogTestCase):
     def test_alert_destructive_variant_maps_to_bootstrap_danger(self) -> None:
         self.assertIn('class="alert alert-danger"', self.render_alert('alert("Payment failed", variant="destructive")'))
 
+    def test_title_only_alert_omits_whitespace_description(self) -> None:
+        self.assertEqual(
+            self.render_alert('alert("Heads up!", description="   ")'),
+            self.render_alert('alert("Heads up!")'),
+        )
+
+    def test_description_only_alert_renders_escaped_message_without_heading(self) -> None:
+        for call in (
+            'alert(description="<Message>", variant="info")',
+            'alert("   ", description="<Message>", variant="info")',
+        ):
+            with self.subTest(call=call):
+                output = self.render_alert(call)
+                self.assertIn('class="alert alert-info"', output)
+                self.assertIn('role="alert"', output)
+                self.assertIn('&lt;Message&gt;', output)
+                self.assertNotIn('alert-heading', output)
+
     def test_alert_semantic_variants_map_to_bootstrap_contexts(self) -> None:
         for variant, expected_class in (
             ("warning", "alert-warning"),
@@ -49,9 +67,11 @@ class AlertTests(CatalogTestCase):
         with self.assertRaisesRegex(ValueError, "Unknown alert variant: urgent"):
             self.render_alert('alert("Heads up!", variant="urgent")')
 
-    def test_alert_requires_visible_title(self) -> None:
-        with self.assertRaisesRegex(ValueError, "Alert title is required"):
-            self.render_alert('alert("   ")')
+    def test_alert_requires_visible_message(self) -> None:
+        for call in ('alert()', 'alert("   ")', 'alert("   ", description="   ")'):
+            with self.subTest(call=call):
+                with self.assertRaisesRegex(ValueError, "Alert title or description is required"):
+                    self.render_alert(call)
 
     def test_alert_icon_renders_inside_hidden_wrapper(self) -> None:
         output = self.render_alert('alert("Heads up!", icon="info")')

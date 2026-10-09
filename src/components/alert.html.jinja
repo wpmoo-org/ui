@@ -3,7 +3,7 @@
 {% set alert_variants = ["default", "destructive", "warning", "success", "info"] %}
 
 {% macro alert(
-  title,
+  title="",
   description="",
   variant="default",
   icon="",
@@ -12,7 +12,7 @@
   action="",
   extra_class=""
 ) -%}
-  {% if not title | trim %}{{ fail("Alert title is required") }}{% endif %}
+  {% if not title | trim and not description | trim %}{{ fail("Alert title or description is required") }}{% endif %}
   {% if variant not in alert_variants %}{{ fail("Unknown alert variant: " ~ variant) }}{% endif %}
   {% set classes = "alert" %}
   {% if variant == "destructive" %}{% set classes = classes ~ " alert-danger" %}{% endif %}
@@ -24,8 +24,10 @@
   <div class="{{ classes }}" role="alert">
     {% if icon %}<span class="alert-icon" aria-hidden="true">{{ render_icon(icon, "inline-start") }}</span>{% endif %}
     <div class="alert-body">
+      {% if title | trim %}
       <div class="alert-heading">{{ title }}</div>
-      {% if description %}<p class="mb-0">{{ description }}</p>{% endif %}
+      {% endif %}
+      {% if description | trim %}<p class="mb-0">{{ description }}</p>{% endif %}
     </div>
     {% if action %}<div class="alert-action">{{ action | safe }}</div>{% endif %}
     {% if dismissible %}{{ close_button(aria_label=dismiss_aria_label, dismiss="alert") }}{% endif %}
