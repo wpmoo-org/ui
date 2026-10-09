@@ -84,3 +84,14 @@ pass, including native document/component tracking, initial hash alignment and
 minimum touch targets. The native 4173 preview confirms the shared 200-ms marker
 and zero list gap, with no warning/error logs. Its observed image is retained in
 the host workspace; no stable certification manifest was regenerated.
+
+## Accepted gallery recognition artwork
+
+On 2026-10-09 the maintainer approved the original monochrome, hand-drawn TOC
+illustration on light and dark surfaces. The transparent 1536 x 1024 source
+is retained in the private host workspace. The public catalog uses the
+[optimized WebP](../../../site/static/images/components/table-of-contents.webp),
+converted through the existing preview pipeline with its alpha preserved.
+Its SHA-256 is `85584ec2c7178e639e081fd36f4e74ee34e11a092a9c8ecc83a675b0cc9ba3b4`.
+The existing ready-component preview gate passes with this asset; no placeholder
+exception or stable certification update is introduced.
