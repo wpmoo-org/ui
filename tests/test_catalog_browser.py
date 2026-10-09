@@ -423,6 +423,44 @@ class CatalogBrowserTests(unittest.TestCase):
                 finally:
                     context.close()
 
+    def test_compact_toc_keyboard_selection_continues_from_the_selected_section(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        try:
+            page = context.new_page()
+            page.set_viewport_size({"width": 900, "height": 900})
+            page.emulate_media(reduced_motion="no-preference")
+            evidence = BrowserEvidence(page)
+            page.goto(f"{self.base_url}/site-dist/components/breadcrumb/")
+            prepare_page(page, CERTIFICATION_CASES[0])
+            compact = page.locator("#catalog-toc-compact")
+            expect(compact).to_be_visible()
+            trigger = compact.get_by_role("button", name="On this page")
+            trigger.press("ArrowDown")
+            compact.locator('a[href="#dropdown"]').press("Enter")
+            expect(page).to_have_url(f"{self.base_url}/site-dist/components/breadcrumb/#dropdown")
+            expect(trigger).to_have_attribute("aria-expanded", "false")
+            expect(compact.locator("[data-toc-current]")).to_have_text("Dropdown")
+
+            page.keyboard.press("Tab")
+            reading_position = page.evaluate("""
+                () => {
+                  const active = document.activeElement;
+                  const target = document.getElementById('dropdown');
+                  return {
+                    inContent: document.getElementById('main-content').contains(active),
+                    afterSection: Boolean(target.compareDocumentPosition(active) & Node.DOCUMENT_POSITION_FOLLOWING),
+                    windowScrollY: window.scrollY,
+                  };
+                }
+            """)
+            self.assertEqual(
+                reading_position,
+                {"inContent": True, "afterSection": True, "windowScrollY": 0},
+            )
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_form_preview_field_wrappers_center_token_width_controls(self) -> None:
         context = new_case_context(self.browser, CERTIFICATION_CASES[0])
         try:

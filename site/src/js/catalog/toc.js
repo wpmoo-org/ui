@@ -10,6 +10,7 @@ export function initToc(root = document) {
   const view = root.defaultView || root.ownerDocument?.defaultView;
   const listeners = [];
   const timers = new Set();
+  const focusableTargets = new Set();
   const listen = (target, type, handler, options) => {
     target?.addEventListener(type, handler, options);
     if (target) {
@@ -175,12 +176,18 @@ export function initToc(root = document) {
     return navigateToHash(view.location.hash, behavior, false);
   };
 
-  targets.forEach(({ link }) => {
+  targets.forEach(({ link, target }) => {
     listen(link, "click", (event) => {
       const hash = link.getAttribute("href");
       if (!hash?.startsWith("#")) return;
       event.preventDefault();
-      navigateToHash(hash, "smooth", true);
+      if (navigateToHash(hash, "smooth", true) && event.detail === 0) {
+        if (!target.hasAttribute("tabindex") && target.tabIndex < 0) {
+          target.setAttribute("tabindex", "-1");
+          focusableTargets.add(target);
+        }
+        target.focus({ preventScroll: true });
+      }
     });
   });
 
@@ -227,6 +234,11 @@ export function initToc(root = document) {
       view.cancelAnimationFrame(chartFrame);
     }
     timers.forEach((id) => view.clearTimeout(id));
+    focusableTargets.forEach((target) => {
+      if (target.getAttribute("tabindex") === "-1") {
+        target.removeAttribute("tabindex");
+      }
+    });
     states.delete(root);
   };
   states.set(root, dispose);

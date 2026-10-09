@@ -52,9 +52,9 @@ Historical stable freezes and previous acceptance records remain unchanged.
 
 The maintainer later approved an exact three-rule Core CSS exception for a
 neutral inline-start rail below the label and a primary-token active segment.
-The renderer adds only native `p-0` to align the rail in RTL. The locally
-verified candidate and new package identities are recorded separately in the
-[Astro intake follow-up](../../../../docs/contracts/2026-10-07-astro-shared-toc-acceptance.md).
+The renderer adds only native `p-0` to align the rail in RTL. Locally verified
+candidate identities and Astro adapter intake are recorded in the private host
+workspace, outside this Core acceptance record.
 The new browser geometry contract protects that explicit direction across
 both themes and directions, including primary customization during scrolling.
 It does not regenerate the historical image manifest or stable certification.
@@ -71,8 +71,9 @@ change. Thirty-one focused rendering/browser/Navigation/package methods pass,
 including intermediate motion positions, reduced motion, wrapped labels,
 LTR/RTL primary customization, responsive remeasurement and disposal restoration.
 The final private Core revision7 and Astro revision14 identities, user approval
-and gap-5 aside evidence are in the linked Astro intake follow-up. Historical
-stable certifications and their image manifest retain their original identity.
+and gap-5 aside evidence are recorded separately in the host workspace.
+Historical stable certifications and their image manifest retain their original
+identity.
 
 
 The Moo UI catalog also consumes the same public macro and lazy tracker for
@@ -81,5 +82,5 @@ colors, typography, rail and spacing CSS are removed; sticky column layout and
 existing host scroll/hash/history handling remain. Nine focused catalog methods
 pass, including native document/component tracking, initial hash alignment and
 minimum touch targets. The native 4173 preview confirms the shared 200-ms marker
-and zero list gap, with no warning/error logs. Its observed image is included in
-the Astro intake follow-up; no stable certification manifest was regenerated.
+and zero list gap, with no warning/error logs. Its observed image is retained in
+the host workspace; no stable certification manifest was regenerated.
