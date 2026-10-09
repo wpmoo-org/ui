@@ -4,7 +4,8 @@ Moo UI Core is an open-source Bootstrap component system. This document defines
 the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
-Moo UI `1.0.0` freezes the documented public package contract. Package stability
+Moo UI `1.1.0` extends the frozen `1.0.0` public package contract with the
+shared Table of Contents component and compatible additions. Package stability
 and component certification are independent: the certification manifest remains
 `preview`. Production certification is introduced incrementally; a component's
 presence in the catalog does not by itself mean that it has completed
@@ -193,10 +194,12 @@ conformance pass for that host. The runner needs Python 3 and Playwright
 only; no Moo UI build tooling is involved.
 
 The archive is reproducible byte-for-byte from the repository source at any
-time. The current Moo UI 1.1.0-dev.1 source carries kit contract version 1.0;
-its development archive hashes to SHA-256
+time. The current Moo UI 1.1.0 source carries kit contract version 1.0;
+its archive hashes to SHA-256
+`e4ab6c256ce4e2e1a3a82a42fdfbbf90f5c5871c14d4853fce928546a8cafbac`.
+The 1.1.0-dev.1 source archive hashes to SHA-256
 `ec92be81e205dd9602213a4a4fbabb91075b87ef227f4ac0ca5e189b92a8a3ba`.
-This development archive is not a published release artifact. The Moo UI 1.0.0
+The Moo UI 1.0.0
 archive also carries contract version 1.0 and hashes to SHA-256
 `3bda0e10fe23e6f157f5e7bd3c09af0efd05c5827fe65615ef2017b7da6929f1`.
 Published artifacts are listed on the GitHub Releases page:

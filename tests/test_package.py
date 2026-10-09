@@ -254,7 +254,7 @@ class PackageMetadataTests(unittest.TestCase):
     def test_stable_package_declares_the_state_artifact_surface(self) -> None:
         package = self._read_package()
 
-        self.assertEqual(package["version"], "1.1.0-dev.1")
+        self.assertEqual(package["version"], "1.1.0")
         self.assertEqual(
             package["exports"]["./state.js"],
             "./dist/js/state.js",

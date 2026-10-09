@@ -1177,6 +1177,34 @@ class CertificationContractTests(unittest.TestCase):
         self.assertTrue(set(freeze["packageExports"]).issubset(package["exports"]))
         self.assertTrue(set(freeze["packageFiles"]).issubset(package["files"]))
 
+    def test_1_1_api_freeze_preserves_the_released_toc_surface(self) -> None:
+        freeze = self._read_json("src/certification/api-freeze-1.1.0.json")
+        package = self._read_json("package.json")
+        self.assertEqual(freeze["freezeVersion"], "1.1.0")
+        self.assertEqual(freeze["freezeVersion"], package["version"])
+        self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
+        self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
+        aggregate = next(record for record in freeze["esmModules"] if record["module"] == "moo-ui.js")
+        self.assertIn("TableOfContents", aggregate["namedExports"])
+        toc = next(record for record in freeze["esmModules"] if record["module"] == "table-of-contents.js")
+        self.assertEqual(toc["export"], "./table-of-contents.js")
+        self.assertEqual(
+            toc["lifecycle"],
+            ["constructor", "getInstance", "getOrCreateInstance", "refresh", "dispose"],
+        )
+        imported = subprocess.run(
+            [
+                "node", "--input-type=module", "--eval",
+                'import Toc from "./src/js/components/table-of-contents.js"; '
+                'const instance = Object.getOwnPropertyNames(Toc.prototype).filter(key => !key.startsWith("_")); '
+                'const statics = ["getInstance", "getOrCreateInstance"].filter(key => typeof Toc[key] === "function"); '
+                'process.stdout.write(JSON.stringify([...instance, ...statics]));',
+            ],
+            cwd=ROOT, capture_output=True, text=True, check=False, env=npm_env(),
+        )
+        self.assertEqual(imported.returncode, 0, imported.stderr)
+        self.assertTrue(set(toc["lifecycle"]).issubset(set(json.loads(imported.stdout))))
+
     def test_stable_api_freeze_matches_current_package_and_runtime_exports(self) -> None:
         """The unchanged 1.0.0 inventory remains a removal guard for additive development."""
         self.assertTrue((CERTIFICATION_ROOT / "api-freeze-1.0.0.json").is_file())
