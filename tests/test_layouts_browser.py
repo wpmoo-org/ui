@@ -147,6 +147,75 @@ class LayoutBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_app_container_sizes_follow_available_page_width(self) -> None:
+        case = BrowserCase(
+            name="app-container-available-width",
+            viewport={"width": 1585, "height": 844},
+            color_scheme="light",
+            direction="ltr",
+        )
+        context, page, evidence = self._open("layout-app", case)
+        try:
+            shell = page.locator('[data-slot="sidebar-wrapper"]')
+            trigger = page.get_by_role("button", name="Toggle page sidebar", exact=True)
+            # The fixture uses Bootstrap's default responsive container scale.
+            containers = {
+                "container-sm": (576, 540),
+                "container-md": (768, 720),
+                "container-lg": (992, 960),
+                "container-xl": (1200, 1140),
+                "container-xxl": (1400, 1320),
+            }
+            for container_class in ("container", *containers, "container-fluid"):
+                page.evaluate(
+                    """className => {
+                      const host = document.querySelector('[data-slot="page"]');
+                      for (const tag of ['header', 'main', 'footer']) {
+                        const region = host.querySelector(`:scope > ${tag}`);
+                        region.querySelector(':scope > .container, :scope > [class*="container-"]').className = className;
+                      }
+                    }""",
+                    container_class,
+                )
+                for state in ("expanded", "collapsed"):
+                    with self.subTest(container=container_class, state=state):
+                        if shell.get_attribute("data-sidebar-state") != state:
+                            trigger.click()
+                        expect(shell).to_have_attribute("data-sidebar-state", state)
+                        report = page.evaluate(
+                            """className => {
+                              const host = document.querySelector('[data-slot="page"]');
+                              return {
+                                viewport: window.innerWidth,
+                                pageWidth: host.getBoundingClientRect().width,
+                                overflow: document.documentElement.scrollWidth > window.innerWidth,
+                                rails: ['header', 'main', 'footer'].map(tag => {
+                                  const rect = host.querySelector(`:scope > ${tag} > .${className}`).getBoundingClientRect();
+                                  return {width: rect.width, left: rect.left, right: rect.right};
+                                }),
+                              };
+                            }""",
+                            container_class,
+                        )
+                        minimum_width = containers.get(container_class, (0, 0))[0]
+                        caps = [
+                            cap for breakpoint, cap in containers.values()
+                            if minimum_width <= breakpoint <= report["pageWidth"]
+                        ] if container_class != "container-fluid" else []
+                        expected_width = min(
+                            report["pageWidth"],
+                            max(caps, default=report["pageWidth"]),
+                        )
+                        for rail in report["rails"]:
+                            self.assertAlmostEqual(rail["width"], expected_width, delta=1, msg=report)
+                            self.assertAlmostEqual(rail["left"], report["rails"][0]["left"], delta=1, msg=report)
+                            self.assertAlmostEqual(rail["right"], report["rails"][0]["right"], delta=1, msg=report)
+                        self.assertEqual(report["viewport"], 1585, report)
+                        self.assertFalse(report["overflow"], report)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_direct_overlay_host_does_not_add_a_second_viewport_of_height(self) -> None:
         context, page, evidence = self._open("layout-app", LAYOUT_CASES[0])
         try:
