@@ -138,3 +138,11 @@
   pointer-events: auto;
   transition-delay: 0s;
 }
+
+.tabs--content-height > .tab-content {
+  display: block;
+}
+
+.tabs--content-height > .tab-content > .tab-pane:not(.active) {
+  display: none;
+}

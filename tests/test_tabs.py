@@ -81,6 +81,19 @@ class TabsTests(CatalogTestCase):
                 'orientation="diagonal")'
             )
 
+    def test_tabs_content_height_is_an_explicit_option(self) -> None:
+        items = '[{"id": "a", "title": "A", "content": "Content A"}]'
+        output = self.render_tabs(f'tabs("t", {items}, height="content")')
+        self.assertIn('<div class="tabs tabs--content-height">', output)
+        self.assertIn('role="tabpanel"', output)
+        self.assertIn('<div class="tabs">', self.render_tabs(f'tabs("t", {items}, height="stable")'))
+
+    def test_tabs_rejects_unknown_height(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Unknown tabs height: fixed"):
+            self.render_tabs(
+                'tabs("t", [{"id": "a", "title": "A", "content": "A"}], height="fixed")'
+            )
+
     def test_disabled_tab_triggers_use_shared_disabled_opacity(self) -> None:
         scss = (ROOT / "scss/components/_tabs.scss").read_text(encoding="utf-8")
 
