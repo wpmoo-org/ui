@@ -37,11 +37,31 @@ class EmptyTests(CatalogTestCase):
             with self.assertRaisesRegex(RuntimeError, 'Missing accepted evidence record for components: button'):
                 _load_evidence_index(inventory, (evidence,))
 
-    def test_source_evidence_does_not_claim_visual_acceptance(self):
+    def test_source_evidence_does_not_claim_release_certification(self):
         evidence = _load_evidence_index()['empty']
         self.assertEqual(evidence['latestEvidence']['status'], 'source-checked')
         self.assertFalse(evidence['accepted'])
         self.assertEqual(evidence['acceptedEvidence'], [])
+
+    def test_source_candidate_cannot_hide_accepted_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            inventory = Path(directory) / 'inventory.json'
+            inventory.write_text(json.dumps({
+                'profiles': {'static': {'tier': 0}},
+                'components': [{'slug': 'button', 'profile': 'static', 'certificationCandidate': True}],
+            }))
+            for status in ('preview-passed', 'backfill-passed'):
+                with self.subTest(status=status):
+                    accepted = Path(directory) / 'accepted.json'
+                    latest = Path(directory) / 'source.json'
+                    accepted.write_text(json.dumps({'components': [{
+                        'slug': 'button', 'tier': 0, 'profile': 'static', 'status': status,
+                    }]}))
+                    latest.write_text(json.dumps({'components': [{
+                        'slug': 'button', 'tier': 0, 'profile': 'static', 'status': 'source-checked',
+                    }]}))
+                    with self.assertRaisesRegex(RuntimeError, 'Certification candidates must not carry accepted evidence: button'):
+                        _load_evidence_index(inventory, (accepted, latest))
 
     def render_empty(self, **values):
         self.assertTrue((ROOT / 'src/components/empty.html.jinja').is_file(), 'Empty composition is not implemented')

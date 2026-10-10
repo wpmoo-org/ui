@@ -1681,6 +1681,15 @@ def _load_evidence_index(inventory_path=None, evidence_paths=None) -> dict[str, 
             "Missing latest evidence record for components: "
             + ", ".join(sorted(missing_latest))
         )
+    accepted_candidates = [
+        slug for slug, component in components.items()
+        if component["certificationCandidate"] and component["accepted"]
+    ]
+    if accepted_candidates:
+        raise RuntimeError(
+            "Certification candidates must not carry accepted evidence: "
+            + ", ".join(sorted(accepted_candidates))
+        )
     missing_accepted = [
         slug for slug, component in components.items()
         if not component["accepted"] and not component["certificationCandidate"]

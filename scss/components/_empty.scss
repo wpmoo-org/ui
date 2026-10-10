@@ -1,0 +1,61 @@
+// Bootstrap 5.3.3 has no Empty component (vendor/bootstrap/scss). This public
+// namespace owns the default surface; Bootstrap utilities remain overrides.
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  gap: $spacer * 1.5;
+  padding: $spacer * 1.5;
+  text-align: center;
+  border-width: var(--bs-border-width);
+  border-style: $moo-empty-border-style;
+  border-color: var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+}
+
+.empty-state-header {
+  display: flex;
+  flex-direction: column;
+  align-items: inherit;
+  gap: $spacer * 0.5;
+}
+
+.empty-state-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacer * 0.75;
+  font-size: $h3-font-size;
+  line-height: 1;
+  color: var(--bs-secondary-color);
+  background-color: var(--bs-tertiary-bg);
+  border-radius: var(--bs-border-radius-lg);
+}
+
+.empty-state-icon > [data-icon] {
+  width: $spacer * 1.5;
+  height: $spacer * 1.5;
+}
+
+.empty-state-title {
+  margin: 0;
+  font-size: $h5-font-size;
+  font-weight: $headings-font-weight;
+  line-height: $headings-line-height;
+}
+
+.empty-state-description {
+  margin: 0;
+  font-size: $font-size-base;
+  color: var(--bs-secondary-color);
+}
+
+.empty-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: inherit;
+  gap: $spacer * 0.5;
+}

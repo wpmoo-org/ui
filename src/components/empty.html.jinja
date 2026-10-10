@@ -1,20 +1,17 @@
-{% from "components/field.html.jinja" import field_group %}
-{% from "components/typography.html.jinja" import typography %}
-
-{# Empty is a shared composition, with no stylesheet or runtime of its own.
-   Icon and action are trusted public-component captures; their providers own
-   their semantics and sizing. Scalar message content remains escaped. #}
+{# Empty owns its default surface and text styles through .empty-state.
+   Icon and action are trusted public-component captures. Their providers own
+   their semantics; scalar messages and additional classes remain escaped. #}
 {% macro empty(title="", description="", icon="", action="", extra_class="") -%}
   {% if not title | trim and not description | trim %}{{ fail("Empty title or description is required") }}{% endif %}
   {% if extra_class is not string %}{{ fail("Empty extra_class must be a string") }}{% endif %}
-  {% set classes = "align-items-center text-center gap-2 p-3 py-4 mb-0 border border-dashed rounded-4" %}
-  {% if extra_class %}{% set classes = classes ~ " " ~ (extra_class | forceescape) %}{% endif %}
-  {% call field_group(extra_class=classes) %}
-    {% if icon %}{{ typography(icon, "muted", extra_class="d-inline-flex") }}{% endif %}
-    {% if title | trim %}{{ typography(title, "subsection-title", extra_class="mb-0") }}{% endif %}
-    {% if description | trim %}{{ typography(description, "muted", extra_class="small") }}{% endif %}
+  <div class="empty-state{% if extra_class %} {{ extra_class | forceescape }}{% endif %}">
+    <div class="empty-state-header">
+      {% if icon %}<div class="empty-state-icon">{{ icon }}</div>{% endif %}
+      {% if title | trim %}<h3 class="empty-state-title">{{ title | forceescape }}</h3>{% endif %}
+      {% if description | trim %}<p class="empty-state-description">{{ description | forceescape }}</p>{% endif %}
+    </div>
     {% if action %}
-      {% call field_group(extra_class="mb-0 mt-3") %}{{ action }}{% endcall %}
+      <div class="empty-state-actions">{{ action }}</div>
     {% endif %}
-  {% endcall %}
+  </div>
 {%- endmacro %}

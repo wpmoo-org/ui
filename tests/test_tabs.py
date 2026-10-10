@@ -219,7 +219,7 @@ class TabsTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         css = self.read_output("assets/css/moo-ui.css")
-        tab_content = css.rsplit(".tab-content {", 1)[1].split("}", 1)[0]
+        tab_content = re.findall(r"(?m)^[ \t]*\.tab-content \{([^}]+)\}", css)[-1]
         self.assertIn("width: 100%;", tab_content)
         self.assertIn("max-width: 100%;", tab_content)
         self.assertIn("min-width: 0;", tab_content)

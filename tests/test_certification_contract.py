@@ -204,7 +204,7 @@ class CertificationContractTests(unittest.TestCase):
         inventory_slugs = {component["slug"] for component in inventory["components"]}
         registry_slugs = {component["slug"] for component in registry}
 
-        self.assertEqual(len(inventory["components"]), 46)
+        self.assertEqual(len(inventory["components"]), 47)
         self.assertEqual(inventory_slugs, registry_slugs)
         self.assertEqual(
             {component["slug"] for component in inventory["plannedComponents"]},
@@ -233,7 +233,7 @@ class CertificationContractTests(unittest.TestCase):
             for evidence_path in component["evidence"]:
                 self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
 
-        self.assertEqual(tier_counts, {0: 24, 1: 6, 2: 5, 3: 11})
+        self.assertEqual(tier_counts, {0: 24, 1: 6, 2: 5, 3: 12})
 
     def test_pilot_evidence_keeps_release_claims_honest(self) -> None:
         pilot = self._read_json("src/certification/pilot-evidence.json")
@@ -599,7 +599,10 @@ class CertificationContractTests(unittest.TestCase):
             )
             self.assertEqual(
                 [component["slug"] for component in attestation["components"]],
-                [component["slug"] for component in inventory["components"]],
+                [
+                    component["slug"] for component in inventory["components"]
+                    if not component.get("certificationCandidate", False)
+                ],
             )
             self.assertEqual(len(attestation["components"]), 46)
             for component in attestation["components"]:
