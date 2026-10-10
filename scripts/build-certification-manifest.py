@@ -225,7 +225,7 @@ def load_inventory(path: Path) -> dict:
 
 
 def certified_components(inventory: dict) -> list[dict]:
-    """Every inventory component, with its evidence proven on disk.
+    """Release components, excluding explicitly marked source candidates.
 
     A component whose profile is undefined, whose tier is out of range,
     or whose evidence files are missing raises here — the manifest must
@@ -234,6 +234,8 @@ def certified_components(inventory: dict) -> list[dict]:
     profiles = inventory.get("profiles") or {}
     components = []
     for component in inventory.get("components", []):
+        if component.get("certificationCandidate") is True:
+            continue
         slug = component.get("slug")
         profile = profiles.get(component.get("profile"))
         if profile is None:

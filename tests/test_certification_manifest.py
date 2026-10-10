@@ -185,6 +185,7 @@ class CertificationManifestTests(unittest.TestCase):
         expected = {
             (component["slug"], inventory["profiles"][component["profile"]]["tier"])
             for component in inventory["components"]
+            if component.get("certificationCandidate") is not True
         }
         actual = {
             (component["slug"], component["tier"])

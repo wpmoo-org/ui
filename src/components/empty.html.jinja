@@ -1,0 +1,20 @@
+{% from "components/field.html.jinja" import field_group %}
+{% from "components/typography.html.jinja" import typography %}
+
+{# Empty is a shared composition, with no stylesheet or runtime of its own.
+   Icon and action are trusted public-component captures; their providers own
+   their semantics and sizing. Scalar message content remains escaped. #}
+{% macro empty(title="", description="", icon="", action="", extra_class="") -%}
+  {% if not title | trim and not description | trim %}{{ fail("Empty title or description is required") }}{% endif %}
+  {% if extra_class is not string %}{{ fail("Empty extra_class must be a string") }}{% endif %}
+  {% set classes = "align-items-center text-center gap-2 p-3 py-4 mb-0 border border-dashed rounded-4" %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ (extra_class | forceescape) %}{% endif %}
+  {% call field_group(extra_class=classes) %}
+    {% if icon %}{{ typography(icon, "muted", extra_class="d-inline-flex") }}{% endif %}
+    {% if title | trim %}{{ typography(title, "subsection-title", extra_class="mb-0") }}{% endif %}
+    {% if description | trim %}{{ typography(description, "muted", extra_class="small") }}{% endif %}
+    {% if action %}
+      {% call field_group(extra_class="mb-0 mt-3") %}{{ action }}{% endcall %}
+    {% endif %}
+  {% endcall %}
+{%- endmacro %}

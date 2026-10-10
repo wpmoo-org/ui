@@ -157,7 +157,7 @@ def assert_worktree_is_clean() -> None:
 
 
 def certified_components() -> list[dict]:
-    """Every inventory component, with its evidence proven on disk.
+    """Release components, excluding explicitly marked source candidates.
 
     Derives each component's attested checks from its evidence profile's
     ``existing`` categories. A component whose profile is undefined, whose
@@ -169,6 +169,8 @@ def certified_components() -> list[dict]:
     profiles = inventory.get("profiles") or {}
     components = []
     for component in inventory.get("components", []):
+        if component.get("certificationCandidate") is True:
+            continue
         slug = component.get("slug")
         profile = profiles.get(component.get("profile"))
         if profile is None:

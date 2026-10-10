@@ -103,11 +103,13 @@ EVIDENCE_FILES = (
     "phase-3-evidence.json",
     "rc-3-evidence.json",
     "2026-10-07-table-of-contents-evidence.json",
+    "2026-10-09-empty-evidence.json",
 )
 ACCEPTED_COMPONENT_EVIDENCE_STATUSES = {
     "preview-passed",
     "backfill-passed",
 }
+COMPONENT_EVIDENCE_STATUSES = ACCEPTED_COMPONENT_EVIDENCE_STATUSES | {"source-checked"}
 BOOTSTRAP_JS_EVIDENCE_FRAGMENT = "js/src/"
 # Ownership matrix rules:
 # - runtimeOwner is derived from explicit Bootstrap JS evidence or public Moo
@@ -126,6 +128,7 @@ MOO_MARKUP_EXTENSION_SOURCES = {
     "datatable": "src/components/datatable.html.jinja",
     "datepicker": "src/components/datepicker.html.jinja",
     "field": "src/components/field.html.jinja",
+    "empty": "src/components/empty.html.jinja",
     "form": "src/components/field.html.jinja",
     "menubar": "src/components/menubar.html.jinja",
     "radio-group": "src/components/radio_group.html.jinja",
@@ -1626,6 +1629,7 @@ def _load_evidence_index(inventory_path=None, evidence_paths=None) -> dict[str, 
         components[slug] = {
             "profile": profile,
             "profileTier": profiles[profile]["tier"],
+            "certificationCandidate": entry.get("certificationCandidate") is True,
             "accepted": False,
             "acceptedEvidence": [],
             "latestEvidence": {},
@@ -1645,7 +1649,7 @@ def _load_evidence_index(inventory_path=None, evidence_paths=None) -> dict[str, 
             if slug not in components:
                 raise RuntimeError(f"Evidence references unknown component: {slug}")
             status = component.get("status", "")
-            if status not in ACCEPTED_COMPONENT_EVIDENCE_STATUSES:
+            if status not in COMPONENT_EVIDENCE_STATUSES:
                 raise RuntimeError(
                     f"Unknown evidence status for {slug} in {evidence_path.name}: "
                     f"{status}"
@@ -1678,7 +1682,8 @@ def _load_evidence_index(inventory_path=None, evidence_paths=None) -> dict[str, 
             + ", ".join(sorted(missing_latest))
         )
     missing_accepted = [
-        slug for slug, component in components.items() if not component["accepted"]
+        slug for slug, component in components.items()
+        if not component["accepted"] and not component["certificationCandidate"]
     ]
     if missing_accepted:
         raise RuntimeError(

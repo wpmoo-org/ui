@@ -1,0 +1,27 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/empty.html.jinja" import empty %}
+{% from "components/button.html.jinja" import button %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% block title %}Empty — Moo UI{% endblock %}
+{% block content %}
+  {{ render_page_header("Empty", "Explain an empty collection with a quiet dashed boundary and a useful next action.") }}
+  <div class="moo-component-examples">
+    {% set create_action %}{{ button("Create item", variant="outline") }}{% endset %}
+    {% set basic %}{{ empty("No items yet", description="Create your first item to get started.", action=create_action) }}{% endset %}
+    {% set usage %}
+      <p>Keep the surrounding page background visible. Empty composes Field Group, Typography and the existing Border utility; it owns no separate stylesheet or runtime.</p>
+      <p>Provide a title or description, and use a short action when the user can resolve the empty state. Omit the action when that capability is unavailable.</p>
+      <p><code>icon</code> and <code>action</code> accept trusted captures from public components. The icon provider owns decorative accessibility and sizing. Plain strings are escaped; do not mark user-supplied markup safe.</p>
+      <p>For filtered collections, explain that no results match and offer a filter reset. For an empty collection, explain how to create the first item. Native navigation, form ownership and permissions remain with the action and its host.</p>
+    {% endset %}
+    {{ render_component_intro(basic, usage) }}
+    {{ render_component_example("empty", "Empty", "basic", "Empty collection", "A title, short explanation and optional action share a calm surface.", basic) }}
+    {% set message_only %}{{ empty("No matching results", description="Try a different search.") }}{% endset %}
+    {{ render_component_example("empty", "Empty", "message-only", "Message only", "Use a short explanation when no direct action is available.", message_only) }}
+    {% set arabic %}{{ empty("لا توجد عناصر بعد", description="أنشئ أول عنصر للبدء.") }}{% endset %}
+    {% set hebrew %}{{ empty("עדיין אין פריטים", description="צרו פריט ראשון כדי להתחיל.") }}{% endset %}
+    {{ render_rtl_example("empty", "The same quiet composition follows the native reading direction.", arabic, hebrew, basic) }}
+  </div>
+{% endblock %}

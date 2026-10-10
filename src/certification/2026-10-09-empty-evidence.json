@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "0.1",
+  "status": "preview",
+  "releaseClaim": "none",
+  "description": "Empty source/render contract evidence. Consumer visual acceptance is pending; this does not certify a whole Core profile or any host adapter.",
+  "components": [
+    {
+      "slug": "empty",
+      "tier": 3,
+      "profile": "t3-static-composite",
+      "status": "source-checked",
+      "evidence": {
+        "existing": ["contract", "markup"],
+        "not-applicable": ["lifecycle"],
+        "manual": ["real-device"],
+        "missing": ["theme", "rtl", "responsive", "keyboard", "focus", "accessibility", "visual", "host-conformance"]
+      },
+      "automatedEvidence": ["tests/test_empty.py", "src/components/empty.html.jinja"],
+      "bootstrapEvidence": ["https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_utilities.scss"],
+      "checks": {
+        "command": ".venv/bin/python3 -m unittest tests.test_empty",
+        "testsPassed": 4,
+        "testsFailed": 0,
+        "scope": "Escaped messages/classes, required visible content and trusted public icon/action captures"
+      },
+      "limitations": ["Visual acceptance and broader host certification are pending. No new stylesheet or runtime is introduced."]
+    }
+  ]
+}

@@ -94,6 +94,7 @@
     {"slug": "button", "profile": "t0-interactive", "evidence": ["tests/test_button.py", "conformance/reports/2026-08-05-reference-host-shell.json"]},
     {"slug": "button-group", "profile": "t0-interactive", "evidence": ["tests/test_button_group.py"]},
     {"slug": "card", "profile": "t0-static", "evidence": ["tests/test_card.py", "conformance/reports/2026-08-05-reference-host-shell.json"]},
+    {"slug": "empty", "profile": "t3-static-composite", "certificationCandidate": true, "evidence": ["tests/test_empty.py", "src/components/empty.html.jinja"]},
     {"slug": "typography", "profile": "t0-static", "evidence": ["tests/test_typography.py", "conformance/reports/2026-08-05-reference-host-shell.json"]},
     {"slug": "kbd", "profile": "t0-static", "evidence": ["tests/test_kbd.py"]},
     {"slug": "input", "profile": "t0-interactive", "evidence": ["tests/test_input.py", "conformance/reports/2026-08-05-reference-host-shell.json"]},
