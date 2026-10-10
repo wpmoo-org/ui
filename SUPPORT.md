@@ -194,8 +194,11 @@ conformance pass for that host. The runner needs Python 3 and Playwright
 only; no Moo UI build tooling is involved.
 
 The archive is reproducible byte-for-byte from the repository source at any
-time. The current Moo UI 1.1.0 source carries kit contract version 1.0;
-its archive hashes to SHA-256
+time. Current development source, based on Moo UI 1.1.0, carries kit contract
+version 1.0; its development archive hashes to SHA-256
+`aa155f3e2c766da5551996961080dd9c2a7aed473b7e93fb7a18ddda948ce525`.
+The [released Moo UI 1.1.0 source](https://github.com/wpmoo-org/ui/releases/tag/v1.1.0)
+archive hashes to SHA-256
 `e4ab6c256ce4e2e1a3a82a42fdfbbf90f5c5871c14d4853fce928546a8cafbac`.
 The 1.1.0-dev.1 source archive hashes to SHA-256
 `ec92be81e205dd9602213a4a4fbabb91075b87ef227f4ac0ca5e189b92a8a3ba`.
