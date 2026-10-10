@@ -35,6 +35,7 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/components/_datepicker.scss",
     "scss/components/_dialog.scss",
     "scss/components/_dropdown.scss",
+    "scss/components/_empty.scss",
     "scss/components/_field.scss",
     "scss/components/_input.scss",
     "scss/components/_input_group.scss",
