@@ -150,7 +150,7 @@
 {% macro datatable_column_header(key, label, sr_label="", align="", sortable=true, width="", sort_state="none", hideable=true, min_width="") -%}
   {% set th_class = "datatable-col" %}
   {% if align %}{% set th_class = th_class ~ " text-" ~ align %}{% endif %}
-  {% set effective_width = 'max(' ~ (width or '0px') ~ ', ' ~ min_width ~ ')' if min_width else width %}
+  {% set effective_width = width if width and '%' in (width | string) else 'max(' ~ (width or '0px') ~ ', ' ~ min_width ~ ')' if min_width else width %}
   {% set width_attr = ' style="width: ' ~ effective_width ~ ';"' if effective_width else "" %}
   {% if sortable %}
     {% set current_sort = sort_state if sort_state in ["asc", "desc"] else "none" %}

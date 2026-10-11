@@ -100,7 +100,11 @@
       and <code>min_width</code> is used. Without a minimum, the original width
       is retained. Native table layout can distribute extra space, and the
       existing responsive frame scrolls when space is insufficient. Cards
-      retain their own layout.
+      retain their own layout. Preferred width declarations containing
+      <code>%</code>, including percentage calculations, retain native table
+      sizing and do not use minimum protection. Protected width declarations
+      and minima must resolve to CSS lengths; use <code>min_width: false</code>
+      for other native width values.
     </p>
 
     <h2 id="composition" class="h4 mt-5 mb-3">Composition</h2>
