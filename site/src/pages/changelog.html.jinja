@@ -1,788 +1,91 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 {% from "components/badge.html.jinja" import badge %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/card.html.jinja" import card %}
+{% from "components/typography.html.jinja" import typography %}
 
 {% block title %}Changelog - Moo UI{% endblock %}
 
 {% block content %}
-  <div class="moo-doc-layout">
-    <article class="moo-doc-page">
-      {{ render_page_header(
-        "Changelog",
-        "Product-facing notes for the public Moo UI package and catalog.",
-        id="changelog",
-        actions=render_section_page_actions(current_slug, site_pages, root_path)
-      ) }}
+  {% set release_id = "release-" ~ product.version | replace(".", "-") %}
+  <article class="moo-doc-page py-5">
+    {{ render_page_header(
+      "Changelog",
+      "Product updates and release notes for Moo UI.",
+      id="changelog",
+      actions=render_section_page_actions(current_slug, site_pages, root_path)
+    ) }}
 
-      <section class="moo-changelog" aria-label="Moo UI release history">
-        <article class="moo-changelog__release" aria-labelledby="release-1-2-0">
-          <div class="moo-changelog__release-heading">
-            {{ badge("v1.2.0", variant="dark") }}
-            <span class="text-body-secondary">Release preparation</span>
+    <article aria-labelledby="{{ release_id }}">
+      {% call card(body_class="d-flex flex-column gap-4") %}
+        <header class="d-flex flex-column gap-3">
+          <div class="d-flex flex-wrap align-items-center gap-3 small text-body-secondary">
+            {{ badge("v" ~ product.version, variant="dark") }}
+            <span>Patch release</span>
           </div>
-          <h2 id="release-1-2-0">Moo UI 1.2.0</h2>
-          <p>
-            This compatible minor release target adds Empty and optional Tabs
-            content height while preserving the 1.1.0 package contract.
-            Component certification remains preview.
+          {{ typography("Moo UI " ~ product.version, variant="section-title", id=release_id, extra_class="mb-0") }}
+          <p class="text-body-secondary mb-0">
+            Consistent DataTable empty results and clearer release notes.
           </p>
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>Empty provides a standard dashed surface, text, icons and actions, with Bootstrap utility customization.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>Tabs can size their content area to the active panel while retaining stable height by default.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>App containers use the Page area remaining after Sidebar so Header, main and Footer stay aligned.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Development</span>
-              <span>Release checks receive a 90-minute job budget, and initial branch scans inspect new commits without secret-scan exceptions.</span>
-            </div>
-          </div>
-        </article>
+        </header>
 
-        <article class="moo-changelog__release" aria-labelledby="release-1-1-0">
-          <div class="moo-changelog__release-heading">
-            {{ badge("v1.1.0", variant="dark") }}
-            <span class="text-body-secondary">Stable public contract</span>
-          </div>
-          <h2 id="release-1-1-0">Moo UI 1.1.0</h2>
-          <p>
-            This compatible minor release adds a shared table of contents and
-            description-only Alerts while preserving the 1.0.0 package contract.
-            Component certification remains preview.
-          </p>
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>Shared responsive Table of Contents with explicit lifecycle, smooth navigation and an animated current-section marker.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Alerts accept a description without a title, retaining escaping and rejecting empty messages.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>Compact TOC keyboard navigation continues from its selected section. Datepicker focus restoration preserves the scroll position.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Development</span>
-              <span>Coverage is updated to 7.16.2 and Wrangler to 4.147.0.</span>
-            </div>
-          </div>
-        </article>
+        <section aria-labelledby="{{ release_id }}-improved">
+          {{ typography("Improved", variant="subsection-title", id=release_id ~ "-improved", extra_class="mb-3") }}
+          <ul class="mb-0 ps-4">
+            <li>
+              <a href="{{ site_href("components/datatable.html", root_path) }}">DataTable</a>
+              now uses the shared
+              <a href="{{ site_href("components/empty.html", root_path) }}">Empty</a>
+              component for its empty-result surface. Filtering, announcements,
+              and reset actions retain their DataTable behavior.
+            </li>
+            <li>
+              Changelog shows one detailed release with documentation links.
+              The complete release history is available on GitHub.
+            </li>
+          </ul>
+        </section>
 
-        <article class="moo-changelog__release" aria-labelledby="release-1-1-0-dev-1">
-          <div class="moo-changelog__release-heading">
-            {{ badge("v1.1.0-dev.1", variant="dark") }}
-            <span class="text-body-secondary">Superseded development preview</span>
-          </div>
-          <h2 id="release-1-1-0-dev-1">Shared table of contents</h2>
-          <p>
-            This development preview introduced a shared table of contents with native
-            fragment links, an optional current-section tracker and a compact
-            Bootstrap dropdown. Stable 1.1.0 supersedes this preview.
-          </p>
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>A primary-colored outline marker that follows the current section, with reduced-motion support.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Catalog navigation switches between the outline and compact header according to the available Page width, including Sidebar state changes.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>The narrow inset layout retains the Body surface. Sidebar toggle rails remain transparent on hover.</span>
-            </div>
-          </div>
-        </article>
+        <section aria-labelledby="{{ release_id }}-fixed">
+          {{ typography("Fixed", variant="subsection-title", id=release_id ~ "-fixed", extra_class="mb-3") }}
+          <ul class="mb-0 ps-4">
+            <li>
+              Tables with no rows show a clear message and hide filter-reset
+              actions. Tables with filtered-out rows keep the clear-filters action.
+            </li>
+            <li>
+              Unchecked checkboxes inside semantic
+              <a href="{{ site_href("components/alert.html", root_path) }}">Alerts</a>
+              retain a visible border in light and dark themes without changing
+              checked, invalid, or keyboard-focus states.
+            </li>
+          </ul>
+        </section>
 
-        <article class="moo-changelog__release" aria-labelledby="release-1-0-0">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v1.0.0</span>
-            <span class="text-body-secondary">Stable public contract</span>
-          </div>
-          <h2 id="release-1-0-0">Moo UI 1.0.0</h2>
-          <p>
-            The first stable release preserves RC11's documented package exports,
-            Sass configuration, CSS hooks and optional runtime lifecycle.
-          </p>
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>The catalog search palette retains its theme-colored outline and elevation above the scoped Bootstrap modal rules.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span>The stable public API is frozen. Compatible additions belong to 1.1.0; incompatible changes require a new major release.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Support</span>
-              <span>Package stability and component certification remain independent. Certification is preview, with the documented manual accessibility and browser/device limits.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-11">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v1.0.0-rc.11</span>
-            <span class="text-body-secondary">Connected steps and border utilities</span>
-          </div>
-          <h2 id="release-1-0-0-rc-11">Steps and Border Utilities</h2>
-          <p>
-            Navigation gains connected step icons and an independent completion
-            state. Completed icons use the primary surface while descriptions
-            remain muted, including on the active step.
-          </p>
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>The scoped <code>border-dashed</code> utility gives surfaces with borders declared on all four sides a dashed outline while preserving their width, color and radius.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>The Utilities archive lists Border and Scroll Fade, with an expandable navigation group and page links from Charts through each utility.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>The development preview rebuilds with the current builder after source edits, keeping archive layout and navigation in sync.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span>RC11 preserves the RC10 package entrypoints and begins the feature freeze for stable 1.0.0. Certification remains preview.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-10">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v1.0.0-rc.10</span>
-            <span class="text-body-secondary">Choice cards and shared interaction contracts</span>
-          </div>
-          <h2 id="release-1-0-0-rc-10">Choice Cards and Responsive Tables</h2>
-          <p>
-            Radio Group now supports whole-card choices with optional icon or
-            uppercase-code media. Native selection, keyboard navigation and
-            disabled states remain available with visually hidden controls.
-          </p>
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>DataTable can switch automatically between table and cards using a configurable breakpoint and separate narrow/wide preferences. Row menus, title wrapping and card action spacing share the component contract.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>The public Sheet module exposes an explicit <code>initSheets(root)</code> initializer. Importing it leaves the document untouched.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Body typography and secondary surfaces follow the resolved theme owner. Sass consumers can configure Small and paragraph spacing while retaining the accepted defaults.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span>Release candidate v1.0.0-rc.10 retains preview certification and updates the package inventory and artifact verification.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-9">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v1.0.0-rc.9</span>
-            <span class="text-body-secondary">Shared owner state bootstrap</span>
-          </div>
-          <h2 id="release-1-0-0-rc-9">State Bootstrap</h2>
-          <p>
-            RC9 replaces the public classic
-            <code>theme-prepaint.js</code> entrypoint with <code>state.js</code>.
-            It restores persisted Theme, Direction, or keyed Sidebar state at
-            the start of the relevant owner.
-          </p>
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span>Release candidate v1.0.0-rc.9 uses version-pinned documentation and third-party notice links.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-8">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v1.0.0-rc.8</span>
-            <span class="text-body-secondary">Prepaint distribution and release-integrity contract</span>
-          </div>
-          <h2 id="release-1-0-0-rc-8">Prepaint Distribution and Release Integrity</h2>
-          <p>
-            Moo UI 1.0.0-rc.8 carries the RC7 public package surface forward
-            and publishes the placement-dependent browser prepaint entrypoint
-            together with a byte-verified release manifest. Certification
-            remains <code>preview</code> until the RC8 acceptance pass closes.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>The package now exports the classic <code>theme-prepaint.js</code> browser entrypoint and the adapter-facing <code>release-manifest.json</code> metadata.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>The release manifest records SHA-256 hashes for the public CSS and prepaint bytes; the tarball verifier validates those bytes without extracting the archive.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span>Release candidate v1.0.0-rc.8; catalog CodePen exports use the active RC8 package version. The release flow accepts the brief CDN propagation window and does not require a second synchronization merge.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-7">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v1.0.0-rc.7</span>
-            <span class="text-body-secondary">Direct layout contract and release-boundary revalidation</span>
-          </div>
-          <h2 id="release-1-0-0-rc-7">Direct Layout Contract and Boundary Revalidation</h2>
-          <p>
-            Moo UI 1.0.0-rc.7 carries the RC6 public package surface forward
-            while documenting the direct <code>app</code>/<code>page</code>
-            layout topology and revalidating the package boundary. Certification
-            remains <code>preview</code> until the RC7 acceptance pass closes.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>The public layout contract now documents direct app/page topology, while the retired RC6 shell macros remain absent from the package surface.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Layout evidence, API-freeze data, package-boundary checks, and a dedicated RC7 acceptance portal were revalidated without adding a runtime export.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span>At the time of the RC7 release, catalog CodePen exports used the then-published RC7 package.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-6">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v1.0.0-rc.6</span>
-            <span class="text-body-secondary">Sidebar and DataTable interaction hardening</span>
-          </div>
-          <h2 id="release-1-0-0-rc-6">Sidebar and DataTable Interaction Hardening</h2>
-          <p>
-            Moo UI 1.0.0-rc.6 carries the RC5 public package surface forward
-            while fixing overlay layering, composed table surfaces, and
-            DataTable search-control interaction states. Certification remains
-            <code>preview</code> during the RC6 acceptance pass.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>Sidebar workspace and profile dropdowns now remain above inset content while rail hover layering stays below open menus.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>Tables composed inside cards inherit the card surface, including selected rows and sticky action cells.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>DataTable search controls contain closed-state border overflow, keep the focused search icon visible, and release overflow for an open filter menu.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>RC6 package metadata, API-freeze data, acceptance state, and boundary baselines. Catalog CodePen exports use the published RC6 package.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span>Release candidate v1.0.0-rc.6</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-5">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v1.0.0-rc.5</span>
-            <span class="text-body-secondary">Catalog and release-evidence hardening</span>
-          </div>
-          <h2 id="release-1-0-0-rc-5">Catalog and Release-Evidence Hardening</h2>
-          <p>
-            Moo UI 1.0.0-rc.5 carries the RC4 public package surface forward
-            while refreshing catalog first-paint behavior, component navigation,
-            and release evidence. Certification remains <code>preview</code>.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>Catalog prepaint and theme initialization now keep documentation navigation, borders, and dark-mode component previews stable during first paint.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Button Group, CodePen export, component landing-page navigation, and form-control examples now follow their documented composition contracts.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>CSS, ESM, Sass, package metadata, boundary baselines, and API-freeze evidence for <code>@wpmoo/ui@1.0.0-rc.5</code>; catalog CodePen exports now use the published RC5 package.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span>Release candidate v1.0.0-rc.5</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-4">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v1.0.0-rc.4</span>
-            <span class="text-body-secondary">Package source and CodePen release alignment</span>
-          </div>
-          <h2 id="release-1-0-0-rc-4">Sass Source and Aggregate JavaScript</h2>
-          <p>
-            Moo UI 1.0.0-rc.4 publishes the documented Sass source entrypoints,
-            the aggregate Moo UI ESM bundle, and the CodePen runtime polish
-            added during the post-rc3 release pass. Certification remains
-            <code>preview</code>.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span><code>@wpmoo/ui/moo-ui.js</code> and <code>@wpmoo/ui/moo-ui.min.js</code> as side-effect-free aggregate ESM entrypoints for the optional Moo UI modules.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>Documented Sass source entrypoints for <code>scss/config</code>, <code>scss/moo-ui</code>, <code>scss/moo-core</code>, <code>scss/components</code>, and <code>scss/settings</code>.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>CodePen exports now load shared demo CSS and runtime setup externally, include the required Moo UI JavaScript for interactive examples, and keep the demo action chrome focused on theme toggle and GitHub access.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Package metadata, API freeze document, generated public metadata, and catalog form-control examples for <code>@wpmoo/ui@1.0.0-rc.4</code>; the certification manifest remains <code>preview</code> and its component list remains empty.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span>Release candidate v1.0.0-rc.4</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-3">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v1.0.0-rc.3</span>
-            <span class="text-body-secondary">Self-contained component build pipeline</span>
-          </div>
-          <h2 id="release-1-0-0-rc-3">Chart, Date Picker, and Slider Build Pipeline</h2>
-          <p>
-            Moo UI 1.0.0-rc.3 adds Chart.js, Date Picker, and Slider as optional
-            public ESM entrypoints with a self-contained esbuild pipeline.
-            Certification remains <code>preview</code>.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span><code>@wpmoo/ui/chart.js</code> and <code>@wpmoo/ui/chart.min.js</code> public ESM entrypoints with Chart.js 4.5.1 bundled at build time via the locked esbuild 0.28.1 pipeline.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span><code>@wpmoo/ui/datepicker.js</code> and <code>@wpmoo/ui/datepicker.min.js</code> public ESM entrypoints as a self-contained Moo UI implementation with no third-party runtime.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span><code>@wpmoo/ui/slider.js</code> public ESM entrypoint as a plain wrapper around native <code>input[type="range"]</code> with no third-party runtime.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Package metadata, API freeze document, and generated public metadata for <code>@wpmoo/ui@1.0.0-rc.3</code>; the certification manifest remains <code>preview</code> and its component list remains empty.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span>Release candidate v1.0.0-rc.3</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-2">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v1.0.0-rc.2</span>
-            <span class="text-body-secondary">Release-candidate polish and acceptance evidence</span>
-          </div>
-          <h2 id="release-1-0-0-rc-2">Rc2 Readiness Closeout</h2>
-          <p>
-            Moo UI 1.0.0-rc.2 keeps certification in preview while folding
-            post-rc1 visual acceptance, fixture, keyboard, and release-metadata
-            fixes into the release candidate.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Component usage guidance, intro examples, RTL examples, reference rows, and catalog code presentation were polished for the rc2 acceptance pass.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>Rc2 manual acceptance portal and 420-check export covering Safari, iPhone Safari, and Samsung tablet Chrome; mobile keyboard rows are intentionally not applicable.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>Combobox input-owned Arrow navigation, Data Table row-action menu lifecycle, dropdown overlays and scroll affordances, Skeleton certification fixture layout, and Tabs and Toggle Group keyboard-only focus rings.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Package metadata and generated public metadata for <code>@wpmoo/ui@1.0.0-rc.2</code>; the certification manifest remains <code>preview</code> and its component list remains empty.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v1.0.0-rc.2">GitHub Release v1.0.0-rc.2</a></span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-1">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v1.0.0-rc.1</span>
-            <span class="text-body-secondary">Complete the 42-component Core roadmap</span>
-          </div>
-          <h2 id="release-1-0-0-rc-1">Context Menu and Data Table</h2>
-          <p>
-            Context Menu and Data Table join the Core as Tier 3 ready
-            components, completing the open-source 42-component roadmap.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>Context Menu with pointer positioning, viewport collision handling, keyboard invocation, focus ownership, dismissal, and a touch fallback.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>Data Table composing Table, Checkbox, Input, Select, Dropdown Menu, Pagination, and Badge contracts with sorting, filtering, bulk actions, empty/loading/error states, and responsive overflow behavior.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>Hand-drawn catalog preview art for Context Menu and Data Table; Combobox and Form previews re-keyed to transparent monochrome.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Data Table toolbar layout moved into component SCSS with new <code>$moo-datatable-*</code> Sass knobs; catalog home and header refinements.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Card spacing runtime variable renamed from <code>--card-spacing</code> to <code>--moo-card-spacing</code> to keep Moo UI-owned custom properties in the documented namespace.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v1.0.0-rc.1">GitHub Release v1.0.0-rc.1</a></span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-0-7-1">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v0.7.1</span>
-            <span class="text-body-secondary">npm README links</span>
-          </div>
-          <h2 id="release-0-7-1">NPM README Links</h2>
-          <p>
-            Published the public documentation updates with npm-safe README
-            image URLs.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>README preview images now use absolute public catalog URLs so they render on npm.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="post-release-docs-boundary">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">Post-release</span>
-            <span class="text-body-secondary">Catalog and documentation boundary</span>
-          </div>
-          <h2 id="post-release-docs-boundary">Catalog and Documentation Boundary</h2>
-          <p>
-            After v0.7.0, the catalog separated site-only assets from Core
-            package outputs and tightened public documentation claims without
-            changing the published package.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>PR #38 separated Core package outputs from site-only documentation and catalog assets.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-0-7-0">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v0.7.0</span>
-            <span class="text-body-secondary">Phase 2 evidence</span>
-          </div>
-          <h2 id="release-0-7-0">Phase 2 Evidence</h2>
-          <p>
-            Expanded the evidence program across overlay and composite
-            components.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>Phase 2 evidence for Tooltip, Popover, Toast, Sheet, Form, Alert Dialog, Menubar, and promoted Dialog, Sidebar, and Combobox evidence.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v0.7.0">GitHub Release v0.7.0</a></span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-0-6-0">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v0.6.0</span>
-            <span class="text-body-secondary">Phase 1 evidence backfill</span>
-          </div>
-          <h2 id="release-0-6-0">Phase 1 Evidence Backfill</h2>
-          <p>
-            Completed the T0/T1 certification backfill and Bootstrap 5.3
-            compatibility lanes for the accepted Core surface.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>Source-backed evidence for static, native-state, and Bootstrap Data API components.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Verified</span>
-              <span>Bootstrap 5.3.0, 5.3.3, and latest 5.3.x compatibility lanes for the release gate.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v0.6.0">GitHub Release v0.6.0</a></span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-0-5-0">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v0.5.0</span>
-            <span class="text-body-secondary">Optional public runtime modules</span>
-          </div>
-          <h2 id="release-0-5-0">Optional Public Runtime Modules</h2>
-          <p>
-            Published side-effect-free public ESM entrypoints for the Bootstrap
-            gaps Moo UI owns.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span><code>@wpmoo/ui/combobox.js</code> and <code>@wpmoo/ui/sidebar.js</code> with explicit initialization and disposal lifecycle.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Catalog JavaScript consumes the same public modules instead of private duplicates.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v0.5.0">GitHub Release v0.5.0</a></span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="release-0-4-0">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v0.4.0</span>
-            <span class="text-body-secondary">Core package expansion</span>
-          </div>
-          <h2 id="release-0-4-0">Core Package Expansion</h2>
-          <p>
-            Moved the package toward a supportable Core surface with a broader
-            component catalog and package manifest.
-          </p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>Complete scoped and full CSS outputs plus the package certification manifest.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v0.4.0">GitHub Release v0.4.0</a></span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="layout-and-polish-fixes">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v0.3.1</span>
-            <span class="text-body-secondary">Layout and polish fixes</span>
-          </div>
-          <h2 id="layout-and-polish-fixes">Layout and Polish Fixes</h2>
-          <p>Consistent page layout across all page types and clearer disabled states for page navigation.</p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>Page action bar (Copy Link and navigation arrows) now aligns to the right edge on component, block, and utility detail pages, matching index and documentation pages.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>Content width is now consistent across all page types, eliminating layout jumps when navigating between documentation and component pages.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>Disabled navigation arrows now use a muted color that clearly reads as inactive.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Fixed</span>
-              <span>Added breathing room between the Bootstrap documentation reference and the bottom pagination bar.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>README quickstart CDN link now follows the floating npm tag so it never goes stale.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="metadata-driven-docs">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v0.3.0</span>
-            <span class="text-body-secondary">Metadata-driven docs navigation</span>
-          </div>
-          <h2 id="metadata-driven-docs">Metadata-Driven Docs Navigation</h2>
-          <p>Converted the documentation flow to a registry-based metadata system integrated with page navigation, link generation, and SEO/LLM-oriented outputs.</p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Component, utility, and block pages now derive titles, descriptions, and navigation ordering from metadata sources under <code>src/registry/</code> and <code>site/src/registry/</code>.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span><code>llms.txt</code> generation and <code>sitemap.xml</code> are now connected to the metadata pipeline.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>A license page and improved consistency in external link handling and institutional references.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="documentation-navigation">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v0.2.1</span>
-            <span class="text-body-secondary">Documentation navigation</span>
-          </div>
-          <h2 id="documentation-navigation">Documentation Navigation</h2>
-          <p>Added page-level copy, AI handoff, and previous/next navigation across the public documentation.</p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Section landing pages now share the same narrow documentation layout, TOC rhythm, and release-aware install links.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="wave-4-components">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v0.2.0</span>
-            <span class="text-body-secondary">Component catalog expansion</span>
-          </div>
-          <h2 id="wave-4-components">Wave 4 Components</h2>
-          <p>Expanded the Bootstrap-native catalog with polished component examples, shared RTL previews, and refreshed overlay behavior.</p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>New and refined examples for the Wave 4 component set, including tables, toggle groups, menus, overlays, and form controls.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>RTL examples now use a shared tabbed preview pattern across component pages.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="catalog-polish">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v0.1.1</span>
-            <span class="text-body-secondary">Public package refresh</span>
-          </div>
-          <h2 id="catalog-polish">Catalog Polish</h2>
-          <p>Refined the public catalog, homepage, and package metadata for the npm release.</p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Homepage, documentation pages, and npm package metadata.</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="moo-changelog__release" aria-labelledby="initial-release">
-          <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v0.1.0</span>
-            <span class="text-body-secondary">Initial public package</span>
-          </div>
-          <h2 id="initial-release">Initial Release</h2>
-          <p>First public release of Moo UI.</p>
-
-          <div class="moo-changelog__changes">
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Added</span>
-              <span>Initial Release</span>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      {{ render_section_page_pagination(current_slug, site_pages, root_path) }}
+        <p class="small text-body-secondary mb-0">
+          Compatible with the public 1.2.0 package API. Component certification
+          remains in preview.
+        </p>
+      {% endcall %}
     </article>
 
-    {{ render_doc_toc([
-      {"id": "release-1-2-0", "label": "v1.2.0"},
-      {"id": "release-1-1-0", "label": "v1.1.0"},
-      {"id": "release-1-1-0-dev-1", "label": "v1.1.0-dev.1"},
-      {"id": "release-1-0-0", "label": "v1.0.0"},
-      {"id": "release-1-0-0-rc-11", "label": "v1.0.0-rc.11"},
-      {"id": "release-1-0-0-rc-10", "label": "v1.0.0-rc.10"},
-      {"id": "release-1-0-0-rc-9", "label": "v1.0.0-rc.9"},
-      {"id": "release-1-0-0-rc-8", "label": "v1.0.0-rc.8"},
-      {"id": "release-1-0-0-rc-7", "label": "v1.0.0-rc.7"},
-      {"id": "release-1-0-0-rc-6", "label": "v1.0.0-rc.6"},
-      {"id": "release-1-0-0-rc-5", "label": "v1.0.0-rc.5"},
-      {"id": "release-1-0-0-rc-4", "label": "v1.0.0-rc.4"},
-      {"id": "release-1-0-0-rc-3", "label": "v1.0.0-rc.3"},
-      {"id": "release-1-0-0-rc-2", "label": "v1.0.0-rc.2"},
-      {"id": "release-1-0-0-rc-1", "label": "v1.0.0-rc.1"},
-      {"id": "release-0-7-1", "label": "v0.7.1"},
-      {"id": "post-release-docs-boundary", "label": "Post-release"},
-      {"id": "release-0-7-0", "label": "v0.7.0"},
-      {"id": "release-0-6-0", "label": "v0.6.0"},
-      {"id": "release-0-5-0", "label": "v0.5.0"},
-      {"id": "release-0-4-0", "label": "v0.4.0"},
-      {"id": "metadata-driven-docs", "label": "Metadata-Driven Docs Navigation"},
-      {"id": "documentation-navigation", "label": "Documentation Navigation"},
-      {"id": "wave-4-components", "label": "Wave 4 Components"},
-      {"id": "catalog-polish", "label": "Catalog Polish"},
-      {"id": "initial-release", "label": "Initial Release"}
-    ]) }}
-  </div>
+    <section class="d-flex flex-column gap-3" aria-labelledby="previous-releases">
+      {{ typography("Previous releases", variant="example-title", id="previous-releases", extra_class="mb-0") }}
+      <p class="text-body-secondary mb-0">
+        Browse earlier versions, complete release notes, and release downloads on GitHub.
+      </p>
+      {{ button(
+        "View all releases on GitHub",
+        variant="outline",
+        element="a",
+        href="https://github.com/wpmoo-org/ui/releases",
+        icon_end="arrow-up-right",
+        extra_class="align-self-start"
+      ) }}
+    </section>
+
+    {{ render_section_page_pagination(current_slug, site_pages, root_path) }}
+  </article>
 {% endblock %}

@@ -245,7 +245,7 @@ class CodePenModalBrowserTests(unittest.TestCase):
                     expect(empty).to_be_hidden()
                     search.fill("zzzz-no-matching-row")
                     expect(empty).to_be_visible()
-                    expect(empty.locator(".datatable-empty-title")).to_have_text(
+                    expect(empty.locator(".empty-state-title")).to_have_text(
                         "No matching results"
                     )
                     expect(summary).to_have_text("No results")

@@ -194,9 +194,9 @@ calm.
 
 ## Status And Support
 
-The `1.2.0` release target adds the Empty component and optional Tabs content
-height, with fixes for App container sizing and release validation. It preserves
-the frozen 1.1.0 public package contract. Component certification remains
+The `1.2.1` patch release target composes DataTable empty results with the shared
+Empty component and simplifies the catalog release notes. It preserves the
+1.2.0 public package API. Component certification remains
 `preview`, with its documented manual and browser/device limits. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
 [GitHub Releases](https://github.com/wpmoo-org/ui/releases).
@@ -222,4 +222,4 @@ The published `LICENSE` also retains the full MIT notices for bundled
 Chart.js and `@kurkle/color`.
 Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
 live in the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.2.0/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.2.1/THIRD_PARTY_NOTICES.md).

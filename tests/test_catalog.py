@@ -1602,6 +1602,21 @@ class CatalogContractTests(CatalogTestCase):
                 for line in path.read_text(encoding="utf-8").splitlines()
             )
             component = path.stem.removeprefix("_")
+            if component == "alert":
+                # The accepted composition changes only unchecked, valid
+                # checkbox borders inside an Alert. Other form selectors
+                # still have to pass the component ownership gate below.
+                source = re.sub(
+                    r"""
+                    ^[\t ]*\.alert\s+\.form-check:not\(\.form-switch\)\s*>\s*
+                    \.form-check-input\[type="checkbox"\]
+                    :not\(:checked\):not\(:indeterminate\):not\(\.is-invalid\):not\(:invalid\)
+                    (?=\s*\{)
+                    """,
+                    ".alert",
+                    source,
+                    flags=re.MULTILINE | re.VERBOSE,
+                )
             if component == "toc":
                 for selector in re.findall(r"(?m)^([^\n{}]+)\{[ \t]*$", source):
                     self.assertIn("[data-toc]", selector)
@@ -3313,14 +3328,6 @@ class CatalogContractTests(CatalogTestCase):
                 ("public-exports", "Public Exports"),
                 ("editing-guidance", "Editing Guidance"),
             ),
-            "changelog.html": (
-                ("release-0-7-1", "v0.7.1"),
-                ("post-release-docs-boundary", "Post-release"),
-                ("release-0-7-0", "v0.7.0"),
-                ("release-0-6-0", "Phase 1 Evidence Backfill"),
-                ("release-0-5-0", "Optional Public Runtime Modules"),
-                ("release-0-4-0", "Core Package Expansion"),
-            ),
         }
 
         for path, links in expected_links.items():
@@ -4297,17 +4304,26 @@ class CatalogContractTests(CatalogTestCase):
             with self.subTest(copy=copy):
                 self.assertIn(copy, skills)
 
-    def test_changelog_page_documents_initial_release_without_timeline_chrome(self) -> None:
+    def test_changelog_page_documents_latest_release_and_links_history(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
         changelog = self.read_output("changelog.html")
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 
-        self.assertIn(f'id="release-{package["version"].replace(".", "-")}"', changelog)
+        release_id = f'release-{package["version"].replace(".", "-")}'
+        tags = StartTagParser()
+        tags.feed(changelog)
+        release_articles = [
+            tag for tag in tags.tags
+            if tag["__tag"] == "article"
+            and (tag.get("aria-labelledby") or "").startswith("release-")
+        ]
+        self.assertEqual(len(release_articles), 1)
+        self.assertEqual(release_articles[0]["aria-labelledby"], release_id)
         current_release = re.search(
-            rf'<article\b[^>]*aria-labelledby="release-{re.escape(package["version"].replace(".", "-"))}"[^>]*>'
-            r"(?P<body>.*?)</article>",
+            rf'<article\b[^>]*aria-labelledby="{re.escape(release_id)}"[^>]*>'
+            + r"(?P<body>.*?)</article>",
             changelog,
             re.DOTALL,
         )
@@ -4318,42 +4334,37 @@ class CatalogContractTests(CatalogTestCase):
             rf'<span\b[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>\s*v{re.escape(package["version"])}\s*</span>',
         )
         self.assertIn("preview", active_release)
-        self.assertIn("Post-release", changelog)
-        self.assertIn("PR #38 separated Core package outputs", changelog)
-        self.assertNotIn("Phase 2 Evidence and Public Docs Boundary", changelog)
+        release_tags = StartTagParser()
+        release_tags.feed(active_release)
+        for group in ("improved", "fixed"):
+            with self.subTest(group=group):
+                self.assertTrue(any(
+                    tag["__tag"] == "h3" and tag.get("id") == f"{release_id}-{group}"
+                    for tag in release_tags.tags
+                ))
 
-        for copy in (
-            "Product-facing notes for the public Moo UI package and catalog.",
-            "v0.2.1",
-            "Documentation navigation",
-            "Documentation Navigation",
-            "Added page-level copy, AI handoff, and previous/next navigation across the public documentation.",
-            "Section landing pages now share the same narrow documentation layout, TOC rhythm, and release-aware install links.",
-            "v0.2.0",
-            "Component catalog expansion",
-            "Wave 4 Components",
-            "Expanded the Bootstrap-native catalog with polished component examples, shared RTL previews, and refreshed overlay behavior.",
-            "New and refined examples for the Wave 4 component set, including tables, toggle groups, menus, overlays, and form controls.",
-            "RTL examples now use a shared tabbed preview pattern across component pages.",
-            "v0.1.1",
-            "Public package refresh",
-            "Catalog Polish",
-            "Refined the public catalog, homepage, and package metadata for the npm release.",
-            "Updated",
-            "Homepage, documentation pages, and npm package metadata.",
-            "v0.1.0",
-            "Initial public package",
-            "Initial Release",
-            "First public release of Moo UI.",
-            "Added",
-        ):
-            with self.subTest(copy=copy):
-                self.assertIn(copy, changelog)
+        release_links = LinkParser()
+        release_links.feed(active_release)
+        hrefs = {link.get("href") for link in release_links.links}
+        self.assertLessEqual({"../components/empty/", "../components/datatable/"}, hrefs)
 
-        self.assertIn("moo-changelog__release", changelog)
-        self.assertIn("moo-changelog__change-row", changelog)
-        self.assertNotIn("moo-changelog__item", changelog)
-        self.assertNotIn("moo-changelog__date", changelog)
+        page_links = LinkParser()
+        page_links.feed(changelog)
+        self.assertEqual(sum(
+            link.get("href") == "https://github.com/wpmoo-org/ui/releases"
+            for link in page_links.links
+        ), 1)
+        self.assertIn("View all releases on GitHub", changelog)
+        self.assertTrue(any(tag.get("id") == "previous-releases" for tag in tags.tags))
+        self.assertTrue(any(
+            tag["__tag"] == "nav" and tag.get("aria-label") == "Docs pagination"
+            for tag in tags.tags
+        ))
+        # The accepted latest-release view omits the page TOC in both placements.
+        self.assertFalse(any(
+            tag.get("id") in {"catalog-toc-list", "catalog-toc-compact"}
+            for tag in tags.tags
+        ))
 
     def test_command_palette_lists_primary_sections(self) -> None:
         result = self.run_build()

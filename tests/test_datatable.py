@@ -247,6 +247,14 @@ class DataTableTests(CatalogTestCase):
         assert empty is not None
         self.assertIn("data-datatable-empty", empty.attrs)
         self.assertIn("hidden", empty.attrs)
+        self.assertEqual(empty.attrs.get("role"), "status")
+        self.assertEqual(empty.attrs.get("aria-live"), "polite")
+        surface = empty.find_one(class_name="empty-state")
+        self.assertIsNotNone(surface)
+        assert surface is not None
+        self.assertIsNotNone(surface.find_one(tag="h3", class_name="empty-state-title"))
+        self.assertIsNotNone(surface.find_one(tag="p", class_name="empty-state-description"))
+        self.assertIsNotNone(surface.find_one(class_name="empty-state-actions"))
         reset = empty.find_one(tag="button")
         self.assertIsNotNone(reset)
         assert reset is not None
