@@ -63,6 +63,11 @@ $moo-alert-dismissible-close-space: $btn-close-width + ($btn-close-padding-x * 2
   --bs-alert-color: var(--moo-info);
 }
 
+.alert .form-check:not(.form-switch) >
+.form-check-input[type="checkbox"]:not(:checked):not(:indeterminate):not(.is-invalid):not(:invalid) {
+  border-color: var(--bs-alert-color);
+}
+
 .alert-icon {
   display: flex;
   flex: 0 0 auto;
