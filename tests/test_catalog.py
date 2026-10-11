@@ -4346,7 +4346,7 @@ class CatalogContractTests(CatalogTestCase):
         release_links = LinkParser()
         release_links.feed(active_release)
         hrefs = {link.get("href") for link in release_links.links}
-        self.assertTrue({"../components/empty/", "../components/datatable/"} <= hrefs)
+        self.assertLessEqual({"../components/empty/", "../components/datatable/"}, hrefs)
 
         page_links = LinkParser()
         page_links.feed(changelog)
