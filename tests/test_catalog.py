@@ -1527,7 +1527,7 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertEqual(component_lines, expected)
 
-    def test_llms_txt_cdn_example_tracks_documented_stable_version(self) -> None:
+    def test_llms_txt_cdn_example_tracks_documented_package_version(self) -> None:
         package = json.loads(
             (ROOT / "package.json").read_text(encoding="utf-8")
         )
@@ -1538,9 +1538,11 @@ class CatalogContractTests(CatalogTestCase):
         )
 
         self.assertIsNotNone(match)
-        stable = re.search(r"stable package: `@wpmoo/ui@([^`]+)`", llms)
-        self.assertIsNotNone(stable)
-        self.assertEqual(match.group(1), stable.group(1))
+        documented = re.search(
+            r"(?:stable package|package release target): `@wpmoo/ui@([^`]+)`", llms
+        )
+        self.assertIsNotNone(documented)
+        self.assertEqual(match.group(1), documented.group(1))
         self.assertEqual(package["version"], site_build.PACKAGE_VERSION)
         if "-dev." in package["version"]:
             self.assertIn(
