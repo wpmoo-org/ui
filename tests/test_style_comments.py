@@ -92,7 +92,7 @@ class StyleCommentTests(unittest.TestCase):
                     sections[1],
                     "Bootstrap configuration" if name == "moo-ui.scss" else "Global styles",
                 )
-                for heading in ("Theme tokens", "Bootstrap Components", "Moo Components", "Buttons", "Data Table", "Application layout"):
+                for heading in ("Theme tokens", "Bootstrap Components", "Moo Components", "Buttons", "Data Table", "Empty", "Application layout"):
                     self.assertIn(heading, sections)
                 self.assertLess(sections.index("Theme tokens"), sections.index("Bootstrap Components"))
                 self.assertLess(sections.index("Bootstrap Components"), sections.index("Moo Components"))

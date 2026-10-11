@@ -4419,6 +4419,8 @@ label.btn {
     font-size: 0.875rem;
     color: var(--moo-muted-foreground);
   }
+
+  /* Empty */
   .empty-state {
     display: flex;
     flex-direction: column;

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import unittest
-
 from playwright.sync_api import expect, sync_playwright
 
 from build import create_environment
+from tests.helpers import CatalogTestCase
 from tests.helpers.browser_harness import (
     BrowserCase,
     launch_certification_browser,
@@ -14,9 +13,11 @@ from tests.helpers.browser_harness import (
 )
 
 
-class TabsHeightBrowserTests(unittest.TestCase):
+class TabsHeightBrowserTests(CatalogTestCase):
     def test_content_height_tracks_active_panel_and_default_stays_stable(self):
         skip_if_browser_launch_is_sandboxed()
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
         template = create_environment().from_string(
             '{% from "components/tabs.html.jinja" import tabs %}'
             '{{ tabs("height-tabs", items, height=height, orientation=orientation) }}'
@@ -26,6 +27,11 @@ class TabsHeightBrowserTests(unittest.TestCase):
             {'id': 'long', 'title': 'Long', 'content': '<p>Long content</p>' * 12},
         ]
         with serve_repository() as base_url, sync_playwright() as playwright:
+            response = playwright.request.new_context()
+            try:
+                self.assertTrue(response.get(f"{base_url}/dist/assets/css/moo-ui.css").ok)
+            finally:
+                response.dispose()
             browser = launch_certification_browser(playwright)
             try:
                 for width, theme, direction, orientation in (
@@ -40,10 +46,11 @@ class TabsHeightBrowserTests(unittest.TestCase):
                                 page = context.new_page()
                                 markup = template.render(items=items, height=height, orientation=orientation)
                                 page.set_content(
-                                    '<html dir="%s" data-bs-theme="%s"><head>'
-                                    '<link rel="stylesheet" href="%s/dist/assets/css/moo-ui.css">'
-                                    '</head><body><div class="moo-ui">%s</div><script src="%s/vendor/bootstrap/dist/js/bootstrap.bundle.min.js">'
-                                    '</script></body></html>' % (direction, theme, base_url, markup, base_url),
+                                    f'<html dir="{direction}" data-bs-theme="{theme}"><head>'
+                                    f'<link rel="stylesheet" href="{base_url}/dist/assets/css/moo-ui.css">'
+                                    f'</head><body><div class="moo-ui">{markup}</div>'
+                                    f'<script src="{base_url}/vendor/bootstrap/dist/js/bootstrap.bundle.min.js">'
+                                    '</script></body></html>',
                                     wait_until='networkidle',
                                 )
                                 short = page.locator('#height-tabs-short-pane')
