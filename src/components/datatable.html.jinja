@@ -147,10 +147,11 @@
   </div>
 {%- endmacro %}
 
-{% macro datatable_column_header(key, label, sr_label="", align="", sortable=true, width="", sort_state="none", hideable=true) -%}
+{% macro datatable_column_header(key, label, sr_label="", align="", sortable=true, width="", sort_state="none", hideable=true, min_width="") -%}
   {% set th_class = "datatable-col" %}
   {% if align %}{% set th_class = th_class ~ " text-" ~ align %}{% endif %}
-  {% set width_attr = ' style="width: ' ~ width ~ ';"' if width else "" %}
+  {% set effective_width = 'max(' ~ (width or '0px') ~ ', ' ~ min_width ~ ')' if min_width else width %}
+  {% set width_attr = ' style="width: ' ~ effective_width ~ ';"' if effective_width else "" %}
   {% if sortable %}
     {% set current_sort = sort_state if sort_state in ["asc", "desc"] else "none" %}
     {% set aria_sort = "ascending" if current_sort == "asc" else "descending" if current_sort == "desc" else "none" %}
@@ -319,8 +320,9 @@
   {% set card_frame_class = "datatable-card-frame" %}
   {% if responsive_mode == "cards" %}{% set card_frame_class = card_frame_class ~ " d-" ~ responsive_breakpoint ~ "-none" %}{% endif %}
   {% set cards_class = "datatable-cards" %}
-  {% set card_columns = namespace(title=none, actions=none) %}
+  {% set card_columns = namespace(title=none, actions=none, first_data_key="") %}
   {% for column in columns %}
+    {% if not card_columns.first_data_key and column.card_role | default("") != "actions" %}{% set card_columns.first_data_key = column.key %}{% endif %}
     {% if column.card_role | default("") == "title" %}{% set card_columns.title = column %}{% endif %}
     {% if column.card_role | default("") == "actions" %}{% set card_columns.actions = column %}{% endif %}
   {% endfor %}
@@ -358,7 +360,7 @@
                 </th>
               {% endif %}
               {% for column in columns %}
-                {{ datatable_column_header(column.key, column.label, sr_label=column.sr_label | default(""), align=column.align | default(""), sortable=column.sortable | default(true), width=column.width | default(""), sort_state=column.initial_sort | default("none"), hideable=column.hideable | default(true)) }}
+                {{ datatable_column_header(column.key, column.label, sr_label=column.sr_label | default(""), align=column.align | default(""), sortable=column.sortable | default(true), width=column.width | default(""), sort_state=column.initial_sort | default("none"), hideable=column.hideable | default(true), min_width=column.min_width | default('16rem' if column.key == card_columns.first_data_key else '')) }}
               {% endfor %}
             </tr>
           </thead>
