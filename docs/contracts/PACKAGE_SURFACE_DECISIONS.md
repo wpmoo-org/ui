@@ -3,6 +3,27 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.2.0 Compatible Additions
+
+The next minor release adds the public Empty surface and optional Tabs content
+height while preserving the frozen 1.1.0 package exports and runtime contracts.
+Empty supplies a standard dashed boundary, text, icon and action presentation;
+Bootstrap utilities remain caller-controlled overrides. Tabs retains stable
+height by default and permits content height through an optional argument.
+
+App container sizing, release job budgets and initial-branch scan ranges are
+compatible fixes in the same release. Empty remains a source-only certification
+candidate; its catalog availability does not promote release certification.
+Historical API inventories and published source archive hashes remain intact.
+
+The source-only boundary is verified by the certification-candidate checks in
+[test_empty.py](../../tests/test_empty.py). The released 1.1.0 TOC/API surface
+is protected by `test_1_1_api_freeze_preserves_the_released_toc_surface` in
+[test_certification_contract.py](../../tests/test_certification_contract.py).
+A separate 1.2.0 export inventory is not planned for this additive release:
+the exported paths and ESM lifecycle contracts are unchanged, so the immutable
+1.1.0 inventory remains their compatibility guard.
+
 ## 1.0.0 Stable Public Contract
 
 The stable package preserves RC11's exports, packed file inventory, public Sass

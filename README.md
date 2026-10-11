@@ -194,9 +194,9 @@ calm.
 
 ## Status And Support
 
-The stable public-contract release is `1.1.0`. It adds a shared Table of
-Contents component, description-only Alerts and compatible navigation fixes
-while preserving the 1.0.0 package contract. Component certification remains
+The `1.2.0` release target adds the Empty component and optional Tabs content
+height, with fixes for App container sizing and release validation. It preserves
+the frozen 1.1.0 public package contract. Component certification remains
 `preview`, with its documented manual and browser/device limits. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
 [GitHub Releases](https://github.com/wpmoo-org/ui/releases).

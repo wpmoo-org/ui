@@ -1184,9 +1184,14 @@ class CertificationContractTests(unittest.TestCase):
         freeze = self._read_json("src/certification/api-freeze-1.1.0.json")
         package = self._read_json("package.json")
         self.assertEqual(freeze["freezeVersion"], "1.1.0")
-        self.assertEqual(freeze["freezeVersion"], package["version"])
-        self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
-        self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
+        if package["version"] == freeze["freezeVersion"]:
+            self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
+            self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
+        else:
+            current_version = tuple(int(part) for part in package["version"].split("-")[0].split("."))
+            self.assertGreater(current_version, (1, 1, 0))
+            self.assertTrue(set(freeze["packageExports"]).issubset(package["exports"]))
+            self.assertTrue(set(freeze["packageFiles"]).issubset(package["files"]))
         aggregate = next(record for record in freeze["esmModules"] if record["module"] == "moo-ui.js")
         self.assertIn("TableOfContents", aggregate["namedExports"])
         toc = next(record for record in freeze["esmModules"] if record["module"] == "table-of-contents.js")
