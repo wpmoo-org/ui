@@ -117,7 +117,7 @@ class DataTableBrowserTests(unittest.TestCase):
         return context, page, evidence
 
     @contextmanager
-    def responsive_fixture(self, *, mode="auto", breakpoint="md", runtime=True, blocked_storage=False, selectable=False, missing_breakpoint=False):
+    def responsive_fixture(self, *, mode="auto", breakpoint="md", runtime=True, blocked_storage=False, selectable=False, missing_breakpoint=False, bulk_delete=False):
         template = create_environment().from_string("""
             <!doctype html><html><head><meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -149,7 +149,8 @@ class DataTableBrowserTests(unittest.TestCase):
               {'key':'status', 'label':'Status'},
               {'key':'actions', 'label':'Actions', 'sortable':false,
                'hideable':false, 'align':'end', 'card_role':'actions'}
-            ], rows, selectable=selectable, responsive_mode=mode,
+            ], rows, selectable=selectable,
+               bulk_actions=([{'key':'delete', 'label':'Delete selected', 'icon':'trash', 'destructive':true}] if bulk_delete else []), responsive_mode=mode,
                responsive_breakpoint=breakpoint) }}
             </main>
             {% if runtime %}
@@ -161,7 +162,7 @@ class DataTableBrowserTests(unittest.TestCase):
             </script>{% endif %}</body></html>
         """)
         try:
-            rendered = template.render(mode=mode, breakpoint=breakpoint, runtime=runtime, selectable=selectable, missing_breakpoint=missing_breakpoint)
+            rendered = template.render(mode=mode, breakpoint=breakpoint, runtime=runtime, selectable=selectable, missing_breakpoint=missing_breakpoint, bulk_delete=bulk_delete)
         except ValueError as error:
             self.fail(f"Public responsive configuration rejected: {error}")
         with tempfile.TemporaryDirectory(prefix="datatable-responsive-", dir=ROOT / "site-dist") as temporary:
@@ -181,6 +182,47 @@ class DataTableBrowserTests(unittest.TestCase):
                 yield page, page.locator('#responsive-items'), evidence
             finally:
                 context.close()
+
+    def test_shared_empty_handles_zero_rows_without_a_filter_action(self) -> None:
+        with self.responsive_fixture(selectable=True, bulk_delete=True) as (page, root, evidence):
+            root.locator('.datatable-frame [data-datatable-select-all]').check()
+            root.get_by_role('button', name='Delete selected', exact=True).click()
+            empty = root.locator('[data-datatable-empty]')
+            expect(empty).to_be_visible()
+            expect(empty.locator('.empty-state-title')).to_have_text('No rows to display')
+            expect(empty.locator('.empty-state-description')).to_be_hidden()
+            expect(empty.locator('.empty-state-actions')).to_be_hidden()
+            expect(empty.locator('[data-datatable-empty-reset]')).to_be_hidden()
+            expect(root.locator('.datatable-frame')).to_be_hidden()
+            expect(root.locator('.datatable-card-frame')).to_be_hidden()
+            evidence.assert_clean()
+
+    def test_shared_empty_clear_filters_restores_the_responsive_frame(self) -> None:
+        for width, theme, direction, frame in (
+            (1280, 'light', 'ltr', '.datatable-frame'),
+            (390, 'dark', 'rtl', '.datatable-card-frame'),
+        ):
+            with self.subTest(width=width, theme=theme, direction=direction):
+                with self.responsive_fixture(mode='cards') as (page, root, evidence):
+                    page.set_viewport_size({'width': width, 'height': 900})
+                    page.locator('.moo-ui').evaluate('(e, state) => { e.dataset.bsTheme = state.theme; e.dir = state.direction; }',
+                                                       {'theme': theme, 'direction': direction})
+                    search = root.locator('[data-datatable-search]')
+                    search.fill('No item can match this search')
+                    empty = root.locator('[data-datatable-empty]')
+                    expect(empty).to_be_visible()
+                    expect(empty.locator('.empty-state-title')).to_have_text('No matching results')
+                    expect(empty.locator('.empty-state-description')).to_be_visible()
+                    expect(empty.locator('.empty-state-actions')).to_be_visible()
+                    self.assertEqual(empty.locator('.empty-state').evaluate('e => getComputedStyle(e).borderTopStyle'), 'dashed')
+                    self.assertEqual(empty.evaluate('e => getComputedStyle(e).borderTopWidth'), '0px')
+                    self.assertEqual(empty.evaluate('e => getComputedStyle(e).paddingTop'), '0px')
+                    empty.get_by_role('button', name='Clear filters', exact=True).click()
+                    expect(search).to_have_value('')
+                    expect(empty).to_be_hidden()
+                    expect(root.locator(frame)).to_be_visible()
+                    expect(root.locator('tbody > tr[data-datatable-row]:not([hidden])')).to_have_count(3)
+                    evidence.assert_clean()
 
     def test_card_actions_keep_end_padding_and_distinct_hover_across_themes(self) -> None:
         for selectable in (False, True):

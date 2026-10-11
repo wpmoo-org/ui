@@ -11,6 +11,7 @@
 {% from "components/badge.html.jinja" import badge %}
 {% from "components/checkbox.html.jinja" import checkbox %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_menu, dropdown_item, dropdown_toggle_item, dropdown_header, dropdown_divider %}
+{% from "components/empty.html.jinja" import empty %}
 {% from "components/kbd.html.jinja" import kbd %}
 {% from "components/separator.html.jinja" import separator %}
 
@@ -430,13 +431,14 @@
         </div>
       </div>
     {% endif %}
-    <div class="datatable-empty" data-datatable-empty hidden role="status" aria-live="polite">
-      <p class="datatable-empty-title mb-1">No matching results</p>
-      <p class="datatable-empty-copy text-body-secondary mb-3">Try a different search or clear the active filters.</p>
-      <button type="button" class="btn btn-outline-secondary btn-sm" data-datatable-empty-reset>
-        Clear filters
-        {{ render_icon("x", "inline-end") }}
-      </button>
+    <div class="datatable-empty p-0 border-0" data-datatable-empty hidden role="status" aria-live="polite">
+      {% set empty_action %}
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-datatable-empty-reset>
+          Clear filters
+          {{ render_icon("x", "inline-end") }}
+        </button>
+      {% endset %}
+      {{ empty(title="No matching results", description="Try a different search or clear the active filters.", action=empty_action) }}
     </div>
     <div class="datatable-pagination mt-3" data-datatable-pagination>
       <div class="datatable-page-size d-flex align-items-center gap-2">

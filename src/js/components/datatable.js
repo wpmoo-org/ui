@@ -717,16 +717,20 @@ export default class DataTable {
     }
     const hasRows = this._rows.length > 0;
     empty.hidden = totalRows !== 0;
-    empty.querySelector(".datatable-empty-title")?.replaceChildren(
+    empty.querySelector(".empty-state-title, .datatable-empty-title")?.replaceChildren(
       this._document.createTextNode(hasRows ? "No matching results" : "No rows to display")
     );
-    const copy = empty.querySelector(".datatable-empty-copy");
+    const copy = empty.querySelector(".empty-state-description, .datatable-empty-copy");
     if (copy) {
       copy.hidden = !hasRows;
     }
     const reset = empty.querySelector("[data-datatable-empty-reset]");
     if (reset) {
       reset.hidden = !hasRows;
+      const actions = reset.closest(".empty-state-actions");
+      if (actions) {
+        actions.hidden = !hasRows;
+      }
     }
   }
 
