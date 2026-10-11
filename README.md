@@ -222,4 +222,4 @@ The published `LICENSE` also retains the full MIT notices for bundled
 Chart.js and `@kurkle/color`.
 Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
 live in the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.1.0/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.2.0/THIRD_PARTY_NOTICES.md).
