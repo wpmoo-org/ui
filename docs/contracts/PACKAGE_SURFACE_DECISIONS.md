@@ -3,6 +3,17 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.2.1 Compatible Fixes
+
+DataTable composes the existing Empty presentation while retaining its own
+live region, visibility, result messages and filter-reset action. Legacy empty
+title and description hooks remain supported. Catalog release notes show one
+current version and link earlier releases to GitHub. Export paths and explicit
+ESM lifecycle contracts are unchanged; this is a patch release.
+Unchecked checkbox borders inside semantic Alerts inherit the Alert foreground
+while checked, indeterminate, invalid and keyboard-focus states retain their
+existing control behavior.
+
 ## 1.2.0 Compatible Additions
 
 The next minor release adds the public Empty surface and optional Tabs content
