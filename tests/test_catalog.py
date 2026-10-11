@@ -1602,6 +1602,21 @@ class CatalogContractTests(CatalogTestCase):
                 for line in path.read_text(encoding="utf-8").splitlines()
             )
             component = path.stem.removeprefix("_")
+            if component == "alert":
+                # The accepted composition changes only unchecked, valid
+                # checkbox borders inside an Alert. Other form selectors
+                # still have to pass the component ownership gate below.
+                source = re.sub(
+                    r"""
+                    ^[\t ]*\.alert\s+\.form-check:not\(\.form-switch\)\s*>\s*
+                    \.form-check-input\[type="checkbox"\]
+                    :not\(:checked\):not\(:indeterminate\):not\(\.is-invalid\):not\(:invalid\)
+                    (?=\s*\{)
+                    """,
+                    ".alert",
+                    source,
+                    flags=re.MULTILINE | re.VERBOSE,
+                )
             if component == "toc":
                 for selector in re.findall(r"(?m)^([^\n{}]+)\{[ \t]*$", source):
                     self.assertIn("[data-toc]", selector)
