@@ -147,6 +147,104 @@ class LayoutBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_app_container_sizes_follow_available_page_width(self) -> None:
+        case = BrowserCase(
+            name="app-container-available-width",
+            viewport={"width": 1585, "height": 844},
+            color_scheme="light",
+            direction="ltr",
+        )
+        context, page, evidence = self._open("layout-app", case)
+        try:
+            shell = page.locator('[data-slot="sidebar-wrapper"]')
+            trigger = page.get_by_role("button", name="Toggle page sidebar", exact=True)
+            # The fixture uses Bootstrap's default responsive container scale.
+            containers = {
+                "container-sm": (576, 540),
+                "container-md": (768, 720),
+                "container-lg": (992, 960),
+                "container-xl": (1200, 1140),
+                "container-xxl": (1400, 1320),
+            }
+            page_widths = (
+                None,
+                *(width for breakpoint, _ in containers.values()
+                  for width in (breakpoint - 1, breakpoint, breakpoint + 1)),
+            )
+            for state in ("expanded", "collapsed"):
+                for page_width in page_widths:
+                    viewport_width = 1585 if page_width is None else 1800
+                    page.set_viewport_size({"width": viewport_width, "height": 844})
+                    for container_class in ("container", *containers, "container-fluid"):
+                        page.evaluate(
+                            """className => {
+                              const host = document.querySelector('[data-slot="page"]');
+                              for (const tag of ['header', 'main', 'footer']) {
+                                const region = host.querySelector(`:scope > ${tag}`);
+                                region.querySelector(':scope > .container, :scope > [class*="container-"]').className = className;
+                              }
+                            }""",
+                            container_class,
+                        )
+                        self._assert_app_container_width(
+                            page, shell, trigger, container_class, containers,
+                            state, page_width, viewport_width,
+                        )
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def _assert_app_container_width(
+        self, page, shell, trigger, container_class, containers,
+        state, page_width, viewport_width,
+    ) -> None:
+        with self.subTest(container=container_class, state=state, page_width=page_width):
+            if shell.get_attribute("data-sidebar-state") != state:
+                trigger.click()
+            expect(shell).to_have_attribute("data-sidebar-state", state)
+            # Keep the viewport above the responsive drawer boundary
+            # while independently sizing the App's remaining Page.
+            shell.evaluate(
+                """(element, width) => {
+                  const sidebar = element.querySelector(':scope > .sidebar');
+                  element.style.width = width === null ? '' :
+                    `${width + sidebar.getBoundingClientRect().width}px`;
+                }""",
+                page_width,
+            )
+            report = page.evaluate(
+                """className => {
+                  const host = document.querySelector('[data-slot="page"]');
+                  return {
+                    viewport: window.innerWidth,
+                    pageWidth: host.getBoundingClientRect().width,
+                    overflow: document.documentElement.scrollWidth > window.innerWidth,
+                    rails: ['header', 'main', 'footer'].map(tag => {
+                      const rect = host.querySelector(`:scope > ${tag} > .${className}`).getBoundingClientRect();
+                      return {width: rect.width, left: rect.left, right: rect.right};
+                    }),
+                  };
+                }""",
+                container_class,
+            )
+            minimum_width = containers.get(container_class, (0, 0))[0]
+            caps = [
+                cap for breakpoint, cap in containers.values()
+                if minimum_width <= breakpoint <= report["pageWidth"]
+            ] if container_class != "container-fluid" else []
+            expected_width = min(
+                report["pageWidth"],
+                max(caps, default=report["pageWidth"]),
+            )
+            for rail in report["rails"]:
+                self.assertAlmostEqual(rail["width"], expected_width, delta=1, msg=report)
+                self.assertAlmostEqual(rail["left"], report["rails"][0]["left"], delta=1, msg=report)
+                self.assertAlmostEqual(rail["right"], report["rails"][0]["right"], delta=1, msg=report)
+            if page_width is not None:
+                self.assertAlmostEqual(report["pageWidth"], page_width, delta=1, msg=report)
+            self.assertEqual(report["viewport"], viewport_width, report)
+            self.assertFalse(report["overflow"], report)
+
     def test_direct_overlay_host_does_not_add_a_second_viewport_of_height(self) -> None:
         context, page, evidence = self._open("layout-app", LAYOUT_CASES[0])
         try:

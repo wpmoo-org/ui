@@ -1,0 +1,17 @@
+{# Empty owns its default surface and text styles through .empty-state.
+   Icon and action are trusted public-component captures. Their providers own
+   their semantics; scalar messages and additional classes remain escaped. #}
+{% macro empty(title="", description="", icon="", action="", extra_class="") -%}
+  {% if not title | trim and not description | trim %}{{ fail("Empty title or description is required") }}{% endif %}
+  {% if extra_class is not string %}{{ fail("Empty extra_class must be a string") }}{% endif %}
+  <div class="empty-state{% if extra_class %} {{ extra_class | forceescape }}{% endif %}">
+    <div class="empty-state-header">
+      {% if icon %}<div class="empty-state-icon">{{ icon }}</div>{% endif %}
+      {% if title | trim %}<h3 class="empty-state-title">{{ title | forceescape }}</h3>{% endif %}
+      {% if description | trim %}<p class="empty-state-description">{{ description | forceescape }}</p>{% endif %}
+    </div>
+    {% if action %}
+      <div class="empty-state-actions">{{ action }}</div>
+    {% endif %}
+  </div>
+{%- endmacro %}

@@ -1,13 +1,16 @@
 {% set tabs_orientations = ["horizontal", "vertical"] %}
+{% set tabs_heights = ["stable", "content"] %}
 
-{% macro tabs(id, items, extra_class="", orientation="horizontal") -%}
+{% macro tabs(id, items, extra_class="", orientation="horizontal", height="stable") -%}
   {% if not id | trim %}{{ fail("Tabs id is required") }}{% endif %}
   {% if not items %}{{ fail("Tabs requires at least one item") }}{% endif %}
   {% if orientation not in tabs_orientations %}{{ fail("Unknown tabs orientation: " ~ orientation) }}{% endif %}
+  {% if height not in tabs_heights %}{{ fail("Unknown tabs height: " ~ height) }}{% endif %}
   {% set has_explicit_active = items | selectattr("active", "defined") | selectattr("active") | list | length > 0 %}
   {% set is_vertical = orientation == "vertical" %}
   {% set wrapper_classes = "tabs" %}
   {% if is_vertical %}{% set wrapper_classes = wrapper_classes ~ " tabs--vertical" %}{% endif %}
+  {% if height == "content" %}{% set wrapper_classes = wrapper_classes ~ " tabs--content-height" %}{% endif %}
   {% if extra_class %}{% set wrapper_classes = (wrapper_classes ~ " " ~ extra_class) | trim %}{% endif %}
   {% set list_classes = "tabs-list nav nav-pills" %}
   {% if is_vertical %}{% set list_classes = list_classes ~ " flex-column" %}{% endif %}

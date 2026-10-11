@@ -1,5 +1,5 @@
 /*!
- * Moo UI v1.1.0 (https://wpmoo.org/)
+ * Moo UI v1.2.0 (https://wpmoo.org/)
  * Copyright 2026 WPMoo Authors
  * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)
  *
@@ -4420,6 +4420,61 @@ label.btn {
     color: var(--moo-muted-foreground);
   }
 
+  /* Empty */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    text-align: center;
+    border-width: var(--bs-border-width);
+    border-style: dashed;
+    border-color: var(--bs-border-color);
+    border-radius: var(--bs-border-radius-lg);
+  }
+  .empty-state-header {
+    display: flex;
+    flex-direction: column;
+    align-items: inherit;
+    gap: 0.5rem;
+  }
+  .empty-state-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+    font-size: 1.53125rem;
+    line-height: 1;
+    color: var(--bs-secondary-color);
+    background-color: var(--bs-tertiary-bg);
+    border-radius: var(--bs-border-radius-lg);
+  }
+  .empty-state-icon > [data-icon] {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .empty-state-title {
+    margin: 0;
+    font-size: 1.09375rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .empty-state-description {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--bs-secondary-color);
+  }
+  .empty-state-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: inherit;
+    gap: 0.5rem;
+  }
+
   /* Table */
   .card .table {
     --bs-table-bg: transparent;
@@ -6078,6 +6133,12 @@ label.btn {
     visibility: visible;
     pointer-events: auto;
     transition-delay: 0s;
+  }
+  .tabs--content-height > .tab-content {
+    display: block;
+  }
+  .tabs--content-height > .tab-content > .tab-pane:not(.active) {
+    display: none;
   }
 
   /* Collapsible */
@@ -8245,6 +8306,84 @@ label.btn {
 .wrapper[data-layout="app"] > [data-slot="page"] > main,
 .wrapper[data-layout="app"] > [data-slot="page"] > footer {
     flex: 0 0 auto;
+  }
+  @supports (container-type: inline-size) {
+    .wrapper[data-layout="app"] > [data-slot="page"] {
+      container: moo-shell / inline-size;
+    }
+    .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > :is( .container, .container-sm, .container-md, .container-lg, .container-xl, .container-xxl   ) {
+      max-width: none;
+    }
+    @container moo-shell (min-width: 576px) {
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container {
+        max-width: 540px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-sm {
+        max-width: 540px;
+      }
+    }
+    @container moo-shell (min-width: 768px) {
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container {
+        max-width: 720px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-sm {
+        max-width: 720px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-md {
+        max-width: 720px;
+      }
+    }
+    @container moo-shell (min-width: 992px) {
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container {
+        max-width: 960px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-sm {
+        max-width: 960px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-md {
+        max-width: 960px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-lg {
+        max-width: 960px;
+      }
+    }
+    @container moo-shell (min-width: 1200px) {
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container {
+        max-width: 1140px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-sm {
+        max-width: 1140px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-md {
+        max-width: 1140px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-lg {
+        max-width: 1140px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-xl {
+        max-width: 1140px;
+      }
+    }
+    @container moo-shell (min-width: 1400px) {
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container {
+        max-width: 1320px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-sm {
+        max-width: 1320px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-md {
+        max-width: 1320px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-lg {
+        max-width: 1320px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-xl {
+        max-width: 1320px;
+      }
+      .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container-xxl {
+        max-width: 1320px;
+      }
+    }
   }
   .wrapper[data-layout="app"] > [data-slot="page"] > main {
     display: flex;

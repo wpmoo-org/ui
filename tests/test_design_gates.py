@@ -214,7 +214,11 @@ def approved_shared_value(prop: str, value: str) -> bool:
         if prop.endswith("-width"):
             return semantic_tokens_only(clean, "width")
         if prop.endswith("-style"):
-            return clean in {"solid", "dashed", "dotted"} or clean == "var(--bs-border-style)"
+            return (
+                clean in {"solid", "dashed", "dotted"}
+                or clean == "var(--bs-border-style)"
+                or bool(SASS_VAR.fullmatch(clean) and clean.endswith("-border-style"))
+            )
         return approved_border_shorthand(clean)
     if "outline" in prop:
         return approved_token_names(clean) or bool(

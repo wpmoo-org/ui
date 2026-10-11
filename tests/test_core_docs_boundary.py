@@ -455,7 +455,8 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
     def test_public_policy_docs_track_current_release_line(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(package["version"], "1.1.0")
+        certification = json.loads((ROOT / "certification.json").read_text(encoding="utf-8"))
+        self.assertEqual(package["version"], certification["coreVersion"])
         published_version = package["version"]
         if "-dev." in published_version:
             freeze = json.loads((ROOT / "src/certification/api-freeze-1.0.0.json").read_text(encoding="utf-8"))

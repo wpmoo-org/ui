@@ -18,6 +18,12 @@
     "description": "Display a structured surface with a header, body, and optional footer."
   },
   {
+    "slug": "empty",
+    "label": "Empty",
+    "status": "ready",
+    "description": "Explain an empty collection with a quiet dashed boundary and an optional next action."
+  },
+  {
     "slug": "typography",
     "label": "Typography",
     "status": "ready",

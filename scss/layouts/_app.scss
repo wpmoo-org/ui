@@ -36,6 +36,41 @@
   flex: 0 0 auto;
 }
 
+// Resolve Bootstrap container sizes against the space left by the app shell.
+// Browsers without container queries retain Bootstrap's viewport behavior.
+@supports (container-type: inline-size) {
+  .wrapper[data-layout="app"] > [data-slot="page"] {
+    container: moo-shell / inline-size;
+  }
+
+  .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > :is(
+    .container,
+    .container-sm,
+    .container-md,
+    .container-lg,
+    .container-xl,
+    .container-xxl
+  ) {
+    max-width: none;
+  }
+
+  @each $breakpoint, $container-max-width in $container-max-widths {
+    @container moo-shell (min-width: #{map-get($grid-breakpoints, $breakpoint)}) {
+      $extend-breakpoint: true;
+      @each $name, $width in $grid-breakpoints {
+        @if $extend-breakpoint {
+          .wrapper[data-layout="app"] > [data-slot="page"] > :is(header, main, footer) > .container#{breakpoint-infix($name, $grid-breakpoints)} {
+            max-width: $container-max-width;
+          }
+        }
+        @if $breakpoint == $name {
+          $extend-breakpoint: false;
+        }
+      }
+    }
+  }
+}
+
 // The page main region owns the space between the optional header and footer.
 // Keep the Bootstrap rail as the flex column too, so app previews and real
 // shells can give their caller content a full-height surface without adding

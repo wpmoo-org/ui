@@ -13,6 +13,8 @@ $dropdown-header-padding-x: $dropdown-item-padding-x !default;
 // exposes paragraph bottom margin, but has no paragraph top-margin knob.
 $moo-small-font-size: 0.75rem !default;
 $moo-paragraph-margin-top: 0 !default;
+// Bootstrap has no Empty component or configurable border-style knob.
+$moo-empty-border-style: dashed !default;
 // Bootstrap has no Combobox component. The Basic pass uses Bootstrap's input
 // height and dropdown menu surface, but the reference control widths,
 // item line-height, and secondary-row size have no Bootstrap knob, so they

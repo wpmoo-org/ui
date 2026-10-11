@@ -35,6 +35,7 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/components/_datepicker.scss",
     "scss/components/_dialog.scss",
     "scss/components/_dropdown.scss",
+    "scss/components/_empty.scss",
     "scss/components/_field.scss",
     "scss/components/_input.scss",
     "scss/components/_input_group.scss",
@@ -256,7 +257,8 @@ class PackageMetadataTests(unittest.TestCase):
     def test_stable_package_declares_the_state_artifact_surface(self) -> None:
         package = self._read_package()
 
-        self.assertEqual(package["version"], "1.1.0")
+        certification = json.loads((ROOT / "certification.json").read_text(encoding="utf-8"))
+        self.assertEqual(package["version"], certification["coreVersion"])
         self.assertEqual(
             package["exports"]["./state.js"],
             "./dist/js/state.js",
@@ -1091,7 +1093,7 @@ for (const specifier of [
         )
 
         self.assertIn("  ui-tests:\n    name: ui-tests", workflow)
-        self.assertIn("timeout-minutes: 45", workflow)
+        self.assertIn("timeout-minutes: 90", workflow)
         self.assertIn("Select test tier", workflow)
         self.assertIn("scripts/run-test-tier.py resolve", workflow)
         self.assertIn("steps.test-tier.outputs.needs_playwright == 'true'", workflow)
@@ -1118,7 +1120,7 @@ for (const specifier of [
         )
 
         self.assertIn("Run release test gate", workflow)
-        self.assertIn("timeout-minutes: 45", workflow)
+        self.assertIn("timeout-minutes: 90", workflow)
         self.assertIn("python scripts/run-test-tier.py run release", workflow)
 
     def test_alias_package_is_not_part_of_root_install(self) -> None:

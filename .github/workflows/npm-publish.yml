@@ -23,11 +23,10 @@ jobs:
   publish:
     name: publish
     runs-on: ubuntu-latest
-    # Same release-tier runner as ui-ci.yml: setup, browser install, full
-    # discovery, package verification, and rehearsal can exceed the old
-    # 25-minute budget on a cold hosted runner, so publish must wait for a real
-    # pass/fail gate instead of a timeout.
-    timeout-minutes: 45
+    # Use the same release-tier budget as UI CI. Full discovery alone reached
+    # 44 minutes; setup, build, package verification and rehearsal need room
+    # to finish before publishing.
+    timeout-minutes: 90
 
     steps:
       - name: Check out repository

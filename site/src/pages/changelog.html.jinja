@@ -17,6 +17,37 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
+        <article class="moo-changelog__release" aria-labelledby="release-1-2-0">
+          <div class="moo-changelog__release-heading">
+            {{ badge("v1.2.0", variant="dark") }}
+            <span class="text-body-secondary">Release preparation</span>
+          </div>
+          <h2 id="release-1-2-0">Moo UI 1.2.0</h2>
+          <p>
+            This compatible minor release target adds Empty and optional Tabs
+            content height while preserving the 1.1.0 package contract.
+            Component certification remains preview.
+          </p>
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>Empty provides a standard dashed surface, text, icons and actions, with Bootstrap utility customization.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>Tabs can size their content area to the active panel while retaining stable height by default.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Fixed</span>
+              <span>App containers use the Page area remaining after Sidebar so Header, main and Footer stay aligned.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Development</span>
+              <span>Release checks receive a 90-minute job budget, and initial branch scans inspect new commits without secret-scan exceptions.</span>
+            </div>
+          </div>
+        </article>
+
         <article class="moo-changelog__release" aria-labelledby="release-1-1-0">
           <div class="moo-changelog__release-heading">
             {{ badge("v1.1.0", variant="dark") }}
@@ -726,6 +757,7 @@
     </article>
 
     {{ render_doc_toc([
+      {"id": "release-1-2-0", "label": "v1.2.0"},
       {"id": "release-1-1-0", "label": "v1.1.0"},
       {"id": "release-1-1-0-dev-1", "label": "v1.1.0-dev.1"},
       {"id": "release-1-0-0", "label": "v1.0.0"},
