@@ -46,6 +46,10 @@ reviews:
         shadows, or borders in component partials -- these must resolve through
         a Sass !default knob, not a literal. Sass imports must stay
         @import-only; flag any @use or @forward.
+        The design gate in tests/test_design_gates.py explicitly permits
+        semantic values transparent, currentColor, inherit, none and zero.
+        These express absence, inheritance or native behavior rather than a
+        design color/measurement; do not require new Sass knobs for them.
     - path: "src/js/components/**"
       instructions: |
         Public ESM modules must stay side-effect-free on import: no
