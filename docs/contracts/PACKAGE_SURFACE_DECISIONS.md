@@ -25,6 +25,21 @@ The [DataTable template contracts](../../tests/test_datatable.py) also verify
 escaped width attributes and rejection of percentage minimums. These inputs
 remain trusted application CSS lengths, not an untrusted CSS sanitizer API.
 
+Development-only updates combine the accessibility checker from dependency PR
+#98 (`axe-core` 4.14.0) with the newer catalog toolchain from #102 (`wrangler`
+4.149.0 and transitive `sharp` 0.35.5). Both remain dev-only, and the Wrangler
+manifest range is unchanged. The existing Node 22 development/CI runtime meets
+the updated tools' requirements. Public peers, exports and distributed file
+inventory are unchanged; these updates retain the patch classification.
+
+Verification: comparison with `6733da1` confirms unchanged manifest exports,
+file globs, side effects, peer dependencies, scripts and Wrangler range; the
+combined lock marks axe-core, Wrangler and Sharp as dev-only. The existing
+boundary recorder builds the candidate and confirms the same 103 approved npm
+inventory paths. The package metadata and inventory contracts in
+[test_core_docs_boundary.py](../../tests/test_core_docs_boundary.py) protect
+these checks, and the release gate revalidates the prepared tarball itself.
+
 ## 1.2.1 Compatible Fixes
 
 DataTable composes the existing Empty presentation while retaining its own
