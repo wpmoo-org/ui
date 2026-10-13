@@ -87,8 +87,9 @@
 
     <h2 id="column-widths" class="h4 mt-5 mb-3">Readable column widths</h2>
     <p class="mb-4">
-      The first data column has a default minimum of <code>16rem</code>.
-      Selection and action columns are excluded. Set a column's
+      Catalog compositions give the first data column a minimum of <code>16rem</code>.
+      Selection and action columns are excluded. In the catalog's internal
+      Jinja producer, which is not an npm API, set a column's
       <code>min_width</code> to a trusted CSS length to protect its readable
       width, or to <code>false</code> to remove the default. Several columns
       can have minima. For example, <code>{key: 'name', min_width: false}</code>
@@ -105,6 +106,13 @@
       sizing and do not use minimum protection. Protected width declarations
       and minima must resolve to CSS lengths; use <code>min_width: false</code>
       for other native width values.
+    </p>
+    <p class="mb-4">
+      Hosts that generate their own HTML can use the existing header width
+      declaration, for example
+      <code>&lt;th style="width: max(0px, 16rem);"&gt;</code>.
+      Keep a preferred percentage width as a native declaration such as
+      <code>&lt;th style="width: 50%;"&gt;</code>.
     </p>
 
     <h2 id="composition" class="h4 mt-5 mb-3">Composition</h2>

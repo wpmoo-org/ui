@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- Contracts: /components/navigation/ and https://getbootstrap.com/docs/5.3/components/navs-tabs/ -->
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
@@ -40,6 +41,9 @@
         <div id="hover-direct" class="nav nav-pills gap-2">
           <a id="hover-direct-current" class="nav-link active" href="#direct-current" aria-current="page">Direct current</a>
           <a id="hover-direct-other" class="nav-link" href="#direct-other">Direct other</a>
+          <!-- The Bootstrap helper models host-enabled pointer handling for a disabled link. -->
+          <a id="hover-direct-disabled" class="nav-link disabled pe-auto" aria-disabled="true" tabindex="-1">Direct unavailable</a>
+          <button id="hover-direct-disabled-button" class="nav-link" type="button" disabled>Direct unavailable button</button>
         </div>
       </nav>
       <button id="hover-outside" class="btn btn-outline-secondary mt-5" type="button">Outside navigation</button>

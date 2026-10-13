@@ -43,13 +43,7 @@ class NavigationHoverBrowserTests(unittest.TestCase):
         return page, evidence
 
     def _background(self, page, selector, color):
-        page.evaluate("""async () => {
-          await new Promise(requestAnimationFrame);
-          await new Promise(requestAnimationFrame);
-          await Promise.all(document.querySelector('main').getAnimations({subtree: true})
-            .filter(animation => animation instanceof CSSTransition)
-            .map(animation => animation.finished.catch(() => {})));
-        }""")
+        # Playwright polls the computed state with its bounded assertion timeout.
         expect(page.locator(selector)).to_have_css("background-color", color)
 
     def _active_color(self, page):
@@ -121,6 +115,11 @@ class NavigationHoverBrowserTests(unittest.TestCase):
                         self._background(page, "#hover-current", color)
                         outside.hover()
                         self._background(page, "#hover-direct-current", color)
+                        for selector in ("#hover-direct-disabled", "#hover-direct-disabled-button"):
+                            disabled = page.locator(selector).bounding_box()
+                            page.mouse.move(disabled["x"] + disabled["width"] / 2, disabled["y"] + disabled["height"] / 2)
+                            self._background(page, "#hover-direct-current", color)
+                            self._background(page, selector, "rgba(0, 0, 0, 0)")
                         for selector in ("#hover-disabled-item", "#hover-disabled-button-item"):
                             disabled = page.locator(selector).bounding_box()
                             page.mouse.move(disabled["x"] + disabled["width"] / 2, disabled["y"] + disabled["height"] / 2)

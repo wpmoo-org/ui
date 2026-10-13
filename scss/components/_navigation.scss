@@ -48,8 +48,8 @@ $nav-link-description-color: color-mix(in srgb, var(--moo-muted-foreground) 95%,
 // group's current pill independently, including native direct-link anatomy.
 // Hosts that bridge their active fill through Bootstrap's variable consume
 // this same state instead of implementing another hover algorithm.
-.nav-pills:has(> .nav-link:hover, > .nav-item:hover > .nav-link:not(.disabled, :disabled)) > .nav-link.active:not(:hover),
-.nav-pills:has(> .nav-link:hover, > .nav-item:hover > .nav-link:not(.disabled, :disabled)) > .nav-item:not(:hover) > .nav-link.active {
+.nav-pills:has(> .nav-link:not(.disabled, :disabled):hover, > .nav-item:hover > .nav-link:not(.disabled, :disabled)) > .nav-link.active:not(:hover),
+.nav-pills:has(> .nav-link:not(.disabled, :disabled):hover, > .nav-item:hover > .nav-link:not(.disabled, :disabled)) > .nav-item:not(:hover) > .nav-link.active {
   --bs-nav-pills-link-active-bg: transparent;
   background-color: var(--bs-nav-pills-link-active-bg);
 }

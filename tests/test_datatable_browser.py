@@ -224,6 +224,8 @@ class DataTableBrowserTests(unittest.TestCase):
                         expect(root).to_have_attribute('data-datatable-view', 'table')
                         for width in (820, 1280):
                             page.set_viewport_size({'width': width, 'height': 900})
+                            if name == 'moved':
+                                self.assertEqual(root.locator('th[data-datatable-column="project"]').evaluate('e => e.style.width'), '')
                             for key, minimum in minimum_pixels.items():
                                 header = root.locator(f'th[data-datatable-column="{key}"]')
                                 self.assertGreaterEqual(header.bounding_box()['width'], minimum - 1)
@@ -233,8 +235,6 @@ class DataTableBrowserTests(unittest.TestCase):
                             frame = root.locator('.table-responsive')
                             self.assertLessEqual(page.evaluate('document.documentElement.scrollWidth'), width)
                             if width == 820:
-                                if name == 'moved' and font_size == 16:
-                                    self.assertLess(root.locator('th[data-datatable-column="project"]').bounding_box()['width'], default_minimum)
                                 self.assertGreater(frame.evaluate('e => e.scrollWidth'), frame.evaluate('e => e.clientWidth'))
                                 self.assertGreater(frame.evaluate('''e => {
                                     e.scrollLeft = e.scrollWidth * (getComputedStyle(e).direction === 'rtl' ? -1 : 1);
@@ -256,6 +256,18 @@ class DataTableBrowserTests(unittest.TestCase):
                         expect(root.locator('.datatable-card-title').first).to_have_text('Solar Powered Robot')
                         self.assertLessEqual(page.evaluate('document.documentElement.scrollWidth'), 390)
                         evidence.assert_clean()
+
+    def test_actions_key_without_card_role_leaves_default_minimum_on_data_column(self) -> None:
+        with self.responsive_fixture(actions_first=True, column_overrides={
+            'actions': {'card_role': '', 'width': '44px'},
+        }) as (page, root, evidence):
+            actions = root.locator('th[data-datatable-column="actions"]')
+            project = root.locator('th[data-datatable-column="project"]')
+            page.set_viewport_size({'width': 820, 'height': 900})
+            minimum = 16 * page.locator('html').evaluate('e => parseFloat(getComputedStyle(e).fontSize)')
+            self.assertLess(actions.bounding_box()['width'], minimum)
+            self.assertGreaterEqual(project.bounding_box()['width'], minimum - 1)
+            evidence.assert_clean()
 
     def test_percentage_widths_keep_native_table_geometry(self) -> None:
         fixed_columns = {key: {'width': width} for key, width in (
