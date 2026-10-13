@@ -117,7 +117,7 @@ class DataTableBrowserTests(unittest.TestCase):
         return context, page, evidence
 
     @contextmanager
-    def responsive_fixture(self, *, mode="auto", breakpoint="md", runtime=True, blocked_storage=False, selectable=False, missing_breakpoint=False, bulk_delete=False):
+    def responsive_fixture(self, *, mode="auto", breakpoint="md", runtime=True, blocked_storage=False, selectable=False, missing_breakpoint=False, bulk_delete=False, column_overrides=None, actions_first=False):
         template = create_environment().from_string("""
             <!doctype html><html><head><meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -141,7 +141,7 @@ class DataTableBrowserTests(unittest.TestCase):
                 'edition':'Olympiad 2027', 'category':'Applied Science',
                 'students':'2', 'status':'Draft', 'actions':actions}}) %}
             {% endfor %}
-            {{ datatable('responsive-items', [
+            {% set columns = [
               {'key':'project', 'label':'Project', 'card_role':'title'},
               {'key':'edition', 'label':'Edition'},
               {'key':'category', 'label':'Category'},
@@ -149,7 +149,12 @@ class DataTableBrowserTests(unittest.TestCase):
               {'key':'status', 'label':'Status'},
               {'key':'actions', 'label':'Actions', 'sortable':false,
                'hideable':false, 'align':'end', 'card_role':'actions'}
-            ], rows, selectable=selectable,
+            ] %}
+            {% for column in columns %}
+              {% set _ = column.update(column_overrides.get(column.key, {})) %}
+            {% endfor %}
+            {% if actions_first %}{% set columns = [columns[-1]] + columns[:-1] %}{% endif %}
+            {{ datatable('responsive-items', columns, rows, selectable=selectable,
                bulk_actions=([{'key':'delete', 'label':'Delete selected', 'icon':'trash', 'destructive':true}] if bulk_delete else []), responsive_mode=mode,
                responsive_breakpoint=breakpoint) }}
             </main>
@@ -162,7 +167,7 @@ class DataTableBrowserTests(unittest.TestCase):
             </script>{% endif %}</body></html>
         """)
         try:
-            rendered = template.render(mode=mode, breakpoint=breakpoint, runtime=runtime, selectable=selectable, missing_breakpoint=missing_breakpoint, bulk_delete=bulk_delete)
+            rendered = template.render(mode=mode, breakpoint=breakpoint, runtime=runtime, selectable=selectable, missing_breakpoint=missing_breakpoint, bulk_delete=bulk_delete, column_overrides=column_overrides or {}, actions_first=actions_first)
         except ValueError as error:
             self.fail(f"Public responsive configuration rejected: {error}")
         with tempfile.TemporaryDirectory(prefix="datatable-responsive-", dir=ROOT / "site-dist") as temporary:
@@ -182,6 +187,120 @@ class DataTableBrowserTests(unittest.TestCase):
                 yield page, page.locator('#responsive-items'), evidence
             finally:
                 context.close()
+
+    def test_accepted_column_minimums_preserve_readable_geometry_and_contained_scroll(self) -> None:
+        cases = (
+            ('default', {}, {'project': '16rem'}),
+            ('smaller-preference', {'project': {'width': '100px'}}, {'project': '16rem'}),
+            ('larger-preference', {'project': {'width': '320px'}}, {'project': '320px'}),
+            ('moved', {'project': {'min_width': False}, 'category': {'min_width': '20rem'}}, {'category': '20rem'}),
+            ('multiple', {'project': {'min_width': '20rem'}, 'category': {'min_width': '20rem'}},
+             {'project': '20rem', 'category': '20rem'}),
+        )
+        fixed_columns = {key: {'width': width} for key, width in (
+            ('edition', '160px'), ('category', '200px'), ('students', '64px'),
+            ('status', '100px'), ('actions', '44px'),
+        )}
+        for name, overrides, minima in cases:
+            columns = {key: dict(value) for key, value in fixed_columns.items()}
+            for key, value in overrides.items():
+                columns.setdefault(key, {}).update(value)
+            for theme, direction, font_size in (
+                ('light', 'ltr', 16), ('dark', 'rtl', 16),
+                ('light', 'ltr', 20), ('dark', 'rtl', 20),
+            ):
+                with self.subTest(case=name, theme=theme, direction=direction, font_size=font_size):
+                    with self.responsive_fixture(selectable=True, column_overrides=columns,
+                                                 actions_first=name == 'default') as (page, root, evidence):
+                        page.set_viewport_size({'width': 820, 'height': 900})
+                        page.locator('html').evaluate('(e, size) => { e.style.fontSize = size + "px"; }', font_size)
+                        root_font_size = page.locator('html').evaluate('e => parseFloat(getComputedStyle(e).fontSize)')
+                        minimum_pixels = {key: float(value[:-3]) * root_font_size if value.endswith('rem')
+                                          else float(value[:-2]) for key, value in minima.items()}
+                        default_minimum = 16 * root_font_size
+                        page.locator('.moo-ui').evaluate(
+                            '(e, state) => { e.dataset.bsTheme = state.theme; e.dir = state.direction; }',
+                            {'theme': theme, 'direction': direction})
+                        expect(root).to_have_attribute('data-datatable-view', 'table')
+                        for width in (820, 1280):
+                            page.set_viewport_size({'width': width, 'height': 900})
+                            if name == 'moved':
+                                self.assertEqual(root.locator('th[data-datatable-column="project"]').evaluate('e => e.style.width'), '')
+                            for key, minimum in minimum_pixels.items():
+                                header = root.locator(f'th[data-datatable-column="{key}"]')
+                                self.assertGreaterEqual(header.bounding_box()['width'], minimum - 1)
+                            selection = root.locator('thead input[data-datatable-select-all]')
+                            self.assertLess(selection.locator('xpath=ancestor::th').bounding_box()['width'], default_minimum)
+                            self.assertLess(root.locator('th[data-datatable-column="actions"]').bounding_box()['width'], default_minimum)
+                            frame = root.locator('.table-responsive')
+                            self.assertLessEqual(page.evaluate('document.documentElement.scrollWidth'), width)
+                            if width == 820:
+                                self.assertGreater(frame.evaluate('e => e.scrollWidth'), frame.evaluate('e => e.clientWidth'))
+                                self.assertGreater(frame.evaluate('''e => {
+                                    e.scrollLeft = e.scrollWidth * (getComputedStyle(e).direction === 'rtl' ? -1 : 1);
+                                    return Math.abs(e.scrollLeft);
+                                }'''), 0)
+                        if name == 'multiple':
+                            root.get_by_role('button', name='View columns', exact=True).click()
+                            toggle = root.locator('[data-datatable-column-toggle="category"]')
+                            toggle.click()
+                            expect(root.locator('th[data-datatable-column="category"]')).to_be_hidden()
+                            self.assertGreaterEqual(root.locator('th[data-datatable-column="project"]').bounding_box()['width'], minimum_pixels['project'] - 1)
+                            toggle.click()
+                            expect(root.locator('th[data-datatable-column="category"]')).to_be_visible()
+                            self.assertGreaterEqual(root.locator('th[data-datatable-column="category"]').bounding_box()['width'], minimum_pixels['category'] - 1)
+                            page.keyboard.press('Escape')
+                        page.set_viewport_size({'width': 390, 'height': 900})
+                        expect(root).to_have_attribute('data-datatable-view', 'cards')
+                        expect(root.locator('.datatable-card-title')).to_have_count(3)
+                        expect(root.locator('.datatable-card-title').first).to_have_text('Solar Powered Robot')
+                        self.assertLessEqual(page.evaluate('document.documentElement.scrollWidth'), 390)
+                        evidence.assert_clean()
+
+    def test_actions_key_without_card_role_leaves_default_minimum_on_data_column(self) -> None:
+        with self.responsive_fixture(actions_first=True, column_overrides={
+            'actions': {'card_role': '', 'width': '44px'},
+        }) as (page, root, evidence):
+            actions = root.locator('th[data-datatable-column="actions"]')
+            project = root.locator('th[data-datatable-column="project"]')
+            page.set_viewport_size({'width': 820, 'height': 900})
+            minimum = 16 * page.locator('html').evaluate('e => parseFloat(getComputedStyle(e).fontSize)')
+            self.assertLess(actions.bounding_box()['width'], minimum)
+            self.assertGreaterEqual(project.bounding_box()['width'], minimum - 1)
+            evidence.assert_clean()
+
+    def test_percentage_widths_keep_native_table_geometry(self) -> None:
+        fixed_columns = {key: {'width': width} for key, width in (
+            ('edition', '160px'), ('category', '200px'), ('students', '64px'),
+            ('status', '100px'), ('actions', '44px'),
+        )}
+        for preferred in ('10%', '50%', 'calc(50% - 1rem)'):
+            for theme, direction in (('light', 'ltr'), ('dark', 'rtl')):
+                with self.subTest(preferred=preferred, theme=theme, direction=direction):
+                    with self.responsive_fixture(column_overrides={
+                        **fixed_columns, 'project': {'width': preferred},
+                    }) as (page, root, evidence):
+                        page.locator('.moo-ui').evaluate(
+                            '(e, state) => { e.dataset.bsTheme = state.theme; e.dir = state.direction; }',
+                            {'theme': theme, 'direction': direction})
+                        for font_size in (16, 20):
+                            page.locator('html').evaluate('(e, size) => { e.style.fontSize = size + "px"; }', font_size)
+                            for viewport in (820, 1280):
+                                page.set_viewport_size({'width': viewport, 'height': 900})
+                                header = root.locator('th[data-datatable-column="project"]')
+                                measured = header.evaluate('''(e, preferred) => {
+                                    const rendered = e.style.width;
+                                    const actual = e.getBoundingClientRect().width;
+                                    e.style.width = preferred;
+                                    const native = e.getBoundingClientRect().width;
+                                    const normalized = e.style.width;
+                                    e.style.width = rendered;
+                                    return {rendered, actual, native, normalized};
+                                }''', preferred)
+                                self.assertAlmostEqual(measured['actual'], measured['native'], delta=1)
+                                self.assertEqual(measured['rendered'], measured['normalized'])
+                                self.assertLessEqual(page.evaluate('document.documentElement.scrollWidth'), viewport)
+                        evidence.assert_clean()
 
     def test_shared_empty_handles_zero_rows_without_a_filter_action(self) -> None:
         with self.responsive_fixture(selectable=True, bulk_delete=True) as (page, root, evidence):

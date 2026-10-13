@@ -85,6 +85,36 @@
       extra_class="align-middle mb-4"
     ) }}
 
+    <h2 id="column-widths" class="h4 mt-5 mb-3">Readable column widths</h2>
+    <p class="mb-4">
+      Catalog compositions give the first data column a minimum of <code>16rem</code>.
+      Selection and action columns are excluded. In the catalog's internal
+      Jinja producer, which is not an npm API, set a column's
+      <code>min_width</code> to a trusted CSS length to protect its readable
+      width, or to <code>false</code> to remove the default. Several columns
+      can have minima. For example, <code>{key: 'name', min_width: false}</code>
+      and <code>{key: 'reference', min_width: '20rem'}</code> move protection
+      to the reference column.
+    </p>
+    <p class="mb-4">
+      <code>width</code> remains the preferred width; the larger of that width
+      and <code>min_width</code> is used. Without a minimum, the original width
+      is retained. Native table layout can distribute extra space, and the
+      existing responsive frame scrolls when space is insufficient. Cards
+      retain their own layout. Preferred width declarations containing
+      <code>%</code>, including percentage calculations, retain native table
+      sizing and do not use minimum protection. Protected width declarations
+      and minima must resolve to CSS lengths; use <code>min_width: false</code>
+      for other native width values.
+    </p>
+    <p class="mb-4">
+      Hosts that generate their own HTML can use the existing header width
+      declaration, for example
+      <code>&lt;th style="width: max(0px, 16rem);"&gt;</code>.
+      Keep a preferred percentage width as a native declaration such as
+      <code>&lt;th style="width: 50%;"&gt;</code>.
+    </p>
+
     <h2 id="composition" class="h4 mt-5 mb-3">Composition</h2>
     <p class="mb-4">
       The table surface is intentionally built from smaller public contracts.

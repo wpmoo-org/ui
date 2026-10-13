@@ -108,6 +108,32 @@ def _parse_html(source: str) -> _Node:
 
 
 class DataTableTests(CatalogTestCase):
+    def test_column_width_values_cannot_escape_the_style_attribute(self) -> None:
+        template = create_environment().from_string(
+            '{% from "components/datatable.html.jinja" import datatable_column_header %}'
+            '{{ datatable_column_header("name", "Name", sortable=sortable, width=width, min_width=minimum) }}'
+        )
+        payload = '20rem;" onmouseover="alert(1)'
+        for sortable in (True, False):
+            for option in ("width", "minimum"):
+                with self.subTest(sortable=sortable, option=option):
+                    html = template.render(sortable=sortable, width=payload if option == "width" else "", minimum=payload if option == "minimum" else "")
+                    parser = _HtmlTreeParser()
+                    parser.feed(html)
+                    header = parser.root.find_one(tag="th")
+                    self.assertNotIn("onmouseover", header.attrs)
+                    self.assertIn(payload, header.attrs["style"])
+
+    def test_column_minimum_requires_a_length_instead_of_a_percentage(self) -> None:
+        template = create_environment().from_string(
+            '{% from "components/datatable.html.jinja" import datatable_column_header %}'
+            '{{ datatable_column_header("name", "Name", min_width=minimum) }}'
+        )
+        for minimum in ("50%", "calc(100% - 2rem)"):
+            with self.subTest(minimum=minimum):
+                with self.assertRaisesRegex(ValueError, "CSS length"):
+                    template.render(minimum=minimum)
+
     def test_configured_responsive_breakpoint_aligns_css_and_runtime_thresholds(self) -> None:
         import sass
 

@@ -147,14 +147,15 @@
   </div>
 {%- endmacro %}
 
-{% macro datatable_column_header(key, label, sr_label="", align="", sortable=true, width="", sort_state="none", hideable=true) -%}
+{% macro datatable_column_header(key, label, sr_label="", align="", sortable=true, width="", sort_state="none", hideable=true, min_width="") -%}
+  {% if min_width and '%' in (min_width | string) %}{{ fail("Data Table min_width must be a CSS length, not a percentage") }}{% endif %}
   {% set th_class = "datatable-col" %}
   {% if align %}{% set th_class = th_class ~ " text-" ~ align %}{% endif %}
-  {% set width_attr = ' style="width: ' ~ width ~ ';"' if width else "" %}
+  {% set effective_width = width if width and '%' in (width | string) else 'max(' ~ (width or '0px') ~ ', ' ~ min_width ~ ')' if min_width else width %}
   {% if sortable %}
     {% set current_sort = sort_state if sort_state in ["asc", "desc"] else "none" %}
     {% set aria_sort = "ascending" if current_sort == "asc" else "descending" if current_sort == "desc" else "none" %}
-    <th scope="col" class="{{ th_class }}" data-datatable-column="{{ key }}"{% if not hideable %} data-datatable-column-fixed="true"{% endif %} data-datatable-sort-state="{{ current_sort }}"{% if current_sort != "none" %} data-datatable-initial-sort="{{ current_sort }}" data-datatable-sort-direction="{{ current_sort }}"{% endif %} aria-sort="{{ aria_sort }}"{{ width_attr | safe }}>
+    <th scope="col" class="{{ th_class }}" data-datatable-column="{{ key }}"{% if not hideable %} data-datatable-column-fixed="true"{% endif %} data-datatable-sort-state="{{ current_sort }}"{% if current_sort != "none" %} data-datatable-initial-sort="{{ current_sort }}" data-datatable-sort-direction="{{ current_sort }}"{% endif %} aria-sort="{{ aria_sort }}"{% if effective_width %} style="width: {{ effective_width | e }};"{% endif %}>
       <div class="dropdown datatable-sort">
         <button class="btn btn-ghost btn-sm datatable-sort-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Sort by {{ label }}" data-datatable-sort-key="{{ key }}">
           <span>{{ label }}</span>
@@ -173,7 +174,7 @@
       </div>
     </th>
   {% else %}
-    <th scope="col" class="{{ th_class }}" data-datatable-column="{{ key }}"{% if not hideable %} data-datatable-column-fixed="true"{% endif %}{{ width_attr | safe }}>
+    <th scope="col" class="{{ th_class }}" data-datatable-column="{{ key }}"{% if not hideable %} data-datatable-column-fixed="true"{% endif %}{% if effective_width %} style="width: {{ effective_width | e }};"{% endif %}>
       {% if label | trim %}
         {{ label }}
       {% elif sr_label | trim %}
@@ -319,8 +320,9 @@
   {% set card_frame_class = "datatable-card-frame" %}
   {% if responsive_mode == "cards" %}{% set card_frame_class = card_frame_class ~ " d-" ~ responsive_breakpoint ~ "-none" %}{% endif %}
   {% set cards_class = "datatable-cards" %}
-  {% set card_columns = namespace(title=none, actions=none) %}
+  {% set card_columns = namespace(title=none, actions=none, first_data_key="") %}
   {% for column in columns %}
+    {% if not card_columns.first_data_key and column.key != "actions" and column.card_role | default("") != "actions" %}{% set card_columns.first_data_key = column.key %}{% endif %}
     {% if column.card_role | default("") == "title" %}{% set card_columns.title = column %}{% endif %}
     {% if column.card_role | default("") == "actions" %}{% set card_columns.actions = column %}{% endif %}
   {% endfor %}
@@ -358,7 +360,7 @@
                 </th>
               {% endif %}
               {% for column in columns %}
-                {{ datatable_column_header(column.key, column.label, sr_label=column.sr_label | default(""), align=column.align | default(""), sortable=column.sortable | default(true), width=column.width | default(""), sort_state=column.initial_sort | default("none"), hideable=column.hideable | default(true)) }}
+                {{ datatable_column_header(column.key, column.label, sr_label=column.sr_label | default(""), align=column.align | default(""), sortable=column.sortable | default(true), width=column.width | default(""), sort_state=column.initial_sort | default("none"), hideable=column.hideable | default(true), min_width=column.min_width | default('16rem' if column.key == card_columns.first_data_key else '')) }}
               {% endfor %}
             </tr>
           </thead>

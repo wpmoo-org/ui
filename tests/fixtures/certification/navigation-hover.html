@@ -1,0 +1,53 @@
+<!doctype html>
+<!-- Contracts: /components/navigation/ and https://getbootstrap.com/docs/5.3/components/navs-tabs/ -->
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Navigation dropdown hover fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+  </head>
+  <body>
+    <main class="moo-ui p-5" data-bs-theme="light">
+      <h1 class="h4 mb-4">Navigation dropdown hover</h1>
+      <nav aria-label="Primary navigation">
+        <ul id="hover-navigation" class="nav nav-pills align-items-start gap-2">
+          <li class="nav-item">
+            <a id="hover-current" class="nav-link active" href="#current" aria-current="page">Current page</a>
+          </li>
+          <li id="hover-parent-item" class="nav-item dropdown">
+            <button id="hover-parent" class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">Other pages</button>
+            <ul id="hover-submenu" class="dropdown-menu">
+              <li><a id="hover-child" class="dropdown-item" href="#child">Submenu page</a></li>
+              <li>
+                <nav aria-label="Nested navigation">
+                  <ul id="hover-nested" class="nav nav-pills flex-column">
+                    <li class="nav-item"><a id="hover-nested-current" class="nav-link active" href="#nested-current" aria-current="page">Nested current</a></li>
+                    <li class="nav-item"><a id="hover-nested-other" class="nav-link" href="#nested-other">Nested other</a></li>
+                  </ul>
+                </nav>
+              </li>
+            </ul>
+          </li>
+          <li id="hover-disabled-item" class="nav-item">
+            <a class="nav-link disabled" aria-disabled="true" tabindex="-1">Unavailable</a>
+          </li>
+          <li id="hover-disabled-button-item" class="nav-item">
+            <button class="nav-link" type="button" disabled>Unavailable button</button>
+          </li>
+        </ul>
+      </nav>
+      <nav aria-label="Direct link navigation" class="mt-5">
+        <div id="hover-direct" class="nav nav-pills gap-2">
+          <a id="hover-direct-current" class="nav-link active" href="#direct-current" aria-current="page">Direct current</a>
+          <a id="hover-direct-other" class="nav-link" href="#direct-other">Direct other</a>
+          <!-- The Bootstrap helper models host-enabled pointer handling for a disabled link. -->
+          <a id="hover-direct-disabled" class="nav-link disabled pe-auto" aria-disabled="true" tabindex="-1">Direct unavailable</a>
+          <button id="hover-direct-disabled-button" class="nav-link" type="button" disabled>Direct unavailable button</button>
+        </div>
+      </nav>
+      <button id="hover-outside" class="btn btn-outline-secondary mt-5" type="button">Outside navigation</button>
+    </main>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

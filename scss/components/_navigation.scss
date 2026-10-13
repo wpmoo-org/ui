@@ -39,18 +39,19 @@ $nav-link-description-color: color-mix(in srgb, var(--moo-muted-foreground) 95%,
   width: 100%;
 }
 
-.nav-pills .nav-link:not(.active, .disabled):hover {
+.nav-pills .nav-link:not(.active, .disabled, :disabled):hover,
+.nav-pills > .nav-item:hover > .nav-link:not(.active, .disabled, :disabled) {
   background-color: var(--moo-muted-surface);
 }
 
-// The active pill's own background (--bs-nav-pills-link-active-bg above)
-// is a persistent class-based state, so it stays lit even while a
-// different pill is hovered -- two pills highlighted at once, competing
-// for attention. Suppress it only while another pill in the same group is
-// hovered, so exactly one pill is ever highlighted: whichever the cursor
-// is over, or the active one when nothing is hovered.
-.nav-pills:has(.nav-link:hover) .nav-link.active:not(:hover) {
-  background-color: transparent;
+// A dropdown and its trigger are one hovered navigation item. Resolve each
+// group's current pill independently, including native direct-link anatomy.
+// Hosts that bridge their active fill through Bootstrap's variable consume
+// this same state instead of implementing another hover algorithm.
+.nav-pills:has(> .nav-link:not(.disabled, :disabled):hover, > .nav-item:hover > .nav-link:not(.disabled, :disabled)) > .nav-link.active:not(:hover),
+.nav-pills:has(> .nav-link:not(.disabled, :disabled):hover, > .nav-item:hover > .nav-link:not(.disabled, :disabled)) > .nav-item:not(:hover) > .nav-link.active {
+  --bs-nav-pills-link-active-bg: transparent;
+  background-color: var(--bs-nav-pills-link-active-bg);
 }
 
 .nav-link [data-icon] {
