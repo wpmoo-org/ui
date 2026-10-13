@@ -3,6 +3,28 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.2.2 Compatible Fixes
+
+Navigation preserves parent hover throughout a submenu, resolves active fill
+within each navigation group, and excludes disabled controls from hover
+ownership. Existing Bootstrap active-background variables carry this correction;
+no new public class or selector contract, token, ESM lifecycle or export is introduced.
+
+The catalog's internal DataTable Jinja producer preserves readable column
+minimums and native percentage widths. Its optional `min_width` input is not an
+npm API: Jinja templates and their signatures are outside the distributed package
+and public compatibility boundary. The rendered table uses existing header width
+declarations and the existing responsive frame. This release preserves the
+1.2.1 package contract and is a patch release.
+
+Verification: [Navigation hover contracts](../../tests/test_navigation_hover_browser.py)
+cover submenu ownership, disabled controls, themes and directions;
+[DataTable browser contracts](../../tests/test_datatable_browser.py) cover
+readable minimums, opt-out, rem scaling, percentage sizing and contained scrolling.
+The [DataTable template contracts](../../tests/test_datatable.py) also verify
+escaped width attributes and rejection of percentage minimums. These inputs
+remain trusted application CSS lengths, not an untrusted CSS sanitizer API.
+
 ## 1.2.1 Compatible Fixes
 
 DataTable composes the existing Empty presentation while retaining its own

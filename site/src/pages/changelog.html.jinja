@@ -27,7 +27,7 @@
           </div>
           {{ typography("Moo UI " ~ product.version, variant="section-title", id=release_id, extra_class="mb-0") }}
           <p class="text-body-secondary mb-0">
-            Consistent DataTable empty results and clearer release notes.
+            Readable DataTable columns and consistent Navigation submenu hover.
           </p>
         </header>
 
@@ -36,14 +36,13 @@
           <ul class="mb-0 ps-4">
             <li>
               <a href="{{ site_href("components/datatable.html", root_path) }}">DataTable</a>
-              now uses the shared
-              <a href="{{ site_href("components/empty.html", root_path) }}">Empty</a>
-              component for its empty-result surface. Filtering, announcements,
-              and reset actions retain their DataTable behavior.
+              examples protect the first data column with a readable minimum.
+              Column minima can be customized or disabled without changing
+              the table's scrolling frame or Cards layout.
             </li>
             <li>
-              Changelog shows one detailed release with documentation links.
-              The complete release history is available on GitHub.
+              Preferred column widths remain intact, including native
+              percentage widths and percentage calculations.
             </li>
           </ul>
         </section>
@@ -52,20 +51,19 @@
           {{ typography("Fixed", variant="subsection-title", id=release_id ~ "-fixed", extra_class="mb-3") }}
           <ul class="mb-0 ps-4">
             <li>
-              Tables with no rows show a clear message and hide filter-reset
-              actions. Tables with filtered-out rows keep the clear-filters action.
+              <a href="{{ site_href("components/navigation.html", root_path) }}">Navigation</a>
+              keeps a parent pill highlighted while the pointer moves through
+              its submenu. Each group retains its own current-route state.
             </li>
             <li>
-              Unchecked checkboxes inside semantic
-              <a href="{{ site_href("components/alert.html", root_path) }}">Alerts</a>
-              retain a visible border in light and dark themes without changing
-              checked, invalid, or keyboard-focus states.
+              Disabled Navigation links and buttons do not take hover ownership.
+              Leaving the submenu restores the current-route highlight.
             </li>
           </ul>
         </section>
 
         <p class="small text-body-secondary mb-0">
-          Compatible with the public 1.2.0 package API. Component certification
+          Compatible with the public 1.2.1 package API. Component certification
           remains in preview.
         </p>
       {% endcall %}

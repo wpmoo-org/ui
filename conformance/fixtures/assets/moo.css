@@ -1,5 +1,5 @@
 /*!
- * Moo UI v1.2.1 (https://wpmoo.org/)
+ * Moo UI v1.2.2 (https://wpmoo.org/)
  * Copyright 2026 WPMoo Authors
  * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)
  *
@@ -4819,11 +4819,14 @@ label.btn {
   .nav.flex-column .nav-link {
     width: 100%;
   }
-  .nav-pills .nav-link:not(.active, .disabled):hover {
+  .nav-pills .nav-link:not(.active, .disabled, :disabled):hover,
+.nav-pills > .nav-item:hover > .nav-link:not(.active, .disabled, :disabled) {
     background-color: var(--moo-muted-surface);
   }
-  .nav-pills:has(.nav-link:hover) .nav-link.active:not(:hover) {
-    background-color: transparent;
+  .nav-pills:has(> .nav-link:not(.disabled, :disabled):hover, > .nav-item:hover > .nav-link:not(.disabled, :disabled)) > .nav-link.active:not(:hover),
+.nav-pills:has(> .nav-link:not(.disabled, :disabled):hover, > .nav-item:hover > .nav-link:not(.disabled, :disabled)) > .nav-item:not(:hover) > .nav-link.active {
+    --bs-nav-pills-link-active-bg: transparent;
+    background-color: var(--bs-nav-pills-link-active-bg);
   }
   .nav-link [data-icon] {
     width: 1rem;
