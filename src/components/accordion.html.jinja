@@ -18,7 +18,7 @@
           <button class="accordion-button{% if not is_open %} collapsed{% endif %}{% if is_disabled %} text-muted{% endif %}{% if button_class %} {{ button_class }}{% endif %}" type="button" id="{{ trigger_id }}" data-bs-toggle="collapse" data-bs-target="#{{ panel_id }}" aria-expanded="{{ "true" if is_open else "false" }}" aria-controls="{{ panel_id }}"{% if is_disabled %} disabled{% endif %}>
             <span>{{ item.title }}</span>
             {% if indicator == "plus-minus" %}
-              <svg data-icon="inline-end" data-lucide="plus" data-accordion-indicator="plus-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <svg data-icon="inline-end" data-accordion-indicator="plus-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                 <path d="M5 12h14" />
                 <path data-accordion-plus="" d="M12 5v14" />
               </svg>

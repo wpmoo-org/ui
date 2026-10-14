@@ -40,6 +40,31 @@ class _BlockShellParser(HTMLParser):
                 return
 
 
+class _BlockCardParser(_BlockShellParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.cards: list[dict] = []
+        self.card_depth: int | None = None
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        classes = (attributes.get("class") or "").split()
+        if "moo-catalog__showcase-card" in classes:
+            self.card_depth = len(self._stack)
+            self.cards.append({"preview": False, "links": []})
+        if self.card_depth is not None:
+            if "moo-catalog__showcase-preview" in classes:
+                self.cards[-1]["preview"] = True
+            if tag == "a":
+                self.cards[-1]["links"].append(attributes.get("href"))
+        super().handle_starttag(tag, attrs)
+
+    def handle_endtag(self, tag: str) -> None:
+        super().handle_endtag(tag)
+        if self.card_depth is not None and len(self._stack) <= self.card_depth:
+            self.card_depth = None
+
+
 class BlocksTests(CatalogTestCase):
     def test_block_shell_parser_ignores_unmatched_closing_tags(self) -> None:
         shell = _BlockShellParser()
@@ -171,26 +196,28 @@ class BlocksTests(CatalogTestCase):
                     self.assertNotIn("sidebar-inset__", standalone)
                     self.assertNotIn("moo-sidebar-demo--", standalone)
 
-    def test_blocks_index_page_lists_both_blocks(self) -> None:
+    def test_blocks_index_page_previews_each_registered_block(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
         index = self.read_output("blocks/index.html")
 
         self.assertIn('data-moo-shell="catalog"', index)
-        for slug, label in (
-            ("sidebar-floating", "Sidebar (Floating)"),
-            ("sidebar-inset", "Sidebar (Inset)"),
-        ):
-            with self.subTest(slug=slug):
-                self.assertIn(f'href="../blocks/{slug}/"', index)
-                self.assertIn(label, index)
+        cards = _BlockCardParser()
+        cards.feed(index)
+        blocks = json.loads(
+            (ROOT / "site/src/registry/blocks.json").read_text(encoding="utf-8")
+        )
+        for block in blocks:
+            with self.subTest(slug=block["slug"]):
+                matches = [card for card in cards.cards
+                           if f'../blocks/{block["slug"]}/' in card["links"]]
+                self.assertEqual(len(matches), 1)
+                self.assertTrue(matches[0]["preview"])
+                self.assertIn(block["label"], index)
         # Blocks cards mirror the Components index showcase-card layout with
         # real block preview art and the whole card as a stretched-link.
         self.assertRegex(index, r'class="[^"]*\bmoo-catalog__showcase-card\b')
-        self.assertEqual(
-            index.count("moo-catalog__showcase-preview"), 3
-        )
         self.assertIn(
             'src="../assets/images/blocks/sidebar-floating.webp"',
             index,

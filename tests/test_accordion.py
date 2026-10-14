@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from build import create_environment
+from build import create_environment, format_html
 from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
@@ -32,6 +32,7 @@ class AccordionTests(CatalogTestCase):
         self.assertIn('bg-body-secondary', output)
         self.assertIn('data-accordion-indicator="plus-minus"', output)
         self.assertIn('data-accordion-plus', output)
+        self.assertIn('data-accordion-plus', format_html(output))
         self.assertIn('&lt;Sources&gt;', output)
         self.assertIn('<p>Original <strong>guidance</strong></p>', output)
         self.assertIn('disabled', output)
