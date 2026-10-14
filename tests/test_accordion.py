@@ -9,6 +9,33 @@ PAGE = ROOT / "site/src/pages/components/accordion.html.jinja"
 
 
 class AccordionTests(CatalogTestCase):
+    def test_accordion_rejects_unknown_indicator(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Accordion indicator"):
+            self.render_accordion(
+                'accordion("faq", [{"id": "a", "title": "Q", "content": "A"}], indicator="unknown")'
+            )
+
+    def test_optional_properties_preserve_content_fragments_and_aria(self) -> None:
+        output = self.render_accordion(
+            'accordion("guide", [{"id": "source", "heading_id": "authored:sources", '
+            '"title": "<Sources>", "content": "<p>Original <strong>guidance</strong></p>", '
+            '"open": true, "disabled": true}], indicator="plus-minus", '
+            'item_class="border rounded", button_class="bg-body-secondary", region=true)'
+        )
+        self.assertIn('id="authored:sources"', output)
+        self.assertIn('data-bs-target="#guide-source"', output)
+        self.assertIn('aria-controls="guide-source"', output)
+        self.assertIn('aria-labelledby="guide-source-trigger"', output)
+        self.assertIn('aria-expanded="true"', output)
+        self.assertIn('role="region"', output)
+        self.assertIn('accordion-item border rounded', output)
+        self.assertIn('bg-body-secondary', output)
+        self.assertIn('data-accordion-indicator="plus-minus"', output)
+        self.assertIn('data-accordion-plus', output)
+        self.assertIn('&lt;Sources&gt;', output)
+        self.assertIn('<p>Original <strong>guidance</strong></p>', output)
+        self.assertIn('disabled', output)
+
     def render_accordion(self, call: str) -> str:
         self.assertTrue(COMPONENT.is_file(), "Accordion macro is not implemented")
         template = create_environment().from_string(

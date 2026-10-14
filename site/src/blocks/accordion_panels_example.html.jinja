@@ -1,0 +1,10 @@
+{% from "blocks/accordion_panels.html.jinja" import accordion_panels %}
+
+{% macro render_panels_example(id="panels-example", always_open=true) -%}
+  {{ accordion_panels(id, [
+    {"id": "plan", "heading_id": id ~ "-plan-heading", "title": "Plan your approach", "content": "<p>Define your goal, identify the information you need, and decide how you will record your work.</p>"},
+    {"id": "create", "title": "Create, test, and document a clear explanation of what you discovered", "content": "<p>Describe your process and keep evidence of your findings.</p>"},
+    {"id": "review", "title": "Review your results", "content": "<p>Compare your results with your original goal and explain the next steps.</p>", "open": true},
+    {"id": "unavailable", "title": "Additional guidance", "content": "<p>This section is currently unavailable.</p>", "disabled": true}
+  ], always_open=always_open) }}
+{%- endmacro %}

@@ -1,6 +1,7 @@
-{% macro accordion(id, items, always_open=false, flush=true, extra_class="") -%}
+{% macro accordion(id, items, always_open=false, flush=true, extra_class="", indicator="chevron", item_class="", button_class="", region=false) -%}
   {% if not id | trim %}{{ fail("Accordion id is required") }}{% endif %}
   {% if not items %}{{ fail("Accordion requires at least one item") }}{% endif %}
+  {% if indicator not in ["chevron", "plus-minus"] %}{{ fail("Accordion indicator must be chevron or plus-minus") }}{% endif %}
   {% set accordion_classes = "accordion w-100" %}
   {% if flush %}{% set accordion_classes = accordion_classes ~ " accordion-flush" %}{% endif %}
   {% if extra_class %}{% set accordion_classes = accordion_classes ~ " " ~ extra_class %}{% endif %}
@@ -12,14 +13,21 @@
       {% set is_disabled = item.disabled is defined and item.disabled %}
       {% set panel_id = id ~ "-" ~ item.id %}
       {% set trigger_id = panel_id ~ "-trigger" %}
-      <div class="accordion-item">
-        <h3 class="accordion-header">
-          <button class="accordion-button{% if not is_open %} collapsed{% endif %}{% if is_disabled %} text-muted{% endif %}" type="button" id="{{ trigger_id }}" data-bs-toggle="collapse" data-bs-target="#{{ panel_id }}" aria-expanded="{{ "true" if is_open else "false" }}" aria-controls="{{ panel_id }}"{% if is_disabled %} disabled{% endif %}>
-            {{ item.title }}
-            {{ render_icon("chevron-down", "inline-end") }}
+      <div class="accordion-item{% if item_class %} {{ item_class }}{% endif %}">
+        <h3 class="accordion-header"{% if item.heading_id | default("") %} id="{{ item.heading_id }}"{% endif %}>
+          <button class="accordion-button{% if not is_open %} collapsed{% endif %}{% if is_disabled %} text-muted{% endif %}{% if button_class %} {{ button_class }}{% endif %}" type="button" id="{{ trigger_id }}" data-bs-toggle="collapse" data-bs-target="#{{ panel_id }}" aria-expanded="{{ "true" if is_open else "false" }}" aria-controls="{{ panel_id }}"{% if is_disabled %} disabled{% endif %}>
+            <span>{{ item.title }}</span>
+            {% if indicator == "plus-minus" %}
+              <svg data-icon="inline-end" data-lucide="plus" data-accordion-indicator="plus-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="M5 12h14" />
+                <path data-accordion-plus="" d="M12 5v14" />
+              </svg>
+            {% else %}
+              {{ render_icon("chevron-down", "inline-end") }}
+            {% endif %}
           </button>
         </h3>
-        <div id="{{ panel_id }}" class="accordion-collapse collapse{% if is_open %} show{% endif %}"{% if not always_open %} data-bs-parent="#{{ id }}"{% endif %} aria-labelledby="{{ trigger_id }}">
+        <div id="{{ panel_id }}" class="accordion-collapse collapse{% if is_open %} show{% endif %}"{% if not always_open %} data-bs-parent="#{{ id }}"{% endif %} aria-labelledby="{{ trigger_id }}"{% if region %} role="region"{% endif %}>
           <div class="accordion-body">{{ item.content | safe }}</div>
         </div>
       </div>

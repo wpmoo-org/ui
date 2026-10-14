@@ -1,0 +1,14 @@
+{% from "components/accordion.html.jinja" import accordion %}
+
+{% macro accordion_panels(id, items, always_open=true, extra_class="") -%}
+  {{ accordion(
+    id, items,
+    always_open=always_open,
+    flush=false,
+    extra_class="d-grid gap-2" ~ (" " ~ extra_class if extra_class else ""),
+    indicator="plus-minus",
+    item_class="border rounded overflow-hidden",
+    button_class="bg-body-secondary fw-semibold text-start pe-5 text-decoration-none",
+    region=true
+  ) }}
+{%- endmacro %}

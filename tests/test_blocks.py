@@ -73,6 +73,11 @@ class BlocksTests(CatalogTestCase):
                     "label": "Sidebar (Inset)",
                     "status": "ready",
                 },
+                {
+                    "slug": "accordion-panels",
+                    "label": "Accordion Panels",
+                    "status": "ready",
+                },
             ],
         )
 
@@ -184,7 +189,7 @@ class BlocksTests(CatalogTestCase):
         # real block preview art and the whole card as a stretched-link.
         self.assertRegex(index, r'class="[^"]*\bmoo-catalog__showcase-card\b')
         self.assertEqual(
-            index.count("moo-catalog__showcase-preview"), 2
+            index.count("moo-catalog__showcase-preview"), 3
         )
         self.assertIn(
             'src="../assets/images/blocks/sidebar-floating.webp"',
