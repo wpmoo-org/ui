@@ -9,7 +9,7 @@
   {{ render_page_header("Accordion Panels", "Expandable guidance in separate surface panels, composed from the public Accordion and Bootstrap utilities.") }}
   <div class="moo-component-examples">
     {% set multiple %}{{ render_panels_example("panels-multiple") }}{% endset %}
-    {{ render_block_example("accordion-panels", "Accordion Panels", "Open multiple sections independently. The same recipe preserves stable heading fragments and disabled items.", multiple, frame_src=site_href("blocks/previews/accordion-panels.html", root_path), frame_width=960, frame_height=640) }}
+    {{ render_block_example("accordion-panels", "Accordion Panels", "Open multiple sections independently. The same recipe preserves stable heading fragments and disabled items.", multiple) }}
     {% set single %}{{ render_panels_example("panels-single", always_open=false) }}{% endset %}
     {{ render_block_example("accordion-panels-single", "One section at a time", "Use the same block with Bootstrap's group-local single-open behavior.", single) }}
   </div>

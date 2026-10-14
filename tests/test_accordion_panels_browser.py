@@ -86,9 +86,9 @@ class AccordionPanelsBrowserTests(unittest.TestCase):
     def test_native_indicator_keyboard_and_single_multiple_modes(self):
         for multiple in (True, False):
             with self.subTest(multiple=multiple):
-                page, evidence = self._page(1440, "light", catalog=not multiple)
+                page, evidence = self._page(1440, "light", catalog=True)
                 try:
-                    group = page.locator("#panels-preview" if multiple else "#panels-single")
+                    group = page.locator("#panels-multiple" if multiple else "#panels-single")
                     plan = group.locator(".accordion-button").nth(0)
                     create = group.locator(".accordion-button").nth(1)
                     review = group.locator(".accordion-button").nth(2)

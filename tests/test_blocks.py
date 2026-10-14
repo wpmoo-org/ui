@@ -51,7 +51,7 @@ class _BlockCardParser(_BlockShellParser):
         classes = (attributes.get("class") or "").split()
         if "moo-catalog__showcase-card" in classes:
             self.card_depth = len(self._stack)
-            self.cards.append({"preview": False, "links": []})
+            self.cards.append({"preview": False, "links": [], "text": []})
         if self.card_depth is not None:
             if "moo-catalog__showcase-preview" in classes:
                 self.cards[-1]["preview"] = True
@@ -63,6 +63,10 @@ class _BlockCardParser(_BlockShellParser):
         super().handle_endtag(tag)
         if self.card_depth is not None and len(self._stack) <= self.card_depth:
             self.card_depth = None
+
+    def handle_data(self, data: str) -> None:
+        if self.card_depth is not None:
+            self.cards[-1]["text"].append(data)
 
 
 class BlocksTests(CatalogTestCase):
@@ -214,7 +218,7 @@ class BlocksTests(CatalogTestCase):
                            if f'../blocks/{block["slug"]}/' in card["links"]]
                 self.assertEqual(len(matches), 1)
                 self.assertTrue(matches[0]["preview"])
-                self.assertIn(block["label"], index)
+                self.assertIn(block["label"], "".join(matches[0]["text"]))
         # Blocks cards mirror the Components index showcase-card layout with
         # real block preview art and the whole card as a stretched-link.
         self.assertRegex(index, r'class="[^"]*\bmoo-catalog__showcase-card\b')
