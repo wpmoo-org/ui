@@ -47,11 +47,15 @@ class AlertIconBrowserTests(unittest.TestCase):
             elif name == "rectangular-info":
                 icon.set("width", "24")
                 icon.set("height", "32")
+            elif name == "width-only-info":
+                icon.set("width", "24")
+            elif name == "height-only-info":
+                icon.set("height", "32")
             return Markup(ElementTree.tostring(icon, encoding="unicode"))
 
         markup = create_environment(icon_renderer=render_icon).from_string("""
             {% from "components/alert.html.jinja" import alert %}
-            {% for icon in ["info", "framed-info", "rectangular-info"] %}
+            {% for icon in ["info", "framed-info", "rectangular-info", "width-only-info", "height-only-info"] %}
                 {{ alert(icon, description="Original message", icon=icon, variant="info") }}
             {% endfor %}
         """).render()
@@ -82,6 +86,8 @@ class AlertIconBrowserTests(unittest.TestCase):
                                 [root_font_size, root_font_size],
                                 [3 * root_font_size, 3 * root_font_size],
                                 [24, 32],
+                                [24, root_font_size],
+                                [root_font_size, 32],
                             ]
                             self.assertEqual(len(dimensions), len(expected_dimensions))
                             for actual, expected in zip(dimensions, expected_dimensions):
