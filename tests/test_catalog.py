@@ -2743,7 +2743,7 @@ class CatalogContractTests(CatalogTestCase):
 
         blocks = self.read_output("blocks/index.html")
         self.assertIn('aria-label="Previous page: Typography"', blocks)
-        self.assertIn('aria-label="Next page: Sidebar (Floating)"', blocks)
+        self.assertIn('aria-label="Next page: Accordion Panels"', blocks)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', blocks)
 
         component = self.read_output("components/switch.html")
@@ -2774,7 +2774,7 @@ class CatalogContractTests(CatalogTestCase):
         ]
         self.assert_page_actions_region(block_header)
         self.assert_page_actions_region(block)
-        self.assertIn('aria-label="Previous page: Blocks"', block)
+        self.assertIn('aria-label="Previous page: Accordion Panels"', block)
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
 
         last_block = self.read_output("blocks/sidebar-inset.html")
