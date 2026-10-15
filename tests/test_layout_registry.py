@@ -152,6 +152,9 @@ COMPONENT_MACROS_BY_FILE = {
 COMPONENT_SOURCE_FILES = {
     path for path in COMPONENT_MACROS_BY_FILE if not path.startswith("src/")
 }
+BLOCK_MACROS_BY_FILE = {
+    "accordion_panels.html.jinja": {"accordion_panels"},
+}
 
 
 def _macro_names(path: Path) -> set[str]:
@@ -164,6 +167,7 @@ def _macro_names(path: Path) -> set[str]:
 def _unregistered_layout_macro_offenders(root: Path) -> list[str]:
     layout_root = root / "src/layouts"
     component_root = root / "src/components"
+    block_root = root / "src/blocks"
     offenders: list[str] = []
 
     for path in sorted((root / "src").rglob("*.html.jinja")):
@@ -173,6 +177,8 @@ def _unregistered_layout_macro_offenders(root: Path) -> list[str]:
             allowed = PUBLIC_LAYOUT_SLUGS
         elif path.parent == component_root:
             allowed = set(COMPONENT_MACROS_BY_FILE.get(path.name, ()))
+        elif path.parent == block_root:
+            allowed = set(BLOCK_MACROS_BY_FILE.get(path.name, ()))
         elif relative == "src/includes/field.html.jinja":
             allowed = COMPONENT_MACROS_BY_FILE[relative]
         else:
@@ -281,19 +287,24 @@ class LayoutRegistryTests(unittest.TestCase):
         self.assertEqual(_unregistered_layout_macro_offenders(ROOT), [])
 
     def test_an_extra_unregistered_layout_macro_is_rejected(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            root = Path(temporary_directory)
-            source = root / "src/components/account_layout.html.jinja"
-            source.parent.mkdir(parents=True)
-            source.write_text(
-                "{% macro account_layout() %}{% endmacro %}\n",
-                encoding="utf-8",
-            )
+        for relative in (
+            "src/components/account_layout.html.jinja",
+            "src/blocks/accordion_panels.html.jinja",
+        ):
+            with self.subTest(path=relative):
+                with tempfile.TemporaryDirectory() as temporary_directory:
+                    root = Path(temporary_directory)
+                    source = root / relative
+                    source.parent.mkdir(parents=True)
+                    source.write_text(
+                        "{% macro account_layout() %}{% endmacro %}\n",
+                        encoding="utf-8",
+                    )
 
-            self.assertEqual(
-                _unregistered_layout_macro_offenders(root),
-                ["src/components/account_layout.html.jinja:account_layout"],
-            )
+                    self.assertEqual(
+                        _unregistered_layout_macro_offenders(root),
+                        [f"{relative}:account_layout"],
+                    )
 
     def test_settings_layout_is_not_a_public_layout(self) -> None:
         payload = self._read_json(REGISTRY)
