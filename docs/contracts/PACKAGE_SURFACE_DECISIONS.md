@@ -3,6 +3,33 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.3.0 Compatible Additions
+
+Accordion gains an optional plus/minus indicator through the additive
+`data-accordion-indicator="plus-minus"` and `data-accordion-plus` markup hooks.
+The default chevron, Bootstrap Collapse ownership, existing classes and
+ARIA relationships remain compatible. The shared Accordion Panels recipe
+composes those hooks with Bootstrap utilities for separate bordered panels,
+neutral action labels, stable heading fragments and single/multiple-open modes.
+Its catalog examples retain their authored SVG paths and render at native size.
+
+Jinja recipe signatures are catalog producer inputs and are excluded from npm.
+The additive indicator CSS/HTML contract is distributed; this meaningful public
+surface addition makes the release minor. Public exports, file globs, peers,
+dependencies and optional ESM lifecycle remain unchanged from 1.2.2.
+
+Alert preserves explicit SVG width and height independently, applying its 1rem
+defaults only to unspecified dimensions. Existing default icons retain their size.
+This compatible correction accompanies the Accordion additions.
+
+Verification: [Accordion contracts](../../tests/test_accordion.py),
+[Panels contracts](../../tests/test_accordion_panels.py),
+[Panels browser checks](../../tests/test_accordion_panels_browser.py) and
+[Alert browser checks](../../tests/test_alert_browser.py) cover the accepted
+markup, indicator interaction, themes, direction, containment and sizing.
+Component certification remains in preview; this release does not promote
+the accepted catalog examples to certified components.
+
 ## 1.2.2 Compatible Fixes
 
 Navigation preserves parent hover throughout a submenu, resolves active fill

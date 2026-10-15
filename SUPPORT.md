@@ -4,8 +4,9 @@ Moo UI Core is an open-source Bootstrap component system. This document defines
 the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
-Moo UI `1.2.2` is a compatible patch release target for Navigation submenu
-hover and DataTable column sizing, preserving the `1.2.1` public API. Package stability
+Moo UI `1.3.0` is a compatible minor release target for Accordion Panels and
+optional plus/minus indicators, with explicit Alert icon sizing preserved.
+The `1.2.2` package exports and existing component defaults remain intact. Package stability
 and component certification are independent: the certification manifest remains
 `preview`. Production certification is introduced incrementally; a component's
 presence in the catalog does not by itself mean that it has completed
@@ -194,9 +195,9 @@ conformance pass for that host. The runner needs Python 3 and Playwright
 only; no Moo UI build tooling is involved.
 
 The archive is reproducible byte-for-byte from the repository source at any
-time. Current development source targeting Moo UI 1.2.2 carries kit contract
+time. Current development source targeting Moo UI 1.3.0 carries kit contract
 version 1.0; its development archive hashes to SHA-256
-`eb1e898a3dea42df44a5d6e0fd795166394c92a97f2638fe42c0193574759351`.
+`767a442248050cba6024b846172aa062fcc4968eae86d1cab966e7590aa6ff1a`.
 The [released Moo UI 1.1.0 source](https://github.com/wpmoo-org/ui/releases/tag/v1.1.0)
 archive hashes to SHA-256
 `e4ab6c256ce4e2e1a3a82a42fdfbbf90f5c5871c14d4853fce928546a8cafbac`.

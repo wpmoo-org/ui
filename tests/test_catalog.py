@@ -4336,7 +4336,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("preview", active_release)
         release_tags = StartTagParser()
         release_tags.feed(active_release)
-        for group in ("improved", "fixed"):
+        for group in ("added", "fixed"):
             with self.subTest(group=group):
                 self.assertTrue(any(
                     tag["__tag"] == "h3" and tag.get("id") == f"{release_id}-{group}"
@@ -4346,7 +4346,9 @@ class CatalogContractTests(CatalogTestCase):
         release_links = LinkParser()
         release_links.feed(active_release)
         hrefs = {link.get("href") for link in release_links.links}
-        self.assertLessEqual({"../components/navigation/", "../components/datatable/"}, hrefs)
+        self.assertLessEqual({
+            "../blocks/accordion-panels/", "../components/accordion/", "../components/alert/",
+        }, hrefs)
 
         page_links = LinkParser()
         page_links.feed(changelog)

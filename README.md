@@ -194,9 +194,9 @@ calm.
 
 ## Status And Support
 
-The `1.2.2` patch release target preserves Navigation parent hover across
-submenus and readable DataTable column widths in catalog compositions. It
-preserves the 1.2.1 public package API. Component certification remains
+The `1.3.0` minor release target adds Accordion Panels compositions and optional
+plus/minus indicators while preserving explicit Alert icon sizes. It
+preserves the 1.2.2 package exports and existing component defaults. Component certification remains
 `preview`, with its documented manual and browser/device limits. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
 [GitHub Releases](https://github.com/wpmoo-org/ui/releases).
@@ -222,4 +222,4 @@ The published `LICENSE` also retains the full MIT notices for bundled
 Chart.js and `@kurkle/color`.
 Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
 live in the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.2.2/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.3.0/THIRD_PARTY_NOTICES.md).
