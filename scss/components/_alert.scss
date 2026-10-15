@@ -74,8 +74,11 @@ $moo-alert-dismissible-close-space: $btn-close-width + ($btn-close-padding-x * 2
   margin-top: 0.125rem;
 }
 
-.alert-icon [data-icon] {
+.alert-icon [data-icon]:not([width]) {
   width: 1rem;
+}
+
+.alert-icon [data-icon]:not([height]) {
   height: 1rem;
 }
 
