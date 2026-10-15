@@ -1,5 +1,5 @@
 /*!
- * Moo UI v1.2.2 (https://wpmoo.org/)
+ * Moo UI v1.3.0 (https://wpmoo.org/)
  * Copyright 2026 WPMoo Authors
  * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)
  *
@@ -5403,8 +5403,10 @@ label.btn {
     flex: 0 0 auto;
     margin-top: 0.125rem;
   }
-  .alert-icon [data-icon] {
+  .alert-icon [data-icon]:not([width]) {
     width: 1rem;
+  }
+  .alert-icon [data-icon]:not([height]) {
     height: 1rem;
   }
   .alert-body {
@@ -6008,6 +6010,15 @@ label.btn {
   }
   .accordion-button:not(.collapsed) [data-icon] {
     transform: translateY(-50%) rotate(-180deg);
+  }
+  .accordion-button:not(.collapsed) [data-accordion-indicator="plus-minus"] {
+    transform: translateY(-50%);
+  }
+  .accordion-button:not(.collapsed) [data-accordion-indicator="plus-minus"] [data-accordion-plus] {
+    display: none;
+  }
+  .accordion-button:dir(rtl):has([data-accordion-indicator="plus-minus"]) {
+    padding-inline-end: 3rem !important;
   }
   .accordion-flush .accordion-button {
     text-align: start;

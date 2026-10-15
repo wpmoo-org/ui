@@ -24,6 +24,18 @@
   transform: translateY(-50%) $accordion-icon-transform;
 }
 
+.accordion-button:not(.collapsed) [data-accordion-indicator="plus-minus"] {
+  transform: translateY(-50%);
+}
+
+.accordion-button:not(.collapsed) [data-accordion-indicator="plus-minus"] [data-accordion-plus] {
+  display: none;
+}
+
+.accordion-button:dir(rtl):has([data-accordion-indicator="plus-minus"]) {
+  padding-inline-end: map-get($spacers, 5) !important;
+}
+
 .accordion-flush .accordion-button {
   text-align: start;
 }

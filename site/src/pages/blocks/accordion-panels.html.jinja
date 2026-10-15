@@ -1,0 +1,16 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "blocks/accordion_panels_example.html.jinja" import render_panels_example %}
+{% from "includes/block-example.html.jinja" import render_block_example %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% block title %}Accordion Panels — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header("Accordion Panels", "Expandable guidance in separate surface panels, composed from the public Accordion and Bootstrap utilities.") }}
+  <div class="moo-component-examples">
+    {% set multiple %}{{ render_panels_example("panels-multiple") }}{% endset %}
+    {{ render_block_example("accordion-panels", "Accordion Panels", "Open multiple sections independently. The same recipe preserves stable heading fragments and disabled items.", multiple) }}
+    {% set single %}{{ render_panels_example("panels-single", always_open=false) }}{% endset %}
+    {{ render_block_example("accordion-panels-single", "One section at a time", "Use the same block with Bootstrap's group-local single-open behavior.", single) }}
+  </div>
+{% endblock %}

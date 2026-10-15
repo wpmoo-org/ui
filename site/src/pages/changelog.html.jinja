@@ -23,30 +23,26 @@
         <header class="d-flex flex-column gap-3">
           <div class="d-flex flex-wrap align-items-center gap-3 small text-body-secondary">
             {{ badge("v" ~ product.version, variant="dark") }}
-            <span>Patch release</span>
+            <span>Minor release</span>
           </div>
           {{ typography("Moo UI " ~ product.version, variant="section-title", id=release_id, extra_class="mb-0") }}
           <p class="text-body-secondary mb-0">
-            Readable DataTable columns and consistent Navigation submenu hover.
+            Accordion Panels compositions and explicit Alert icon sizing.
           </p>
         </header>
 
-        <section aria-labelledby="{{ release_id }}-improved">
-          {{ typography("Improved", variant="subsection-title", id=release_id ~ "-improved", extra_class="mb-3") }}
+        <section aria-labelledby="{{ release_id }}-added">
+          {{ typography("Added", variant="subsection-title", id=release_id ~ "-added", extra_class="mb-3") }}
           <ul class="mb-0 ps-4">
             <li>
-              <a href="{{ site_href("components/datatable.html", root_path) }}">DataTable</a>
-              examples protect the first data column with a readable minimum.
-              Column minima can be customized or disabled without changing
-              the table's scrolling frame or Cards layout.
+              <a href="{{ site_href("blocks/accordion-panels.html", root_path) }}">Accordion Panels</a>
+              combines separate bordered panels, neutral title surfaces and
+              plus/minus indicators using the shared Accordion and Bootstrap utilities.
             </li>
             <li>
-              Preferred column widths remain intact, including native
-              percentage widths and percentage calculations.
-            </li>
-            <li>
-              Development tooling updates improve accessibility checks and
-              keep the catalog preview toolchain current.
+              <a href="{{ site_href("components/accordion.html", root_path) }}">Accordion</a>
+              supports optional plus/minus markup, stable heading fragments and
+              labeled regions while retaining the default chevron and native Collapse behavior.
             </li>
           </ul>
         </section>
@@ -55,19 +51,19 @@
           {{ typography("Fixed", variant="subsection-title", id=release_id ~ "-fixed", extra_class="mb-3") }}
           <ul class="mb-0 ps-4">
             <li>
-              <a href="{{ site_href("components/navigation.html", root_path) }}">Navigation</a>
-              keeps a parent pill highlighted while the pointer moves through
-              its submenu. Each group retains its own current-route state.
+              <a href="{{ site_href("components/alert.html", root_path) }}">Alert</a>
+              preserves explicitly sized icons. Icons without explicit dimensions
+              keep the existing default size.
             </li>
             <li>
-              Disabled Navigation links and buttons do not take hover ownership.
-              Leaving the submenu restores the current-route highlight.
+              Accordion Panels code examples preserve their custom indicator paths,
+              and catalog previews use normal text size and the active theme surface.
             </li>
           </ul>
         </section>
 
         <p class="small text-body-secondary mb-0">
-          Compatible with the public 1.2.1 package API. Component certification
+          Compatible with the public 1.2.2 package API. Component certification
           remains in preview.
         </p>
       {% endcall %}

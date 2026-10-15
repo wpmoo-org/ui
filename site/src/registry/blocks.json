@@ -8,5 +8,10 @@
     "slug": "sidebar-inset",
     "label": "Sidebar (Inset)",
     "status": "ready"
+  },
+  {
+    "slug": "accordion-panels",
+    "label": "Accordion Panels",
+    "status": "ready"
   }
 ]

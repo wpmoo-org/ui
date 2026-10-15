@@ -1,0 +1,14 @@
+{% extends "layouts/block-preview.html.jinja" %}
+{% from "blocks/accordion_panels_example.html.jinja" import render_panels_example %}
+
+{% block title %}Accordion Panels RTL Preview — Moo UI{% endblock %}
+
+{% block content %}
+  <div class="container py-4" dir="rtl">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-9">
+        {{ render_panels_example("panels-rtl-preview") }}
+      </div>
+    </div>
+  </div>
+{% endblock %}

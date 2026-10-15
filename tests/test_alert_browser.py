@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import unittest
+from xml.etree import ElementTree
+
+from markupsafe import Markup
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -28,6 +31,75 @@ CONTROL_STYLES = """input => {
         mark: mark.content === 'none' ? null : [mark.content, mark.borderColor, mark.borderWidth, mark.transform],
     };
 }"""
+
+
+class AlertIconBrowserTests(unittest.TestCase):
+    def test_explicit_icon_dimensions_are_preserved(self):
+        skip_if_browser_launch_is_sandboxed()
+        css = compile_style(ROOT / "scss/moo-ui.scss")
+        default_renderer = create_environment().globals["render_icon"]
+
+        def render_icon(name, position):
+            icon = ElementTree.fromstring(str(default_renderer("info", position)))
+            if name == "framed-info":
+                icon.set("width", "3rem")
+                icon.set("height", "3rem")
+            elif name == "rectangular-info":
+                icon.set("width", "24")
+                icon.set("height", "32")
+            elif name == "width-only-info":
+                icon.set("width", "24")
+            elif name == "height-only-info":
+                icon.set("height", "32")
+            return Markup(ElementTree.tostring(icon, encoding="unicode"))
+
+        markup = create_environment(icon_renderer=render_icon).from_string("""
+            {% from "components/alert.html.jinja" import alert %}
+            {% for icon in ["info", "framed-info", "rectangular-info", "width-only-info", "height-only-info"] %}
+                {{ alert(icon, description="Original message", icon=icon, variant="info") }}
+            {% endfor %}
+        """).render()
+        with sync_playwright() as playwright:
+            browser = launch_certification_browser(playwright)
+            try:
+                for theme, direction, width in (("light", "ltr", 1040), ("dark", "rtl", 390)):
+                    with self.subTest(theme=theme, direction=direction):
+                        context = new_case_context(browser, BrowserCase(
+                            "alert-icon-dimensions", {"width": width, "height": 844}, theme, direction,
+                        ))
+                        try:
+                            page = context.new_page()
+                            evidence = BrowserEvidence(page)
+                            page.set_content(
+                                f'<html lang="en" dir="{direction}"><head><style>{css}</style></head>'
+                                f'<body><main class="moo-ui bg-body p-4" data-bs-theme="{theme}">'
+                                f'{markup}</main></body></html>',
+                            )
+                            dimensions = page.locator(".alert-icon svg").evaluate_all("""icons =>
+                                icons.map(icon => {
+                                    const rect = icon.getBoundingClientRect();
+                                    return [rect.width, rect.height];
+                                })""")
+                            root_font_size = page.locator("html").evaluate("""root =>
+                                parseFloat(getComputedStyle(root).fontSize)""")
+                            expected_dimensions = [
+                                [root_font_size, root_font_size],
+                                [3 * root_font_size, 3 * root_font_size],
+                                [24, 32],
+                                [24, root_font_size],
+                                [root_font_size, 32],
+                            ]
+                            self.assertEqual(len(dimensions), len(expected_dimensions))
+                            for actual, expected in zip(dimensions, expected_dimensions):
+                                for actual_size, expected_size in zip(actual, expected):
+                                    self.assertAlmostEqual(actual_size, expected_size, delta=0.1)
+                            self.assertTrue(page.evaluate("""() =>
+                                document.documentElement.scrollWidth <= innerWidth"""))
+                            evidence.assert_clean()
+                        finally:
+                            context.close()
+            finally:
+                browser.close()
 
 
 class AlertCheckboxBrowserTests(unittest.TestCase):
