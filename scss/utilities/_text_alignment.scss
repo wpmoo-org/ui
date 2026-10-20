@@ -1,0 +1,32 @@
+// Bootstrap maps start/end to physical edges in its LTR utility build.
+// One logical map owns standalone and embedded Moo text alignment.
+$moo-text-alignment-utility: map-get($utilities, "text-align");
+@if type-of($moo-text-alignment-utility) == "map" {
+  $utilities: map-merge(
+    $utilities,
+    (
+      "text-align": map-merge(
+        $moo-text-alignment-utility,
+        (
+          values: map-merge(
+            map-get($moo-text-alignment-utility, values),
+            (start: start, end: end)
+          ),
+        )
+      ),
+    )
+  );
+}
+
+// Embedded hosts keep their own Bootstrap build outside the Moo scope.
+@mixin moo-text-alignment-utilities {
+  $utility: map-get($utilities, "text-align");
+  @each $breakpoint in map-keys($grid-breakpoints) {
+    @include media-breakpoint-up($breakpoint) {
+      $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+      @if type-of($utility) == "map" and (map-get($utility, responsive) or $infix == "") {
+        @include generate-utility($utility, $infix);
+      }
+    }
+  }
+}

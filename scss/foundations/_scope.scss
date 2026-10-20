@@ -4,6 +4,7 @@
   @import "../foundations/focus";
   /* Utilities */
   @import "../utilities/border";
+  @include moo-text-alignment-utilities;
   @import "../utilities/scroll_fade";
   @import "../utilities/scroll_smooth";
   /* Application layout */
