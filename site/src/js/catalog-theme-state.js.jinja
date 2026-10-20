@@ -2,6 +2,67 @@
   const owner = document.currentScript?.parentElement;
   if (!owner?.matches?.('.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]')) return;
 
+  // Core keeps physical left/right placement. The catalog mirrors its own
+  // configured LTR edge without changing the shared Sidebar contract or CSS.
+  const bindSidebarPlacement = () => {
+    const sidebar = owner.querySelector?.("#catalog-sidebar");
+    if (!sidebar) return false;
+    const ltrSide = sidebar.dataset.side === "right" ? "right" : "left";
+    const chevrons = {
+      "chevron-left": {{ render_icon("chevron-left", "inline-end") | tojson }},
+      "chevron-right": {{ render_icon("chevron-right", "inline-end") | tojson }},
+    };
+    const iconTemplates = new Map();
+    const syncChevrons = () => {
+      sidebar.querySelectorAll("button.sidebar-menu-button--disclosure").forEach((button) => {
+        const icon = button.querySelector(":scope > .sidebar-menu-button__end > svg");
+        if (!icon || !Object.prototype.hasOwnProperty.call(chevrons, icon.dataset.lucide)) return;
+        const rtl = window.getComputedStyle(button).direction === "rtl";
+        const expanded = button.getAttribute("aria-expanded") === "true";
+        // Core rotates the open right-chevron downward. Keep that contract;
+        // choose the registered left-chevron only for a closed RTL disclosure.
+        const name = rtl && !expanded ? "chevron-left" : "chevron-right";
+        if (icon.dataset.lucide === name) return;
+        if (!iconTemplates.has(name)) {
+          const template = document.createElement("template");
+          template.innerHTML = chevrons[name];
+          iconTemplates.set(name, template);
+        }
+        icon.replaceWith(iconTemplates.get(name).content.firstElementChild.cloneNode(true));
+      });
+    };
+    const syncPlacement = () => {
+      const rtl = window.getComputedStyle(sidebar).direction === "rtl";
+      const side = rtl ? (ltrSide === "left" ? "right" : "left") : ltrSide;
+      sidebar.dataset.side = side;
+      sidebar.classList.toggle("offcanvas-start", side === "left");
+      sidebar.classList.toggle("offcanvas-end", side === "right");
+      syncChevrons();
+    };
+    syncPlacement();
+    if (typeof window.MutationObserver === "function") {
+      const observer = new window.MutationObserver(syncPlacement);
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["dir"] });
+      observer.observe(owner, { attributes: true, attributeFilter: ["dir"] });
+      const chevronObserver = new window.MutationObserver(syncChevrons);
+      chevronObserver.observe(sidebar, {
+        attributes: true,
+        attributeFilter: ["aria-expanded"],
+        childList: true,
+        subtree: true,
+      });
+    }
+    return true;
+  };
+  // This script runs before visible catalog markup. Observe its parser-created
+  // Sidebar so restored RTL placement is correct before the first rendered frame.
+  if (!bindSidebarPlacement() && typeof window.MutationObserver === "function") {
+    const observer = new window.MutationObserver(() => {
+      if (bindSidebarPlacement()) observer.disconnect();
+    });
+    observer.observe(owner, { childList: true, subtree: true });
+  }
+
   const payload = {{ theme_builder_state | tojson }};
   const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
   const enumValue = (key, candidate) => {
