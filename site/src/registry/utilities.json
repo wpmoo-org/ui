@@ -8,5 +8,10 @@
     "slug": "scroll-fade",
     "label": "Scroll Fade",
     "status": "ready"
+  },
+  {
+    "slug": "overlay-scrollbar",
+    "label": "Overlay Scrollbar",
+    "status": "ready"
   }
 ]

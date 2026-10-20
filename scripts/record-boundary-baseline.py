@@ -26,6 +26,7 @@ CORE_OUTPUTS = {
     "dist/js/slider.js",
     "dist/js/sheet.js",
     "dist/js/toc.js",
+    "dist/js/overlay-scrollbar.js",
     "dist/js/table-of-contents.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",

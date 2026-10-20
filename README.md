@@ -168,6 +168,29 @@ import { initSheets } from "@wpmoo/ui/sheet.js";
 initSheets(document);
 ```
 
+For an opt-in document overlay scrollbar, load the stylesheet first and pass
+the resolved page theme owner explicitly:
+
+```js
+import OverlayScrollbar from "@wpmoo/ui/overlay-scrollbar.js";
+const scrollbar = OverlayScrollbar.getOrCreateInstance(document.querySelector(".moo-ui"), {
+  label: "Page scroll position", // supply a localized accessible name
+  hideDelay: 900,
+});
+// scrollbar.refresh(); // after host geometry changes
+// scrollbar.dispose(); // restore the native scrollbar
+```
+
+The module preserves native document/touch/wheel scrolling. Its thin thumb
+appears while scrolling, near the trailing mouse edge or on keyboard focus;
+show/hide never reserves a layout gutter. Initial activation removes any native
+gutter. By default it controls the standards-mode document. Pass
+`scrollElement: element` for an existing native scrolling region belonging to
+the same theme owner; the catalog uses this for its Page main region. There is
+one instance per scroll target, without replacing or wrapping that target.
+Printing, forced colors and horizontal overflow use the
+native scrollbar instead. It does not initialize merely by importing the module.
+
 ## Why Teams Try It
 
 - Keep server-rendered HTML, Bootstrap classes, and familiar plugin behavior.

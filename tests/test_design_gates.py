@@ -519,9 +519,12 @@ console.log(JSON.stringify(Object.fromEntries(
             {
                 "_background_color.scss",
                 "_border.scss",
+                "_overlay_scrollbar.scss",
+                "_overlay_scrollbar_native.scss",
                 "_scroll_fade.scss",
                 "_scroll_fade_primitives.scss",
                 "_scroll_smooth.scss",
+                "_text_alignment.scss",
             },
         )
         self.assertEqual(
@@ -579,6 +582,8 @@ console.log(JSON.stringify(Object.fromEntries(
                 "bootstrap/scss/maps",
                 "bootstrap/scss/mixins",
                 "bootstrap/scss/utilities",
+                "utilities/text_alignment",
+                "utilities/overlay_scrollbar",
                 "themes/theme",
                 "bootstrap/scss/root",
                 "themes/root",
@@ -611,6 +616,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "utilities/background_color",
                 "bootstrap/scss/utilities/api",
                 "utilities/scroll_fade_primitives",
+                "utilities/overlay_scrollbar_native",
                 "foundations/backdrop",
                 "foundations/scope",
             ],
@@ -627,6 +633,8 @@ console.log(JSON.stringify(Object.fromEntries(
                 "bootstrap/scss/maps",
                 "bootstrap/scss/mixins",
                 "bootstrap/scss/utilities",
+                "utilities/text_alignment",
+                "utilities/overlay_scrollbar",
                 "themes/theme",
                 "foundations/globals",
                 "foundations/backdrop",

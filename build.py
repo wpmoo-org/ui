@@ -64,6 +64,7 @@ STATE_PATH = JS_ROOT / "state.js"
 JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
+    "overlay-scrollbar.js",
     "combobox.js",
     "context-menu.js",
     "slider.js",

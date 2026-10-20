@@ -29,6 +29,7 @@
       "./datatable.js",
       "./slider.js",
       "./toc.js",
+      "./overlay-scrollbar.js",
       "./table-of-contents.js",
       "./sheet.js",
       "./chart.js",

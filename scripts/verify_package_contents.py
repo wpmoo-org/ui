@@ -34,6 +34,7 @@ APPROVED_TARBALL_FILES = {
     "dist/js/datatable.js",
     "dist/js/slider.js",
     "dist/js/toc.js",
+    "dist/js/overlay-scrollbar.js",
     "dist/js/table-of-contents.js",
     "dist/js/sheet.js",
     "dist/js/moo-ui.js",
@@ -119,9 +120,12 @@ APPROVED_TARBALL_FILES = {
     "scss/themes/_theme.scss",
     "scss/utilities/_background_color.scss",
     "scss/utilities/_border.scss",
+    "scss/utilities/_overlay_scrollbar.scss",
+    "scss/utilities/_overlay_scrollbar_native.scss",
     "scss/utilities/_scroll_fade.scss",
     "scss/utilities/_scroll_fade_primitives.scss",
     "scss/utilities/_scroll_smooth.scss",
+    "scss/utilities/_text_alignment.scss",
     "package.json",
 }
 

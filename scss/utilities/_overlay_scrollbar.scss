@@ -1,0 +1,70 @@
+// Bootstrap has no overlay scrollbar component. This opt-in document bridge
+// preserves native scrolling and never creates a replacement scroll viewport.
+@mixin moo-overlay-scrollbar-native($selector: "html.scrollbar-overlay-native") {
+  #{$selector} {
+    scrollbar-width: none;
+  }
+
+  #{$selector}::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media print, (forced-colors: active) {
+    #{$selector} {
+      scrollbar-width: auto !important;
+    }
+
+    #{$selector}::-webkit-scrollbar {
+      display: revert !important;
+    }
+  }
+}
+
+@mixin moo-overlay-scrollbar {
+  @include moo-overlay-scrollbar-native(".scrollbar-overlay-native");
+
+  .scrollbar-overlay {
+    --moo-scrollbar-overlay-hit-size: #{$moo-scrollbar-overlay-hit-size};
+    --moo-scrollbar-overlay-thumb-size: #{$moo-scrollbar-overlay-thumb-size};
+    position: fixed;
+    inset-block: 0;
+    inset-inline-end: 0;
+    z-index: $zindex-fixed;
+    inline-size: var(--moo-scrollbar-overlay-hit-size);
+    color: var(--bs-secondary-color);
+    opacity: 0;
+    pointer-events: none;
+    touch-action: none;
+    @include transition($transition-fade);
+
+    &[data-scrollbar-visible="true"],
+    &:focus-visible {
+      opacity: 1;
+    }
+
+    &[data-scrollbar-interactive="true"],
+    &:focus-visible {
+      pointer-events: auto;
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: var(--bs-emphasis-color);
+    }
+  }
+
+  .scrollbar-overlay-thumb {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: map-get($spacers, 1);
+    inline-size: var(--moo-scrollbar-overlay-thumb-size);
+    background-color: currentColor;
+    border-radius: var(--bs-border-radius-pill);
+  }
+
+  @media print, (forced-colors: active) {
+    .scrollbar-overlay {
+      display: none !important;
+    }
+  }
+}

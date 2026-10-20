@@ -31,6 +31,7 @@ CORE_OUTPUTS = {
     "dist/js/slider.js",
     "dist/js/sheet.js",
     "dist/js/toc.js",
+    "dist/js/overlay-scrollbar.js",
     "dist/js/table-of-contents.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
@@ -166,6 +167,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/slider.js",
             "js/sheet.js",
             "js/toc.js",
+            "js/overlay-scrollbar.js",
             "js/table-of-contents.js",
             "js/moo-ui.js",
             "js/moo-ui.min.js",
@@ -208,6 +210,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "components/button/index.html",
             "blocks/sidebar-floating/index.html",
             "utils/scroll-fade/index.html",
+            "utils/overlay-scrollbar/index.html",
         }
 
         self.assertEqual(package_files, expected_package_files)
