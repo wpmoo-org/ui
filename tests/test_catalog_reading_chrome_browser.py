@@ -162,14 +162,15 @@ class CatalogReadingChromeBrowserTests(unittest.TestCase):
             const script=document.querySelector('script[type="module"][src*="catalog/index"]');
             const {initCatalog}=await import(script.src);
             initCatalog(document)();
-            const main=document.querySelector('main#main-content');
-            const original=main.classList.contains('no-scrollbar');
+            const hosts=[document.querySelector('main#main-content'),document.documentElement];
+            document.documentElement.classList.add('no-scrollbar');
+            const original=hosts.map(el=>el.classList.contains('no-scrollbar'));
             const sheets=[...document.styleSheets];
             sheets.forEach(sheet=>sheet.disabled=true);
             const {initCatalogScrollbar}=await import('/assets/js/catalog/overlay-scrollbar.js');
             let rejected=false;
             try { initCatalogScrollbar(document); } catch { rejected=true; }
-            const restored=main.classList.contains('no-scrollbar')===original;
+            const restored=hosts.every((el,i)=>el.classList.contains('no-scrollbar')===original[i]);
             const remaining=document.querySelectorAll('.scrollbar-overlay').length;
             sheets.forEach(sheet=>sheet.disabled=false);
             const release=initCatalogScrollbar(document);
@@ -178,6 +179,41 @@ class CatalogReadingChromeBrowserTests(unittest.TestCase):
             return {rejected,restored,remaining,recovered};
         }''')
         self.assertEqual(result, {'rejected': True, 'restored': True, 'remaining': 0, 'recovered': True})
+
+    def test_failed_catalog_initialization_releases_the_already_created_demo(self):
+        context = self.browser.new_context(viewport={'width': 390, 'height': 844}, reduced_motion='reduce')
+        self.addCleanup(context.close)
+        page = context.new_page()
+        errors = []
+        console_errors = []
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        page.on('console', lambda message: console_errors.append(message.text) if message.type in ('error', 'warning') else None)
+        page.goto(self.base_url + '/introduction/')
+        page.wait_for_selector('.scrollbar-overlay', state='attached')
+        with page.expect_event('pageerror') as failure:
+            page.evaluate('''async () => {
+                const script=document.querySelector('script[type="module"][src*="catalog/index"]');
+                const {initCatalog}=await import(script.src);
+                initCatalog(document)();
+                const owner=document.querySelector('.moo-ui[data-bs-theme]');
+                owner.setAttribute('data-overlay-scrollbar-demo','');
+                document.querySelector('[data-moo-shell="catalog"]').removeAttribute('data-moo-shell');
+                // A separate resolved owner cannot control the existing main
+                // scrollport. The real constructor rejects this public boundary.
+                const foreign=document.createElement('div');
+                foreign.className='moo-ui';
+                foreign.dataset.bsTheme='dark';
+                foreign.dataset.mooShell='catalog';
+                owner.append(foreign);
+                window.releaseFailedCatalog=initCatalog(document);
+            }''')
+        expected = 'OverlayScrollbar scrollElement must belong to the same resolved theme owner.'
+        self.assertEqual(str(failure.value), expected)
+        page.evaluate('releaseFailedCatalog()')
+        self.assertEqual(errors, [expected])
+        self.assertEqual(console_errors, [])
+        self.assertEqual(page.locator('.scrollbar-overlay').count(), 0)
+        self.assertFalse(page.locator('html').evaluate('(el)=>el.classList.contains("scrollbar-overlay-native")'))
 
     def test_visible_scrollbar_does_not_capture_a_second_touch_swipe_at_the_edge(self):
         if self.browser.browser_type.name != 'chromium':

@@ -95,7 +95,13 @@ export function initCatalog(root = document) {
     () => import("./overlay-scrollbar.js"),
     ({ initOverlayScrollbarDemo, initCatalogScrollbar }) => {
       const releaseDemo = initOverlayScrollbarDemo(root);
-      const releaseCatalog = initCatalogScrollbar(root);
+      let releaseCatalog;
+      try {
+        releaseCatalog = initCatalogScrollbar(root);
+      } catch (error) {
+        releaseDemo?.();
+        throw error;
+      }
       return () => { releaseCatalog?.(); releaseDemo?.(); };
     },
   );

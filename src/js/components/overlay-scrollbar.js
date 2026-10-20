@@ -179,6 +179,7 @@ export default class OverlayScrollbar {
     Object.assign(this._bar.style, {
       insetInlineEnd: "auto", bottom: "auto", top: `${top}px`, height: `${Math.max(0, bottom - top)}px`,
       left: `${Math.max(0, Math.min(this._window.innerWidth - width, left))}px`,
+      direction: rtl ? "rtl" : "ltr",
     });
     return bounds.width > 0 && bottom > top && left < this._window.innerWidth && left + width > 0;
   }

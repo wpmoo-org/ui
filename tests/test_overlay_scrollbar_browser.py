@@ -135,6 +135,26 @@ class OverlayScrollbarBrowserTests(unittest.TestCase):
         page.wait_for_timeout(100)
         self.assertEqual(page.locator('#reader').evaluate('(el)=>el.scrollWidth'), 298)
 
+    def test_scroll_element_direction_overrides_its_theme_owners_direction(self):
+        for owner_direction, direction in (('ltr', 'rtl'), ('rtl', 'ltr')):
+            with self.subTest(owner=owner_direction, scroller=direction):
+                page = self.open_fixture(nested=True, direction=owner_direction)
+                page.locator('#reader').evaluate('(el,dir)=>el.dir=dir', direction)
+                page.evaluate('scrollbar.refresh()')
+                state = page.evaluate('''() => {
+                    const root=document.getElementById('reader');
+                    const bar=document.querySelector('.scrollbar-overlay');
+                    const thumb=document.querySelector('.scrollbar-overlay-thumb');
+                    const r=root.getBoundingClientRect(),b=bar.getBoundingClientRect(),t=thumb.getBoundingClientRect();
+                    const rtl=getComputedStyle(root).direction==='rtl';
+                    return {direction:getComputedStyle(bar).direction,
+                        barGap:rtl?b.left-r.left-root.clientLeft:r.left+root.clientLeft+root.clientWidth-b.right,
+                        gap:rtl?t.left-r.left-root.clientLeft:r.left+root.clientLeft+root.clientWidth-t.right};
+                }''')
+                self.assertEqual(state['direction'], direction)
+                self.assertAlmostEqual(state['barGap'], 0, delta=1)
+                self.assertAlmostEqual(state['gap'], 4, delta=1)
+
     def test_keyboard_controls_native_scroll_without_trapping_tab(self):
         page = self.open_fixture(nested=True)
         bar = page.get_by_role('scrollbar')

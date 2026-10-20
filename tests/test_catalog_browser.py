@@ -815,13 +815,14 @@ class CatalogDirectionBrowserTests(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertTrue(response.ok)
 
-    def assert_edge(self, page, direction):
+    def assert_edge(self, page, direction, configured="left"):
         sidebar = page.locator("#catalog-sidebar")
-        expect(sidebar).to_have_attribute("data-side", "right" if direction == "rtl" else "left")
+        side = ("right" if configured == "left" else "left") if direction == "rtl" else configured
+        expect(sidebar).to_have_attribute("data-side", side)
         box = sidebar.bounding_box()
         self.assertIsNotNone(box)
-        edge = box["x"] + box["width"] if direction == "rtl" else box["x"]
-        expected = page.evaluate("innerWidth") if direction == "rtl" else 0
+        edge = box["x"] + box["width"] if side == "right" else box["x"]
+        expected = page.evaluate("innerWidth") if side == "right" else 0
         self.assertAlmostEqual(edge, expected, delta=1)
         self.assertFalse(page.evaluate("document.documentElement.scrollWidth > innerWidth"))
 
@@ -888,6 +889,32 @@ class CatalogDirectionBrowserTests(unittest.TestCase):
                     expect(page.locator('[data-sidebar-key="catalog-shell"]')).not_to_have_attribute(
                         "data-sidebar-ready", "",
                     )
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def test_repeated_direction_initialization_preserves_the_configured_edge(self):
+        desktop = next(case for case in CERTIFICATION_CASES if not case.is_mobile)
+        for direction, configured in itertools.product(("ltr", "rtl"), ("left", "right")):
+            with self.subTest(direction=direction, configured=configured):
+                case = replace(desktop, direction=direction)
+                context, page, evidence = self.catalog_page(case)
+                try:
+                    self.open_catalog(page)
+                    page.locator("#catalog-sidebar").evaluate("""(el, side) => {
+                        delete el.dataset.catalogConfiguredSide;
+                        el.dataset.side = side;
+                    }""", configured)
+                    for _ in range(2):
+                        page.evaluate("""source => {
+                            const script = document.createElement('script');
+                            script.textContent = source;
+                            document.querySelector('.moo-ui[data-bs-theme]').append(script);
+                            script.remove();
+                        }""", self.state_script)
+                        expect(page.locator("#catalog-sidebar")).to_have_attribute("data-catalog-configured-side", configured)
+                        expect(page.locator("#catalog-sidebar")).to_be_visible()
+                        self.assert_edge(page, direction, configured)
                     evidence.assert_clean()
                 finally:
                     context.close()

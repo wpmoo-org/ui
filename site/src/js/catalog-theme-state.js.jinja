@@ -7,7 +7,9 @@
   const bindSidebarPlacement = () => {
     const sidebar = owner.querySelector?.("#catalog-sidebar");
     if (!sidebar) return false;
-    const ltrSide = sidebar.dataset.side === "right" ? "right" : "left";
+    const configuredSide = sidebar.dataset.catalogConfiguredSide ?? sidebar.dataset.side;
+    const ltrSide = configuredSide === "right" ? "right" : "left";
+    sidebar.dataset.catalogConfiguredSide = ltrSide;
     const chevrons = {
       "chevron-left": {{ render_icon("chevron-left", "inline-end") | tojson }},
       "chevron-right": {{ render_icon("chevron-right", "inline-end") | tojson }},
