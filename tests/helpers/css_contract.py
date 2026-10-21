@@ -21,6 +21,10 @@ DETACHED_OVERLAY_BACKDROP_OWNER = re.compile(
     r"(?:::{0,1}[A-Za-z0-9_-]+(?:\([^)]*\))?)*$"
 )
 URL_PATTERN = re.compile(r"url\((.*?)\)", re.IGNORECASE | re.DOTALL)
+NATIVE_DOCUMENT_SCROLLBAR_RULES = {
+    "html.scrollbar-overlay-native": ("scrollbar-width", "none", "auto"),
+    "html.scrollbar-overlay-native::-webkit-scrollbar": ("display", "none", "revert"),
+}
 REMOTE_PATTERN = re.compile(r"https?://", re.IGNORECASE)
 ANIMATION_KEYWORDS = {
     "alternate",
@@ -74,7 +78,20 @@ def _is_allowed_state_selector(selector: str) -> bool:
 
 
 def _assert_detached_overlay_media(test_case, rule: object) -> None:
-    """Allow only backdrop state rules inside a global media wrapper."""
+    """Allow detached backdrops or the exact opt-in native scrollbar fallback."""
+    if _serialized(rule.prelude) == "print, (forced-colors: active)":
+        rules = _nested_rules(rule)
+        test_case.assertEqual(len(rules), 2)
+        for nested in rules:
+            test_case.assertTrue(
+                _assert_native_document_scrollbar(test_case, nested, fallback=True),
+                f"unexpected native fallback rule: {nested!r}",
+            )
+        test_case.assertEqual(
+            {_serialized(nested.prelude) for nested in rules},
+            {"html.scrollbar-overlay-native", "html.scrollbar-overlay-native::-webkit-scrollbar"},
+        )
+        return
     for nested in _walk_rules(_nested_rules(rule)):
         nested_type = getattr(nested, "type", None)
         if nested_type == "qualified-rule":
@@ -137,6 +154,24 @@ def _walk_rules(rules: Iterable[object]) -> Iterable[object]:
             yield from _walk_rules(_nested_rules(rule))
 
 
+def _assert_native_document_scrollbar(test_case, rule: object, *, fallback: bool = False) -> bool:
+    """Permit only the approved native-scroll visibility bridge, never theming."""
+    if getattr(rule, "type", None) != "qualified-rule":
+        return False
+    selector = _serialized(rule.prelude)
+    if selector not in NATIVE_DOCUMENT_SCROLLBAR_RULES:
+        return False
+    declarations = tinycss2.parse_declaration_list(rule.content, skip_comments=True, skip_whitespace=True)
+    test_case.assertEqual(len(declarations), 1, "native scrollbar bridge must have one visibility declaration")
+    declaration = declarations[0]
+    test_case.assertEqual(getattr(declaration, "type", None), "declaration")
+    name, normal, restored = NATIVE_DOCUMENT_SCROLLBAR_RULES[selector]
+    test_case.assertEqual(declaration.lower_name, name)
+    value = (_serialized(declaration.value), declaration.important)
+    test_case.assertEqual(value, (restored, True) if fallback else (normal, False))
+    return True
+
+
 def assert_single_moo_scope(test_case, css: str) -> None:
     scopes = _scope_rules(css)
     test_case.assertEqual(len(scopes), 1, "moo.css must emit one @scope")
@@ -159,10 +194,16 @@ def assert_owner_scoped_token_bridges(test_case, css: str, *, scoped: bool) -> N
     if not scoped:
         return
 
+    # Validate top-level values/media strictly before walking scoped rules.
+    # The subsequent token-leak scan excludes only these exact selectors whose
+    # complete bodies and media context have already passed the global gate.
+    assert_allowed_global_rules(test_case, css)
     for rule in _walk_rules(parse_stylesheet(css)):
         if getattr(rule, "type", None) != "qualified-rule":
             continue
         selector = _serialized(rule.prelude)
+        if selector in NATIVE_DOCUMENT_SCROLLBAR_RULES:
+            continue
         for part in _selector_parts(selector):
             test_case.assertNotRegex(
                 part,
@@ -178,6 +219,12 @@ def assert_allowed_global_rules(test_case, css: str) -> None:
             keyword = _at_keyword(rule)
             prelude = _serialized(getattr(rule, "prelude", []))
             if keyword == "scope":
+                for nested in _walk_rules(_nested_rules(rule)):
+                    if _assert_native_document_scrollbar(test_case, nested):
+                        test_case.fail(
+                            "document scrollbar visibility rules must be global, "
+                            "not hidden inside @scope"
+                        )
                 continue
             if keyword == "keyframes":
                 test_case.assertTrue(
@@ -206,6 +253,8 @@ def assert_allowed_global_rules(test_case, css: str) -> None:
             test_case.fail(f"unexpected global @{keyword} rule: {prelude}")
 
         if rule_type == "qualified-rule":
+            if _assert_native_document_scrollbar(test_case, rule, fallback=False):
+                continue
             selector = _serialized(rule.prelude)
             for part in _selector_parts(selector):
                 if DETACHED_OVERLAY_BACKDROP_OWNER.match(part) is not None:

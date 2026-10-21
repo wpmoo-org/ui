@@ -1,4 +1,5 @@
 {% from "components/toc.html.jinja" import table_of_contents %}
+{% from "components/separator.html.jinja" import separator %}
 
 {% macro render_doc_toc(items, presentation="list") -%}
   {% if presentation not in ["list", "compact"] %}{{ fail("Unknown catalog TOC presentation: " ~ presentation) }}{% endif %}
@@ -8,11 +9,14 @@
   {% endfor %}
   {% if prepared.items %}
     {% if presentation == "compact" %}
-      <div data-page-container>
+      <div data-page-container class="container-fluid position-absolute top-100 start-0 end-0">
         <div data-page-hide-from="lg">
-          <div class="row moo-catalog__toc-row border-top">
-            <div class="col">
-              {{ table_of_contents("catalog-toc-compact", prepared.items, presentation="compact", content_id="main-content", scroll_root_id="main-content", extra_class="py-3") }}
+          <div class="fade" data-catalog-reading-bar hidden inert>
+            <div class="row bg-body">
+              {{ separator(extra_class="moo-catalog__toc-row m-0 border-0 border-top") }}
+              <div class="col">
+                {{ table_of_contents("catalog-toc-compact", prepared.items, presentation="compact", content_id="main-content", scroll_root_id="main-content", extra_class="py-3") }}
+              </div>
             </div>
           </div>
         </div>

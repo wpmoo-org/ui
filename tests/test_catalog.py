@@ -2764,7 +2764,7 @@ class CatalogContractTests(CatalogTestCase):
         ]
         self.assert_page_actions_region(utility_header)
         self.assert_page_actions_region(utility)
-        self.assertIn('aria-label="Previous page: Border"', utility)
+        self.assertIn('aria-label="Previous page: Overlay Scrollbar"', utility)
         self.assertIn('aria-label="Next page: Support &amp; Evidence"', utility)
 
         block = self.read_output("blocks/sidebar-floating.html")
@@ -2790,10 +2790,19 @@ class CatalogContractTests(CatalogTestCase):
 
         border = self.read_output("utils/border.html")
         self.assertIn('aria-label="Previous page: Utilities"', border)
-        self.assertIn('aria-label="Next page: Scroll Fade"', border)
+        self.assertIn('aria-label="Next page: Overlay Scrollbar"', border)
 
         support = self.read_output("support.html")
         self.assertIn('aria-label="Previous page: Scroll Fade"', support)
+        overlay = self.read_output("utils/overlay-scrollbar.html")
+        overlay_pagination = re.search(
+            r'<nav class="moo-doc-pagination" aria-label="Docs pagination">(?P<body>.*?)</nav>',
+            overlay,
+            re.S,
+        )
+        self.assertIsNotNone(overlay_pagination)
+        self.assertIn('href="../../utils/border/"', overlay_pagination.group("body"))
+        self.assertIn('href="../../utils/scroll-fade/"', overlay_pagination.group("body"))
         self.assertIn('aria-label="Next page: Contributing"', support)
         self.assertIn('href="../contributing/"', support)
 
@@ -3407,11 +3416,23 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn('data-toc-scroll-root="main-content"', compact.group("body"))
                 parsed_header = site_build.ComponentTocParser()
                 parsed_header.feed(header.group("body"))
-                divider = parsed_header.by_id["catalog-toc-compact"].parent
-                while divider is not None and not divider.has_class("border-top"):
-                    divider = divider.parent
-                self.assertIsNotNone(divider)
-                visibility = divider.parent if divider else None
+                panel = parsed_header.by_id["catalog-toc-compact"].parent
+                while panel is not None and "data-catalog-reading-bar" not in panel.attrs:
+                    panel = panel.parent
+                self.assertIsNotNone(panel)
+                self.assertIn("hidden", panel.attrs)
+                self.assertIn("inert", panel.attrs)
+                descendants = list(panel.children)
+                separators = []
+                while descendants:
+                    node = descendants.pop()
+                    if node.tag == "hr":
+                        separators.append(node)
+                    descendants.extend(node.children)
+                self.assertEqual(len(separators), 1)
+                self.assertEqual(separators[0].attrs.get("aria-hidden"), "true")
+                self.assertTrue(separators[0].has_class("border-top"))
+                visibility = panel.parent
                 while visibility is not None and "data-page-hide-from" not in visibility.attrs:
                     visibility = visibility.parent
                 self.assertIsNotNone(visibility)
@@ -4346,8 +4367,8 @@ class CatalogContractTests(CatalogTestCase):
         release_links = LinkParser()
         release_links.feed(active_release)
         hrefs = {link.get("href") for link in release_links.links}
-        self.assertLessEqual({
-            "../blocks/accordion-panels/", "../components/accordion/", "../components/alert/",
+        self.assertEqual({
+            "../utils/overlay-scrollbar/", "../charts/", "../installation/",
         }, hrefs)
 
         page_links = LinkParser()

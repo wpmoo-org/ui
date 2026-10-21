@@ -23,6 +23,7 @@ const FEATURE_SELECTORS = {
   datepicker: "[data-datepicker], [data-datepicker-range], [data-calendar]",
   slider: "[data-slider]",
   tableOfContents: "[data-toc]",
+  overlayScrollbar: '[data-overlay-scrollbar-demo], [data-moo-shell="catalog"]',
   tasksExample: "[data-moo-example-tasks]",
   usersExample: "[data-moo-example-users]",
 };
@@ -86,6 +87,24 @@ export function initCatalog(root = document) {
     initToc(root),
     initAcceptancePortal(root),
   ];
+
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.overlayScrollbar,
+    () => import("./overlay-scrollbar.js"),
+    ({ initOverlayScrollbarDemo, initCatalogScrollbar }) => {
+      const releaseDemo = initOverlayScrollbarDemo(root);
+      let releaseCatalog;
+      try {
+        releaseCatalog = initCatalogScrollbar(root);
+      } catch (error) {
+        releaseDemo?.();
+        throw error;
+      }
+      return () => { releaseCatalog?.(); releaseDemo?.(); };
+    },
+  );
 
   pushLazyFeature(
     disposers,
@@ -165,6 +184,8 @@ export function initCatalog(root = document) {
     ({ default: TableOfContents }) => {
       const instances = Array.from(root.querySelectorAll("[data-toc]"))
         .map((element) => TableOfContents.getOrCreateInstance(element));
+      const view = root.defaultView || root.ownerDocument.defaultView;
+      root.dispatchEvent(new view.Event("moo:catalog-toc-ready"));
       return () => instances.forEach((instance) => instance.dispose());
     },
   );

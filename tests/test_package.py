@@ -90,9 +90,12 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/themes/_theme.scss",
     "scss/utilities/_background_color.scss",
     "scss/utilities/_border.scss",
+    "scss/utilities/_overlay_scrollbar.scss",
+    "scss/utilities/_overlay_scrollbar_native.scss",
     "scss/utilities/_scroll_fade.scss",
     "scss/utilities/_scroll_fade_primitives.scss",
     "scss/utilities/_scroll_smooth.scss",
+    "scss/utilities/_text_alignment.scss",
 }
 EXPECTED_PACKAGE_FILES = {
     "dist/assets/css/moo-ui.css",
@@ -106,6 +109,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/slider.js",
     "dist/js/sheet.js",
     "dist/js/toc.js",
+    "dist/js/overlay-scrollbar.js",
     "dist/js/table-of-contents.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
@@ -134,6 +138,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./slider.js": "./dist/js/slider.js",
     "./sheet.js": "./dist/js/sheet.js",
     "./toc.js": "./dist/js/toc.js",
+    "./overlay-scrollbar.js": "./dist/js/overlay-scrollbar.js",
     "./table-of-contents.js": "./dist/js/table-of-contents.js",
     "./moo-ui.js": "./dist/js/moo-ui.js",
     "./moo-ui.min.js": "./dist/js/moo-ui.min.js",
@@ -485,6 +490,7 @@ class PackageMetadataTests(unittest.TestCase):
                 "slider.js",
                 "sheet.js",
                 "toc.js",
+                "overlay-scrollbar.js",
                 "table-of-contents.js",
                 "chart.js",
                 "datepicker.js",
@@ -676,6 +682,7 @@ import ContextMenu from "@wpmoo/ui/context-menu.js";
 import DataTable from "@wpmoo/ui/datatable.js";
 import Slider from "@wpmoo/ui/slider.js";
 import Toc from "@wpmoo/ui/toc.js";
+import OverlayScrollbar from "@wpmoo/ui/overlay-scrollbar.js";
 import LegacyToc from "@wpmoo/ui/table-of-contents.js";
 import { initSheets } from "@wpmoo/ui/sheet.js";
 import MooUI, {
@@ -688,6 +695,7 @@ import MooUI, {
   MooDateRangePicker,
   Sidebar as AggregateSidebar,
   Slider as AggregateSlider,
+  OverlayScrollbar as AggregateOverlayScrollbar,
   initSheets as AggregateInitSheets,
 } from "@wpmoo/ui/moo-ui.js";
 import MooUIMinified, {
@@ -709,6 +717,11 @@ if (
   ContextMenu.name !== "ContextMenu" ||
   DataTable.name !== "DataTable" ||
   Slider.name !== "MooSlider" ||
+  OverlayScrollbar.name !== "OverlayScrollbar" ||
+  typeof OverlayScrollbar.getOrCreateInstance !== "function" ||
+  typeof AggregateOverlayScrollbar.getOrCreateInstance !== "function" ||
+  MooUI.OverlayScrollbar !== AggregateOverlayScrollbar ||
+  typeof MooUIMinified.OverlayScrollbar.getOrCreateInstance !== "function" ||
   Toc !== LegacyToc ||
   typeof Toc.getOrCreateInstance !== "function" ||
   typeof AggregateCombobox.getOrCreateInstance !== "function" ||
@@ -949,6 +962,7 @@ for (const specifier of [
             "sheet.js",
             "slider.js",
             "toc.js",
+            "overlay-scrollbar.js",
             "table-of-contents.js",
             "src/js/moo-ui.js",
             "chart.js",

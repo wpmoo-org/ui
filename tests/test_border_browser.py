@@ -78,7 +78,9 @@ class BorderTests(CatalogTestCase):
                             current.get_attribute("href"),
                             "../../utils/" + route if route else "../utils/",
                         )
-                        self.assertEqual(menu.locator("a").count(), 3)
+                        self.assertEqual(menu.locator("a").count(), 4)
+                        overlay_href = "../../utils/overlay-scrollbar/" if route else "../utils/overlay-scrollbar/"
+                        self.assertEqual(menu.locator(f'a[href="{overlay_href}"]').count(), 1)
                         if not route:
                             self.assertEqual(page.locator(".moo-doc-layout").count(), 1)
                             pagination = page.get_by_role("article").get_by_role(

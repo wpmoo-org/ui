@@ -8,6 +8,7 @@ import Datepicker, {
 import Sidebar from "./components/sidebar.js";
 import Slider from "./components/slider.js";
 import TableOfContents from "./components/toc.js";
+import OverlayScrollbar from "./components/overlay-scrollbar.js";
 import { initSheets } from "./components/sheet.js";
 
 async function loadChart() {
@@ -26,6 +27,7 @@ const MooUI = {
   Sidebar,
   Slider,
   TableOfContents,
+  OverlayScrollbar,
   initSheets,
 };
 
@@ -40,6 +42,7 @@ export {
   Sidebar,
   Slider,
   TableOfContents,
+  OverlayScrollbar,
   initSheets,
 };
 

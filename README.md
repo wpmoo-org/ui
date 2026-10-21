@@ -168,6 +168,29 @@ import { initSheets } from "@wpmoo/ui/sheet.js";
 initSheets(document);
 ```
 
+For an opt-in document overlay scrollbar, load the stylesheet first and pass
+the resolved page theme owner explicitly:
+
+```js
+import OverlayScrollbar from "@wpmoo/ui/overlay-scrollbar.js";
+const scrollbar = OverlayScrollbar.getOrCreateInstance(document.querySelector(".moo-ui"), {
+  label: "Page scroll position", // supply a localized accessible name
+  hideDelay: 900,
+});
+// scrollbar.refresh(); // after host geometry changes
+// scrollbar.dispose(); // restore the native scrollbar
+```
+
+The module preserves native document/touch/wheel scrolling. Its thin thumb
+appears while scrolling, near the trailing mouse edge or on keyboard focus;
+show/hide never reserves a layout gutter. Initial activation removes any native
+gutter. By default it controls the standards-mode document. Pass
+`scrollElement: element` for an existing native scrolling region belonging to
+the same theme owner; the catalog uses this for its Page main region. There is
+one instance per scroll target, without replacing or wrapping that target.
+Printing, forced colors and horizontal overflow use the
+native scrollbar instead. It does not initialize merely by importing the module.
+
 ## Why Teams Try It
 
 - Keep server-rendered HTML, Bootstrap classes, and familiar plugin behavior.
@@ -194,9 +217,10 @@ calm.
 
 ## Status And Support
 
-The `1.3.0` minor release target adds Accordion Panels compositions and optional
-plus/minus indicators while preserving explicit Alert icon sizes. It
-preserves the 1.2.2 package exports and existing component defaults. Component certification remains
+The `1.4.0` minor release target adds the opt-in OverlayScrollbar module and
+scoped Sass support while preserving native scrolling. It retains existing
+1.3.0 exports and component defaults and corrects logical text alignment.
+The catalog shares this runtime and unifies its reading navigation. Component certification remains
 `preview`, with its documented manual and browser/device limits. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
 [GitHub Releases](https://github.com/wpmoo-org/ui/releases).
@@ -222,4 +246,4 @@ The published `LICENSE` also retains the full MIT notices for bundled
 Chart.js and `@kurkle/color`.
 Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
 live in the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.3.0/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.4.0/THIRD_PARTY_NOTICES.md).

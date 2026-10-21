@@ -2,7 +2,7 @@
 
 > Bootstrap markup. shadcn feel.
 
-Moo UI 1.3.0 is the release target for a Bootstrap 5.3-native component system with a restrained,
+Moo UI 1.4.0 is the release target for a Bootstrap 5.3-native component system with a restrained,
 shadcn-inspired visual language for server-rendered and Bootstrap-native apps.
 It is CSS-first, not JavaScript-free: Bootstrap owns native plugin behavior,
 while Moo UI adds optional, explicit ESM only for documented gaps.
@@ -14,7 +14,7 @@ implementation.
 
 ## Version And Support
 
-- package release target: `@wpmoo/ui@1.3.0`
+- package release target: `@wpmoo/ui@1.4.0`
 - Bootstrap peer range: `>=5.3.0 <5.4`
 - Tested Bootstrap versions in the manifest: `5.3.0`, `5.3.3`, `5.3.8`
 - License: MIT for source code
@@ -38,6 +38,7 @@ not independent or accredited certification.
 - `@wpmoo/ui/datatable.js`: optional DataTable ESM lifecycle
 - `@wpmoo/ui/sidebar.js`: optional Sidebar ESM lifecycle
 - `@wpmoo/ui/toc.js`: optional TableOfContents lifecycle and current-section tracking (`table-of-contents.js` remains a compatibility entrypoint)
+- `@wpmoo/ui/overlay-scrollbar.js`: opt-in OverlayScrollbar lifecycle for native document or same-owner element scrolling, with native fallback
 - `@wpmoo/ui/chart.js`: optional Chart ESM lifecycle (Chart.js 4.5.1 bundled)
 - `@wpmoo/ui/chart.min.js`: minified Chart bundle (artifact variant of chart.js)
 - `@wpmoo/ui/datepicker.js`: optional Datepicker ESM lifecycle (self-contained, no third-party runtime)
@@ -60,7 +61,7 @@ entrypoints; undocumented internal partial paths are not separate public APIs.
 
 ## Installation Facts
 
-- Version-pinned CDN full stylesheet after publication: `https://unpkg.com/@wpmoo/ui@1.3.0/dist/assets/css/moo-ui.css`
+- Version-pinned CDN full stylesheet after publication: `https://unpkg.com/@wpmoo/ui@1.4.0/dist/assets/css/moo-ui.css`
 
 Full replacement:
 
@@ -89,7 +90,8 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"; // only when plugins are use
 
 Optional Moo UI ESM is imported only for documented gaps and must be initialized
 explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
-`sidebar.js`, `chart.js`, `datepicker.js`, `slider.js`, `sheet.js`, or the aggregate
+`sidebar.js`, `chart.js`, `datepicker.js`, `slider.js`, `sheet.js`,
+`overlay-scrollbar.js`, or the aggregate
 `moo-ui.js` does not scan the document.
 
 ## Runtime Ownership
@@ -114,6 +116,8 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 - Table of Contents: native fragment links and a
   Bootstrap dropdown, with optional Moo UI ESM for current-section tracking
   and explicit `refresh()` / `dispose()` lifecycle
+- Overlay Scrollbar: opt-in Moo UI ESM over native document or same-owner
+  element scrolling, with explicit `refresh()` / `dispose()` and native fallback
 
 ## Documentation
 
@@ -183,13 +187,14 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 - [Blocks](https://ui.wpmoo.org/blocks/)
 - [Utilities](https://ui.wpmoo.org/utils/)
 - [Border](https://ui.wpmoo.org/utils/border/)
+- [Overlay Scrollbar](https://ui.wpmoo.org/utils/overlay-scrollbar/)
 - [Scroll Fade](https://ui.wpmoo.org/utils/scroll-fade/)
 
 ## Agent Guidance
 
 - Preserve Bootstrap behavior before adding custom behavior.
 - Use Moo UI ESM only for Combobox, Context Menu, DataTable, Sidebar, Chart,
-  Datepicker, Slider, Sheet initialization, Table of Contents, or the documented
+  Datepicker, Slider, Sheet initialization, Table of Contents, Overlay Scrollbar, or the documented
   aggregate `moo-ui.js` entrypoint.
 - Do not invent public Sass APIs, undocumented JavaScript entrypoints, or
   certification claims.

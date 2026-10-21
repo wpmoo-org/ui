@@ -22,6 +22,10 @@ MODULES = {
     "examples-tasks.js": "initExamplesTasks",
     "examples-users.js": "initExamplesUsers",
     "toc.js": "initToc",
+    # Helpers are lifecycle-owned by initToc / initCatalog; their observable
+    # teardown contracts are covered by test_catalog_reading_chrome_browser.
+    "reading-bar.js": None,
+    "overlay-scrollbar.js": None,
     "code-preview.js": "initCodePreview",
     "scroll-host.js": None,
     "bootstrap-preview.js": "initBootstrapPreview",
@@ -33,6 +37,7 @@ MODULES = {
     "theme-builder-schema.js": None,
 }
 LAZY_CATALOG_MODULES = {
+    "overlay-scrollbar.js",
     "examples-chart.js",
     "examples-tasks.js",
     "examples-users.js",

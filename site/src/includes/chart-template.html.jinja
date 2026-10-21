@@ -299,20 +299,6 @@
   </p>
 {% endmacro %}
 
-{% macro render_chart_gallery_nav() %}
-  <nav class="moo-chart-template-nav mb-4" aria-label="Chart examples" data-moo-chart-template-nav>
-    <div class="moo-chart-template-nav__list nav nav-pills flex-nowrap overflow-auto no-scrollbar">
-      <a class="nav-link" href="#chart-area">Area</a>
-      <a class="nav-link" href="#chart-bar">Bar</a>
-      <a class="nav-link" href="#chart-line">Line</a>
-      <a class="nav-link" href="#chart-pie">Pie</a>
-      <a class="nav-link" href="#chart-radar">Radar</a>
-      <a class="nav-link" href="#chart-radial">Radial</a>
-      <a class="nav-link" href="#chart-tooltip">Tooltip</a>
-    </div>
-  </nav>
-{% endmacro %}
-
 {% macro render_chart_gallery() %}
   {{ chart_example(
     "chart-area-default-example",

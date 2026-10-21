@@ -1,5 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "includes/chart-template.html.jinja" import render_chart_gallery, render_chart_gallery_nav with context %}
+{% from "includes/chart-template.html.jinja" import render_chart_gallery with context %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -23,9 +23,7 @@
         the <a href="{{ site_href("components/chart.html", root_path) }}">Chart component documentation</a>.
       </p>
 
-      {{ render_chart_gallery_nav() }}
-
-      <div class="moo-component-examples">
+      <div class="moo-component-examples mt-5">
         {{ render_chart_gallery() }}
       </div>
 

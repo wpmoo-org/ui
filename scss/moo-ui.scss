@@ -8,6 +8,8 @@
 @import "bootstrap/scss/maps";
 @import "bootstrap/scss/mixins";
 @import "bootstrap/scss/utilities";
+@import "utilities/text_alignment";
+@import "utilities/overlay_scrollbar";
 @import "themes/theme";
 
 /* Bootstrap layout and standalone-only components */
@@ -50,5 +52,6 @@
 @import "bootstrap/scss/utilities/api";
 
 @import "utilities/scroll_fade_primitives";
+@import "utilities/overlay_scrollbar_native";
 @import "foundations/backdrop";
 @import "foundations/scope";

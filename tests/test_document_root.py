@@ -230,6 +230,34 @@ class DocumentRootTests(unittest.TestCase):
         )
         self.assertFalse(has_class(preview_main, "moo-ui"))
 
+    def test_catalog_direction_bootstrap_is_separate_and_ready_before_content(self) -> None:
+        source, root = self.parse_page("components/alert/index.html")
+        _body, owner = self.assert_document_owner(source, root)
+        script = next(
+            node for node in owner.children
+            if node.tag == "script"
+            and "assets/js/catalog-direction-state.js?" in node.attrs.get("src", "")
+        )
+        self.assertNotIn("async", script.attrs)
+        self.assertNotIn("defer", script.attrs)
+        self.assertNotEqual(script.attrs.get("type"), "module")
+        self.assertTrue(any(
+            node.tag == "link"
+            and node.attrs.get("rel") == "preload"
+            and node.attrs.get("as") == "script"
+            and node.attrs.get("href") == script.attrs["src"]
+            for node in elements(root)
+        ))
+        catalog = next(node for node in owner.children if has_class(node, "moo-catalog"))
+        self.assertLess(owner.children.index(script), owner.children.index(catalog))
+        self.assertTrue((SITE_DIST / "assets/js/catalog-direction-state.js").is_file())
+        theme_script = next(
+            node for node in owner.children
+            if node.tag == "script"
+            and "assets/js/catalog-theme-state.js?" in node.attrs.get("src", "")
+        )
+        self.assertLess(owner.children.index(theme_script), owner.children.index(script))
+
     def test_raw_certification_fixture_uses_a_body_first_resolved_owner(self) -> None:
         fixture_directory = ROOT / "tests/fixtures/certification"
         fixture_paths = sorted(fixture_directory.glob("*.html*"))

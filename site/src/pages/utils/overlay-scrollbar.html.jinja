@@ -1,0 +1,39 @@
+{% extends "layouts/base.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/typography.html.jinja" import typography %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
+
+{% block title %}Overlay Scrollbar — Moo UI{% endblock %}
+
+{% block body %}
+  <main id="main-content" class="container py-5" data-overlay-scrollbar-demo>
+    {{ typography("Overlay Scrollbar", variant="page-title", extra_class="mb-3") }}
+    <p class="lead">A quiet page scrollbar without a layout gutter. The document still owns scrolling.</p>
+    <div class="d-flex flex-wrap gap-2 mb-4" data-overlay-scrollbar-controls>
+      {{ button("Dark / light", variant="outline") }}
+      {{ button("LTR / RTL", variant="outline") }}
+      {{ button("Use native scrollbar", variant="outline") }}
+      {{ button("Back to utilities", variant="link", element="a", href=site_href("utils/index.html", root_path)) }}
+    </div>
+    <p>Scroll to reveal the thumb. Stop scrolling and it fades away while you read. With a mouse, move to the trailing edge to reveal it again. Drag the thumb, click the track, or focus it with Tab and use Arrow keys, Page Up/Down, Home or End.</p>
+    <p>Touch and wheel scrolling stay native. Reduced-motion preferences remove the fade transition. Forced-colors mode, printing and horizontal page overflow keep the native scrollbar instead. Disabling the enhancement restores it.</p>
+    <h2 class="h4 mt-5">Opt-in public module</h2>
+    <pre class="p-3 bg-body-tertiary rounded"><code>import OverlayScrollbar from "@wpmoo/ui/overlay-scrollbar.js";
+const owner = document.querySelector(".moo-ui");
+const scrollbar = OverlayScrollbar.getOrCreateInstance(owner);
+// scrollbar.refresh(); // after host geometry changes
+// scrollbar.dispose(); // restore the native scrollbar</code></pre>
+    <p>The stylesheet must be loaded first. There is one instance per native scroll target, attached to one explicit theme owner. The default is the standards-mode document; pass <code>scrollElement</code> to use an existing native scrolling region, like the catalog's Page main. No replacement viewport is created. Showing and hiding the thumb never changes content width; enabling it initially removes the native gutter.</p>
+    <h2 class="h4 mt-4">Options and theme tokens</h2>
+    <p><code>hideDelay</code> defaults to 900 milliseconds; <code>label</code> supplies the localized accessible name. The default is “Page scroll position”. Importing the module does not initialize anything.</p>
+    <p>Bootstrap does not provide an overlay scrollbar. Its two geometry tokens are <code>--moo-scrollbar-overlay-thumb-size</code> (backed by <code>$moo-scrollbar-overlay-thumb-size</code>, inheriting the shared thin-scrollbar scale) and <code>--moo-scrollbar-overlay-hit-size</code> (backed by <code>$moo-scrollbar-overlay-hit-size</code>, a 24px interaction target). Color uses Bootstrap's secondary/emphasis text tokens, radius uses its pill token, edge spacing uses Bootstrap's smallest positive spacing step, and motion uses its reduced-motion-aware fade transition.</p>
+    {% for number in range(1, 17) %}
+      <section class="py-4 border-top">
+        {{ typography("Reading section " ~ number, variant="section-title", extra_class="mb-3") }}
+        <p>Read at your own pace. The scroll indicator stays out of the way until you need it. The page keeps its normal document structure, native scrolling, links and keyboard behavior.</p>
+        <p>Try another theme or direction, resize the viewport, and compare the same content with the native scrollbar. The indicator follows the page position without moving the reading column.</p>
+      </section>
+    {% endfor %}
+    {{ render_section_page_pagination(current_slug, site_pages, root_path) }}
+  </main>
+{% endblock %}

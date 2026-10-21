@@ -1,6 +1,6 @@
 {
   "name": "@wpmoo/ui",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Bootstrap markup. shadcn feel. A frontend-framework-free component system for server-rendered apps.",
   "license": "MIT",
   "author": "WPMoo (https://wpmoo.org)",
@@ -39,6 +39,7 @@
     "./datatable.js": "./dist/js/datatable.js",
     "./slider.js": "./dist/js/slider.js",
     "./toc.js": "./dist/js/toc.js",
+    "./overlay-scrollbar.js": "./dist/js/overlay-scrollbar.js",
     "./table-of-contents.js": "./dist/js/table-of-contents.js",
     "./sheet.js": "./dist/js/sheet.js",
     "./chart.js": "./dist/js/chart.js",
@@ -68,6 +69,7 @@
     "dist/js/datatable.js",
     "dist/js/slider.js",
     "dist/js/toc.js",
+    "dist/js/overlay-scrollbar.js",
     "dist/js/table-of-contents.js",
     "dist/js/sheet.js",
     "dist/js/chart.js",

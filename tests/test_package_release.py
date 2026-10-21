@@ -33,7 +33,8 @@ class ReleasePackageTests(unittest.TestCase):
 
     def test_publish_workflow_dry_run_uses_the_prepared_tarball(self) -> None:
         workflow = (ROOT / ".github/workflows/npm-publish.yml").read_text()
-        version = json.loads((ROOT / "package.json").read_text())["version"]
+        package = json.loads((ROOT / "package.json").read_text())
+        version = package["version"]
         commands = [
             line.strip().removeprefix("run: ")
             for line in workflow.splitlines()
@@ -48,6 +49,7 @@ class ReleasePackageTests(unittest.TestCase):
             payload = pack_release(destination)[0]
             tarball = destination / payload["filename"]
             before = hashlib.sha256(tarball.read_bytes()).hexdigest()
+            publish_result = None
             for command in commands:
                 command = command.replace(
                     "${{ steps.package.outputs.version }}", version,
@@ -63,11 +65,25 @@ class ReleasePackageTests(unittest.TestCase):
                         "--registry", "http://127.0.0.1:9",
                     ])
                 result = subprocess.run(
-                    args, cwd=ROOT, env=npm_env(), check=False,
+                    args, cwd=ROOT, env={
+                        **npm_env(),
+                        # The deliberately unreachable registry must not spend
+                        # the test budget retrying optional dry-run lookups.
+                        "npm_config_fetch_retries": "0",
+                        "npm_config_fetch_timeout": "10000",
+                    }, check=False,
                     capture_output=True, text=True, timeout=60,
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
-            published = json.loads(result.stdout)
+                if args[:2] == ["npm", "publish"]:
+                    publish_result = result
+            self.assertIsNotNone(publish_result)
+            published = json.loads(publish_result.stdout)
+            # npm 11 can key publish JSON by package name; older npm returns
+            # the same package record directly. Preserve exact byte identity.
+            if package["name"] in published:
+                self.assertEqual(set(published), {package["name"]})
+                published = published[package["name"]]
             self.assertEqual(published["version"], version)
             self.assertEqual(published["shasum"], payload["shasum"])
             self.assertEqual(published["integrity"], payload["integrity"])

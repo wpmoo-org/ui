@@ -1,0 +1,87 @@
+(() => {
+  const owner = document.currentScript?.parentElement;
+  if (!owner?.matches?.('.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]')) return;
+
+  // Core keeps physical placement; only catalog navigation mirrors direction.
+  const bindSidebarPlacement = () => {
+    const sidebar = owner.querySelector?.("#catalog-sidebar");
+    if (!sidebar) return false;
+    if (sidebar.dataset.catalogDirectionBound === "") return true;
+    const configuredSide = sidebar.dataset.catalogConfiguredSide ?? sidebar.dataset.side;
+    const ltrSide = configuredSide === "right" ? "right" : "left";
+    sidebar.dataset.catalogConfiguredSide = ltrSide;
+    const chevrons = {
+      "chevron-left": {{ render_icon("chevron-left", "inline-end") | tojson }},
+      "chevron-right": {{ render_icon("chevron-right", "inline-end") | tojson }},
+    };
+    const iconTemplates = new Map();
+    const ownIconInsertions = new WeakSet();
+    const syncChevrons = () => {
+      sidebar.querySelectorAll("button.sidebar-menu-button--disclosure").forEach((button) => {
+        const icon = button.querySelector(":scope > .sidebar-menu-button__end > svg");
+        if (!icon || !Object.prototype.hasOwnProperty.call(chevrons, icon.dataset.lucide)) return;
+        const rtl = window.getComputedStyle(button).direction === "rtl";
+        const expanded = button.getAttribute("aria-expanded") === "true";
+        const name = rtl && !expanded ? "chevron-left" : "chevron-right";
+        if (icon.dataset.lucide === name) return;
+        if (!iconTemplates.has(name)) {
+          const template = document.createElement("template");
+          template.innerHTML = chevrons[name];
+          iconTemplates.set(name, template);
+        }
+        const replacement = iconTemplates.get(name).content.firstElementChild.cloneNode(true);
+        ownIconInsertions.add(replacement);
+        icon.replaceWith(replacement);
+      });
+    };
+    const syncPlacement = () => {
+      const rtl = window.getComputedStyle(sidebar).direction === "rtl";
+      const side = rtl ? (ltrSide === "left" ? "right" : "left") : ltrSide;
+      sidebar.dataset.side = side;
+      sidebar.classList.toggle("offcanvas-start", side === "left");
+      sidebar.classList.toggle("offcanvas-end", side === "right");
+      syncChevrons();
+    };
+    if (typeof window.MutationObserver === "function") {
+      // This classic prepaint bootstrap intentionally lives for the document's
+      // lifetime, independently of optional catalog ESM init/dispose cycles.
+      const observer = new window.MutationObserver(syncPlacement);
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["dir"] });
+      observer.observe(owner, { attributes: true, attributeFilter: ["dir"] });
+      const containsDisclosure = (node) => node.nodeType === 1 && (
+        node.matches("button.sidebar-menu-button--disclosure") ||
+        node.querySelector("button.sidebar-menu-button--disclosure") ||
+        node.closest("button.sidebar-menu-button--disclosure")
+      );
+      const chevronObserver = new window.MutationObserver((records) => {
+        // Parser-created disclosures and late icon content need a sync. Consume
+        // our own replacement records without triggering another full scan.
+        let synchronize = false;
+        for (const record of records) {
+          if (record.type === "attributes") synchronize = true;
+          for (const node of record.addedNodes) {
+            if (ownIconInsertions.has(node)) ownIconInsertions.delete(node);
+            else if (containsDisclosure(node)) synchronize = true;
+          }
+        }
+        if (synchronize) syncChevrons();
+      });
+      chevronObserver.observe(sidebar, {
+        attributes: true,
+        attributeFilter: ["aria-expanded"],
+        childList: true,
+        subtree: true,
+      });
+    }
+    syncPlacement();
+    sidebar.dataset.catalogDirectionBound = "";
+    return true;
+  };
+  // Observe parser-created navigation before the first content frame.
+  if (!bindSidebarPlacement() && typeof window.MutationObserver === "function") {
+    const observer = new window.MutationObserver(() => {
+      if (bindSidebarPlacement()) observer.disconnect();
+    });
+    observer.observe(owner, { childList: true, subtree: true });
+  }
+})();
