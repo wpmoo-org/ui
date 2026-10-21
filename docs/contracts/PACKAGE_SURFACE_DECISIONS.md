@@ -3,6 +3,45 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.4.0 Compatible Additions
+
+The release target adds `@wpmoo/ui/overlay-scrollbar.js`, its aggregate
+`OverlayScrollbar` export and documented opt-in Sass styling. The document or
+same-owner element remains the native scrollport; initialization is explicit
+and paired with disposal. Forced colors, printing and horizontal overflow keep
+native scrollbars. Existing exports, component defaults, peers and dependencies
+remain compatible with 1.3.0. This additive public surface requires a minor
+release rather than reusing the already published 1.3.0 version.
+
+Logical `text-start`/`text-end` utilities share one standalone/scoped definition.
+The catalog consumes the shared scrollbar, fades compact TOC and Separator
+together, preserves native fragments and input, removes the competing Charts
+navigator and wraps long Installation URLs with Bootstrap utilities.
+
+Theme token restoration remains owner-local. Separate catalog direction
+bootstrap owns document-direction observation and physical Sidebar placement;
+it does not change public Core Sidebar ownership.
+
+The explicit document-scroll option has one native-visibility bridge outside
+the owner: `html.scrollbar-overlay-native` controls only `scrollbar-width`,
+with `::-webkit-scrollbar` controlling only `display`. Exact print/forced-color
+fallback restores native visibility. This exception does not permit document
+theme tokens, typography or layout rules. Contract tests constrain the exact
+selectors, property/value/priority pairs and media context, with mutation cases
+rejecting wider selectors, extra declarations and theme/layout leakage.
+
+Candidate gate definitions: [scrollbar browser contracts](../../tests/test_overlay_scrollbar_browser.py),
+[catalog reading chrome](../../tests/test_catalog_reading_chrome_browser.py),
+[direction/first-paint browser contracts](../../tests/test_catalog_browser.py),
+[native visibility boundary/mutation checks](../../tests/test_css_contract.py),
+[package verification](../../tests/test_package.py) and
+[tarball identity checks](../../tests/test_package_release.py).
+These define required verification; they are not a final passing release attestation.
+Verification remains release-specific. Component certification stays in preview;
+unexecuted browser/device checks are not inferred from the version increment.
+Merging this version to main starts the existing automatic tag/publish/release
+chain, so release readiness must be established before the maintainer merges.
+
 ## 1.3.0 Compatible Additions
 
 Accordion gains an optional plus/minus indicator through the additive

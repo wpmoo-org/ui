@@ -1,6 +1,6 @@
 {
   "name": "@wpmoo/ui",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Bootstrap markup. shadcn feel. A frontend-framework-free component system for server-rendered apps.",
   "license": "MIT",
   "author": "WPMoo (https://wpmoo.org)",

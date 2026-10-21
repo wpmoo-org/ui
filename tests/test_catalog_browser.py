@@ -776,7 +776,7 @@ class CatalogDirectionBrowserTests(unittest.TestCase):
         # Exercise current catalog source against built Core assets without
         # rebuilding the distribution or changing any certification fixture.
         cls.state_script = create_environment().get_template(
-            "js/catalog-theme-state.js.jinja"
+            "js/catalog-direction-state.js.jinja"
         ).render(theme_builder_state=theme_builder_first_paint_payload())
         cls.server = serve_repository()
         cls.base_url = cls.server.__enter__()
@@ -802,7 +802,7 @@ class CatalogDirectionBrowserTests(unittest.TestCase):
             """
         )
         context.route(
-            "**/assets/js/catalog-theme-state.js*",
+            "**/assets/js/catalog-direction-state.js*",
             lambda route: route.fulfill(
                 content_type="text/javascript", body=self.state_script,
             ),
@@ -862,6 +862,7 @@ class CatalogDirectionBrowserTests(unittest.TestCase):
                             side: sidebar.dataset.side,
                             visibility: getComputedStyle(sidebar).visibility,
                             chevrons: [...buttons].map(readChevron),
+                            moduleExecuted: Boolean(window.__catalogDirectionModuleExecuted),
                           };
                         };
                         requestAnimationFrame(sample);
@@ -872,15 +873,21 @@ class CatalogDirectionBrowserTests(unittest.TestCase):
                         time.sleep(0.15)
                         route.fulfill(content_type="text/javascript", body=self.state_script)
 
-                    page.route("**/assets/js/catalog-theme-state.js*", delayed_state)
-                    page.route(
-                        "**/assets/js/catalog/index.js*",
-                        lambda route: route.fulfill(content_type="text/javascript", body=""),
-                    )
+                    page.route("**/assets/js/catalog-direction-state.js*", delayed_state)
+                    def delayed_module(route):
+                        page.wait_for_function("window.__catalogDirectionFirstFrame", timeout=5000)
+                        route.fulfill(
+                            content_type="text/javascript",
+                            body="window.__catalogDirectionModuleExecuted = true;",
+                        )
+
+                    page.route("**/assets/js/catalog/index.js*", delayed_module)
                     self.open_catalog(page)
                     page.wait_for_function("window.__catalogDirectionFirstFrame")
                     frame = page.evaluate("window.__catalogDirectionFirstFrame")
                     self.assertEqual(frame["side"], "right" if direction == "rtl" else "left")
+                    self.assertFalse(frame["moduleExecuted"])
+                    self.assertTrue(page.evaluate("window.__catalogDirectionModuleExecuted"))
                     self.assertEqual(set(frame["chevrons"]), {"left" if direction == "rtl" else "right"})
                     if case.is_mobile:
                         self.assertEqual(frame["visibility"], "hidden")
@@ -900,6 +907,12 @@ class CatalogDirectionBrowserTests(unittest.TestCase):
                 case = replace(desktop, direction=direction)
                 context, page, evidence = self.catalog_page(case)
                 try:
+                    # Exercise the first configured bind, then replay it. The
+                    # separate first-frame test covers automatic early loading.
+                    page.route(
+                        "**/assets/js/catalog-direction-state.js*",
+                        lambda route: route.fulfill(content_type="text/javascript", body=""),
+                    )
                     self.open_catalog(page)
                     page.locator("#catalog-sidebar").evaluate("""(el, side) => {
                         delete el.dataset.catalogConfiguredSide;
@@ -913,8 +926,35 @@ class CatalogDirectionBrowserTests(unittest.TestCase):
                             script.remove();
                         }""", self.state_script)
                         expect(page.locator("#catalog-sidebar")).to_have_attribute("data-catalog-configured-side", configured)
+                        expect(page.locator("#catalog-sidebar")).to_have_attribute("data-catalog-direction-bound", "")
                         expect(page.locator("#catalog-sidebar")).to_be_visible()
                         self.assert_edge(page, direction, configured)
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def test_late_disclosure_icon_follows_direction_without_a_state_change(self):
+        desktop = next(case for case in CERTIFICATION_CASES if not case.is_mobile)
+        for direction in ("ltr", "rtl"):
+            with self.subTest(direction=direction):
+                context, page, evidence = self.catalog_page(replace(desktop, direction=direction))
+                try:
+                    self.open_catalog(page)
+                    button = page.locator("#catalog-sidebar button.sidebar-menu-button--disclosure").first
+                    end = button.locator(".sidebar-menu-button__end")
+                    end.locator("svg").evaluate("el => el.remove()")
+                    page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
+                    wrong_icon = "chevron-left" if direction == "ltr" else "chevron-right"
+                    markup = create_environment().from_string(
+                        '{{ render_icon(name, "inline-end") }}'
+                    ).render(name=wrong_icon)
+                    end.evaluate("""(el, markup) => {
+                        const template = document.createElement('template');
+                        template.innerHTML = markup;
+                        el.append(template.content);
+                    }""", markup)
+                    self.assert_chevron(page, button, "right" if direction == "ltr" else "left")
+                    expect(button).to_have_attribute("aria-expanded", "false")
                     evidence.assert_clean()
                 finally:
                     context.close()
@@ -937,7 +977,15 @@ class CatalogDirectionBrowserTests(unittest.TestCase):
                     if case.is_mobile:
                         expect(sidebar).to_have_css("visibility", "hidden")
                         trigger = page.locator("[data-sidebar-trigger]")
+                        page.evaluate("""() => {
+                            window.__catalogSidebarShown = false;
+                            document.getElementById('catalog-sidebar').addEventListener(
+                                'shown.bs.offcanvas', () => { window.__catalogSidebarShown = true; },
+                                {once: true},
+                            );
+                        }""")
                         trigger.click()
+                        page.wait_for_function("window.__catalogSidebarShown === true")
                         expect(sidebar).to_have_css("transform", "none")
                         self.assert_edge(page, direction)
                         page.keyboard.press("Escape")

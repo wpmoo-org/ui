@@ -83,9 +83,20 @@ class EmptyBrowserTests(CatalogTestCase):
                                 expect(customized).to_have_css("border-style", "none")
                                 expect(customized).to_have_css("padding-top", "0px")
                                 expect(customized).to_have_css("align-items", "flex-start")
-                                # These distributions carry Bootstrap's LTR utility
-                                # definitions, where text-start explicitly means left.
-                                expect(customized).to_have_css("text-align", "left")
+                                # The shared logical utility follows the owner in
+                                # both distributions, including RTL embedded hosts.
+                                expect(customized).to_have_css("text-align", "start")
+                                alignment = customized.evaluate("""el => {
+                                    const header=el.querySelector('.empty-state-header');
+                                    const heading=header.querySelector('h3');
+                                    const range=document.createRange();
+                                    range.selectNodeContents(heading);
+                                    const text=range.getBoundingClientRect(),bounds=header.getBoundingClientRect();
+                                    const left=text.left-bounds.left,right=bounds.right-text.right;
+                                    return getComputedStyle(el).direction==='rtl'
+                                        ? {start:right,end:left} : {start:left,end:right};
+                                }""")
+                                self.assertLess(alignment["start"], alignment["end"])
                                 expect(customized.locator(".empty-state-header")).to_have_css(
                                     "align-items", "flex-start",
                                 )

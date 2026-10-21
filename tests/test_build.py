@@ -54,7 +54,7 @@ class BuildTests(CatalogTestCase):
                     ),
                 ),
             ):
-                output = build.write_catalog_theme_state_js(state)
+                output = build.write_catalog_state_module("catalog-theme-state", state)
                 self.assertTrue(output.read_text(encoding="utf-8").startswith("/*!"))
                 completed = subprocess.run(
                     [
@@ -223,6 +223,44 @@ class BuildTests(CatalogTestCase):
         self.assertTrue((SITE_DIST / "sitemap.xml").is_file())
         self.assertTrue((SITE_DIST / "robots.txt").is_file())
 
+    def test_catalog_direction_bootstrap_builds_without_theme_configuration(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            with mock.patch.object(build, "SITE_DIST", Path(tempdir)):
+                output = build.write_catalog_state_module("catalog-direction-state", {})
+                self.assertEqual(output.name, "catalog-direction-state.js")
+                self.assertTrue(output.read_text(encoding="utf-8").startswith("/*!"))
+                completed = subprocess.run(
+                    ["node", "--check", str(output)],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(completed.returncode, 0, completed.stderr)
+
+                executed = subprocess.run(
+                    [
+                        "node", "--input-type=module", "--eval", """
+                        import fs from "node:fs";
+                        import vm from "node:vm";
+                        const owner = {matches: () => true, querySelector: () => null};
+                        vm.runInNewContext(fs.readFileSync(process.argv[1], "utf8"), {
+                          document: {currentScript: {parentElement: owner}},
+                          window: {},
+                        });
+                        """, str(output),
+                    ],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(executed.returncode, 0, executed.stderr)
+
+    def test_catalog_state_module_rejects_unknown_or_traversing_names(self) -> None:
+        for name in ("../escape", "/escape", "unknown"):
+            with self.subTest(name=name):
+                with self.assertRaisesRegex(ValueError, "Unknown catalog state module"):
+                    build.write_catalog_state_module(name, {})
+
     def test_asset_version_ignores_codepen_only_demo_assets(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             site_dist = Path(tempdir)
@@ -234,6 +272,7 @@ class BuildTests(CatalogTestCase):
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-state.js", "catalog state js"),
                 ("assets/js/catalog-theme-state.js", "catalog theme state js"),
+                ("assets/js/catalog-direction-state.js", "catalog direction state js"),
                 ("assets/js/state.js", "state js"),
                 ("assets/js/theme-owner.js", "theme owner js"),
                 ("assets/js/codepen-demo.js", "initial codepen demo"),
@@ -267,6 +306,7 @@ class BuildTests(CatalogTestCase):
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-state.js", "initial state js"),
                 ("assets/js/catalog-theme-state.js", "catalog theme state js"),
+                ("assets/js/catalog-direction-state.js", "catalog direction state js"),
                 ("assets/js/state.js", "state js"),
                 ("assets/js/theme-owner.js", "theme owner js"),
             ):
@@ -299,6 +339,7 @@ class BuildTests(CatalogTestCase):
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-state.js", "catalog state js"),
                 ("assets/js/catalog-theme-state.js", "catalog theme state js"),
+                ("assets/js/catalog-direction-state.js", "catalog direction state js"),
                 ("assets/js/state.js", "state js"),
                 ("assets/js/theme-owner.js", "theme owner js"),
             ):
@@ -313,6 +354,7 @@ class BuildTests(CatalogTestCase):
                     "assets/js/state.js",
                     "assets/js/theme-owner.js",
                     "assets/js/catalog-theme-state.js",
+                    "assets/js/catalog-direction-state.js",
                 ):
                     original_version = build.asset_version()
                     target = site_dist / relative

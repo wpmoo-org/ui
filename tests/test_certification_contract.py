@@ -1257,7 +1257,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(imported.returncode, 0, imported.stderr)
         expected_exports = set(aggregate["namedExports"])
         if package["version"] != freeze["freezeVersion"]:
-            expected_exports.add("TableOfContents")
+            expected_exports.update({"TableOfContents", "OverlayScrollbar"})
         self.assertEqual(expected_exports, set(json.loads(imported.stdout)))
 
     def test_rc5_freeze_test_docstring_matches_enforced_equality(self) -> None:

@@ -62,6 +62,7 @@ JS_COMPONENTS = SRC / "js/components"
 JS_ROOT = SRC / "js"
 STATE_PATH = JS_ROOT / "state.js"
 JS_CATALOG = SITE_SRC / "js/catalog"
+CATALOG_STATE_MODULES = ("catalog-theme-state", "catalog-direction-state")
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
     "overlay-scrollbar.js",
@@ -2037,6 +2038,7 @@ def asset_version() -> str:
         SITE_DIST / "assets/js/bootstrap.bundle.min.js",
         SITE_DIST / "assets/js/catalog-state.js",
         SITE_DIST / "assets/js/catalog-theme-state.js",
+        SITE_DIST / "assets/js/catalog-direction-state.js",
         SITE_DIST / "assets/js/state.js",
         SITE_DIST / "assets/js/theme-owner.js",
         SITE_DIST / "assets/js/catalog/index.js",
@@ -2222,11 +2224,13 @@ def _normalize_esbuild_module_comments(output: Path) -> None:
         output.write_text(normalized, encoding="utf-8")
 
 
-def write_catalog_theme_state_js(state: dict[str, object]) -> Path:
-    source = create_environment().get_template("js/catalog-theme-state.js.jinja").render(
+def write_catalog_state_module(name: str, state: dict[str, object]) -> Path:
+    if name not in CATALOG_STATE_MODULES:
+        raise ValueError(f"Unknown catalog state module: {name}")
+    source = create_environment().get_template(f"js/{name}.js.jinja").render(
         theme_builder_state=state,
     )
-    output = SITE_DIST / "assets/js/catalog-theme-state.js"
+    output = SITE_DIST / f"assets/js/{name}.js"
     output.parent.mkdir(parents=True, exist_ok=True)
     result = subprocess.run(
         [
@@ -2242,7 +2246,7 @@ def write_catalog_theme_state_js(state: dict[str, object]) -> Path:
     )
     if result.returncode != 0:
         raise RuntimeError(
-            "esbuild failed for catalog-theme-state.js:\n"
+            f"esbuild failed for {name}.js:\n"
             f"stdout: {result.stdout}\n"
             f"stderr: {result.stderr}"
         )
@@ -2733,7 +2737,9 @@ def build_site() -> None:
     copy_site_assets()
     theme_builder_payload = theme_builder_first_paint_payload()
     write_catalog_state_css(theme_builder_payload)
-    write_catalog_theme_state_js(catalog_state_config(theme_builder_payload))
+    state_config = catalog_state_config(theme_builder_payload)
+    for name in CATALOG_STATE_MODULES:
+        write_catalog_state_module(name, state_config)
     copy_certification_fixtures_to_site()
     render_layout_certification_fixtures()
     copy_site_metadata()
