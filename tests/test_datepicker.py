@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 from datetime import datetime
+from html.parser import HTMLParser
 
 from build import create_environment
 from tests.helpers import (
@@ -118,6 +119,25 @@ class DatepickerMacroTests(CatalogTestCase):
         )
         self.assertNotIn("data-datepicker-range-start required", output)
         self.assertNotIn("data-datepicker-range-end required", output)
+
+    def test_initial_prompt_state_distinguishes_dates_and_partial_ranges(self) -> None:
+        cases = (
+            ('datepicker(id="date", name="date", label="Date")', "true"),
+            ('datepicker(id="date", name="date", label="Date", value="2026-13-40")', "true"),
+            ('datepicker(id="date", name="date", label="Date", value="2026-10-23")', "false"),
+            ('date_range_picker(id="range", start_name="start", end_name="end", label="Range")', "true"),
+            ('date_range_picker(id="range", start_name="start", end_name="end", label="Range", start_value="2026-10-23")', "false"),
+            ('date_range_picker(id="range", start_name="start", end_name="end", label="Range", start_value="2026-10-23", end_value="2026-10-25")', "false"),
+            ('date_range_picker(id="range", start_name="start", end_name="end", label="Range", start_value="2026-13-40", end_value="2026-13-41")', "true"),
+        )
+        for call, empty in cases:
+            with self.subTest(call=call):
+                output = self.render_datepicker("{{ " + call + " }}")
+                labels = []
+                parser = HTMLParser()
+                parser.handle_starttag = lambda tag, attrs: labels.append(dict(attrs)) if tag == "span" and "data-datepicker-label" in dict(attrs) else None
+                parser.feed(output)
+                self.assertEqual([label.get("data-datepicker-empty") for label in labels], [empty])
 
     def test_single_datepicker_label_uses_placeholder_for_invalid_values(self) -> None:
         output = self.render_datepicker(

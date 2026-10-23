@@ -1,5 +1,5 @@
 /*!
- * Moo UI v1.4.0 (https://wpmoo.org/)
+ * Moo UI v1.4.1 (https://wpmoo.org/)
  * Copyright 2026 WPMoo Authors
  * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)
  *
@@ -720,7 +720,7 @@ html.scrollbar-overlay-native::-webkit-scrollbar {
     padding: 0;
   }
   .form-control::placeholder {
-    color: var(--bs-tertiary-color);
+    color: var(--bs-secondary-color);
     opacity: 1;
   }
   .form-control:disabled {
@@ -3863,6 +3863,9 @@ html.scrollbar-overlay-native::-webkit-scrollbar {
   }
 
   /* Select */
+  .form-select:not(:disabled):not([multiple]):is(:not([size]), [size="1"]):has(option[data-placeholder="true"]:checked) {
+    color: var(--bs-secondary-color);
+  }
   .form-select option,
 .form-select optgroup {
     color: var(--bs-body-color);
@@ -6467,6 +6470,8 @@ label.btn {
   }
   .field > .form-label {
     margin-bottom: 0;
+  }
+  .field .form-label {
     font-weight: 500;
   }
   .field[data-invalid="true"] {
@@ -6545,6 +6550,7 @@ label.btn {
     max-width: var(--moo-datepicker-width);
   }
   .moo-datepicker__trigger {
+    --bs-btn-font-weight: 400;
     width: 100%;
     justify-content: flex-start;
     text-align: start;
@@ -6553,6 +6559,9 @@ label.btn {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .moo-datepicker__trigger:not(:disabled):not(.is-invalid):not(:hover, :active, :focus-visible, [aria-expanded="true"]) [data-datepicker-empty="true"] {
+    color: var(--bs-secondary-color);
   }
   .moo-datepicker__trigger.is-invalid {
     border-color: var(--bs-form-invalid-border-color);

@@ -3,6 +3,33 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.4.1 Compatible Fixes
+
+Field applies its existing medium label weight to nested composite-control
+labels without changing label association or spacing defaults. Enabled form
+prompts use the existing secondary-text token instead of the disabled tone.
+Native Select callers explicitly annotate prompt options with
+`data-placeholder="true"`; ordinary empty/zero values, disabled options and
+multiple/listbox modes keep their native meaning. Native `:checked` owns colour
+updates, including direct value assignment and form reset; no Select runtime is
+added. Date Picker exposes `data-datepicker-empty="true|false"` on its existing
+visible label and synchronizes it through its existing controller lifecycle.
+A valid start date makes a partial range selected, not empty. Prompt and selected
+date text use normal Input weight; interactive/invalid/disabled Button colours
+retain ownership.
+
+These opt-in annotations correct empty-selection presentation without replacing
+existing markup, value semantics, exports, peers, dependencies or default
+interaction behavior. This is a compatible patch to 1.4.0, not a new component
+release. Jinja producer options remain outside the npm API; their rendered
+state hooks are documented on the public component pages. Host adapters adopt
+the annotations independently through identified artifact intake.
+
+The accepted appearance is protected by the Field parity browser contracts,
+Select and Date Picker rendering/state tests, and accepted stylesheet baselines.
+Release-specific checks remain required. Certification stays in preview;
+merging to main starts the existing automatic tag/publish/release chain.
+
 ## 1.4.0 Compatible Additions
 
 The release target adds `@wpmoo/ui/overlay-scrollbar.js`, its aggregate

@@ -31,11 +31,11 @@
       {% if option.options is defined %}
         <optgroup label="{{ option.label }}"{% if option.disabled is defined and option.disabled %} disabled{% endif %}>
           {% for child in option.options %}
-            <option value="{{ child.value }}"{% if child.value == selected or (child.selected is defined and child.selected) %} selected{% endif %}{% if child.disabled is defined and child.disabled %} disabled{% endif %}>{{ child.label }}</option>
+            <option value="{{ child.value }}"{% if child.value == selected or (child.selected is defined and child.selected) %} selected{% endif %}{% if child.disabled is defined and child.disabled %} disabled{% endif %}{% if child.placeholder is defined and child.placeholder %} data-placeholder="true"{% endif %}>{{ child.label }}</option>
           {% endfor %}
         </optgroup>
       {% else %}
-        <option value="{{ option.value }}"{% if option.value == selected or (option.selected is defined and option.selected) %} selected{% endif %}{% if option.disabled is defined and option.disabled %} disabled{% endif %}>{{ option.label }}</option>
+        <option value="{{ option.value }}"{% if option.value == selected or (option.selected is defined and option.selected) %} selected{% endif %}{% if option.disabled is defined and option.disabled %} disabled{% endif %}{% if option.placeholder is defined and option.placeholder %} data-placeholder="true"{% endif %}>{{ option.label }}</option>
       {% endif %}
     {% endfor %}
   </select>

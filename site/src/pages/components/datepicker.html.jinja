@@ -30,6 +30,7 @@
     {% endset %}
     {% set usage %}
       <p>Use <code>[data-datepicker]</code> for a single date, <code>[data-datepicker-range]</code> for start/end ranges, and <code>[data-calendar]</code> when the calendar should stay inline. The trigger owns <code>aria-expanded</code> and <code>aria-controls</code>; the popover owns <code>role="dialog"</code>; the calendar owns roving day focus and selection state.</p>
+      <p>The displayed label exposes <code>data-datepicker-empty="true|false"</code>. An empty prompt uses the shared Input placeholder colour; a selected date, including the first date of an incomplete range, uses normal trigger text. Initial markup, selection, clearing, public setters and form reset keep this state synchronized. Disabled and invalid trigger colours retain their existing priority.</p>
       <p>The optional Datepicker ESM is a self-contained Moo UI module with no third-party runtime; it owns the visible surface, date math, and selection state. Import <code>@wpmoo/ui/datepicker.js</code>, initialize only the root your page owns, and call <code>dispose()</code> before removing that root in a partial-page or SPA update.</p>
     {% endset %}
     {{ render_component_intro(
