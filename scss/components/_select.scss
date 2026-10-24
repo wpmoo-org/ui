@@ -1,5 +1,11 @@
 /* Select */
 .form-select {
+  // Explicit option semantics, not value/required/disabled heuristics. Native
+  // :checked follows selection, direct value assignments and form resets.
+  &:not(:disabled):not([multiple]):is(:not([size]), [size="1"]):has(option[data-placeholder="true"]:checked) {
+    color: $input-placeholder-color;
+  }
+
   option,
   optgroup {
     color: var(--bs-body-color);

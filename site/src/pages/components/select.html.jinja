@@ -8,7 +8,7 @@
 {% block title %}Native Select — Moo UI{% endblock %}
 
 {% set fruit_options = [
-  {"value": "", "label": "Choose a workspace", "selected": true, "disabled": true},
+  {"value": "", "label": "Choose a workspace", "selected": true, "disabled": true, "placeholder": true},
   {"value": "ops", "label": "Operations"},
   {"value": "design", "label": "Design"},
   {"value": "analytics", "label": "Analytics"},
@@ -70,7 +70,7 @@
           label="Native Select",
           id="select-intro",
           options=[
-            {"value": "", "label": "Choose an option", "selected": true, "disabled": true},
+            {"value": "", "label": "Choose an option", "selected": true, "disabled": true, "placeholder": true},
             {"value": "one", "label": "Option one"},
             {"value": "two", "label": "Option two"},
             {"value": "three", "label": "Option three"}
@@ -84,6 +84,7 @@
       <p>Use <code>.form-select</code> when the user must choose one value from a finite list and native browser behavior is enough. Pair the control with a visible label, keep option values stable for form submission, and use a disabled placeholder option when no value has been chosen yet.</p>
       <p>Use option groups only when they make a long list easier to scan. Keep labels short, avoid using select for huge searchable datasets, and prefer Combobox when filtering, async loading, or multi-selection is central to the workflow.</p>
       <p>Set native state directly on the control: <code>disabled</code> when it is unavailable, <code>multiple</code> only when several values can be submitted, and invalid state when validation fails. Size variants such as <code>.form-select-sm</code> and <code>.form-select-lg</code> should match the density of the surrounding form.</p>
+      <p>Mark an actual prompt option with <code>placeholder: true</code>, rendered as <code>data-placeholder="true"</code> on that option. Only a selected prompt in a single-line, enabled Select uses the shared Input placeholder colour. Empty values and disabled options are not implicitly prompts. Optional prompts may remain selectable; native option values, submission and validation are unchanged. Multiple and listbox controls keep normal option text. Native selection, programmatic value changes and form reset update the colour without JavaScript.</p>
     {% endset %}
     {{ render_component_intro(
       intro,
@@ -92,7 +93,7 @@
     ) }}
 
     {% set simple_options = [
-      {"value": "", "label": "Choose queue", "selected": true, "disabled": true},
+      {"value": "", "label": "Choose queue", "selected": true, "disabled": true, "placeholder": true},
       {"value": "ops", "label": "Operations"},
       {"value": "design", "label": "Design"},
       {"value": "analytics", "label": "Analytics"},
@@ -182,7 +183,7 @@
                 label="Primary queue",
                 id="select-field-1",
                 options=[
-                  {"value": "", "label": "Choose queue", "disabled": true},
+                  {"value": "", "label": "Choose queue", "disabled": true, "placeholder": true},
                   {"value": "ops", "label": "Operations"},
                   {"value": "support", "label": "Support"},
                   {"value": "finance", "label": "Finance"}
@@ -197,7 +198,7 @@
                 label="Fallback queue",
                 id="select-field-2",
                 options=[
-                  {"value": "", "label": "Choose queue", "selected": true, "disabled": true},
+                  {"value": "", "label": "Choose queue", "selected": true, "disabled": true, "placeholder": true},
                   {"value": "ops", "label": "Operations"},
                   {"value": "support", "label": "Support"},
                   {"value": "finance", "label": "Finance"}
@@ -225,7 +226,7 @@
             label="مساحة العمل",
             id="select-rtl-arabic",
             options=[
-              {"value": "", "label": "اختر مساحة العمل", "selected": true, "disabled": true},
+              {"value": "", "label": "اختر مساحة العمل", "selected": true, "disabled": true, "placeholder": true},
               {"value": "ops", "label": "العمليات"},
               {"value": "design", "label": "التصميم"},
               {"value": "analytics", "label": "التحليلات"}
@@ -246,7 +247,7 @@
             label="סביבת עבודה",
             id="select-rtl-hebrew",
             options=[
-              {"value": "", "label": "בחר סביבת עבודה", "selected": true, "disabled": true},
+              {"value": "", "label": "בחר סביבת עבודה", "selected": true, "disabled": true, "placeholder": true},
               {"value": "ops", "label": "תפעול"},
               {"value": "design", "label": "עיצוב"},
               {"value": "analytics", "label": "אנליטיקה"}
@@ -267,7 +268,7 @@
             label="Workspace",
             id="select-rtl-english",
             options=[
-              {"value": "", "label": "Choose workspace", "selected": true, "disabled": true},
+              {"value": "", "label": "Choose workspace", "selected": true, "disabled": true, "placeholder": true},
               {"value": "ops", "label": "Operations"},
               {"value": "design", "label": "Design"},
               {"value": "analytics", "label": "Analytics"}

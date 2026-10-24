@@ -8,7 +8,8 @@ $input-line-height: 1.4285714286 !default;
 $input-bg: var(--moo-input-bg, transparent) !default;
 $input-border-color: var(--moo-border) !default;
 $input-border-radius: var(--bs-border-radius-lg) !default;
-$input-placeholder-color: var(--bs-tertiary-color) !default;
+// Enabled prompts are secondary text, not the lower-contrast disabled tone.
+$input-placeholder-color: var(--bs-secondary-color) !default;
 $input-focus-bg: var(--moo-input-bg, transparent) !default;
 // Bootstrap leaves disabled text-control foregrounds null by default
 // (vendor/bootstrap/scss/_variables.scss), which lets real values inherit the

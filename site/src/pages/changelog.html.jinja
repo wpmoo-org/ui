@@ -23,52 +23,42 @@
         <header class="d-flex flex-column gap-3">
           <div class="d-flex flex-wrap align-items-center gap-3 small text-body-secondary">
             {{ badge("v" ~ product.version, variant="dark") }}
-            <span>Minor release</span>
+            <span>Patch release</span>
           </div>
           {{ typography("Moo UI " ~ product.version, variant="section-title", id=release_id, extra_class="mb-0") }}
           <p class="text-body-secondary mb-0">
-            Opt-in native-scroll overlay scrollbar and unified catalog reading navigation.
+            Consistent Field labels and readable empty-selection prompts.
           </p>
         </header>
-
-        <section aria-labelledby="{{ release_id }}-added">
-          {{ typography("Added", variant="subsection-title", id=release_id ~ "-added", extra_class="mb-3") }}
-          <ul class="mb-0 ps-4">
-            <li>
-              <a href="{{ site_href("utils/overlay-scrollbar.html", root_path) }}">Overlay Scrollbar</a>
-              adds explicit-init ESM and scoped Sass support for native document
-              and element scrollports, with keyboard controls and native fallback.
-            </li>
-            <li>
-              The catalog uses the shared scrollbar and fades its compact
-              Table of Contents and Separator together below the Header.
-            </li>
-          </ul>
-        </section>
 
         <section aria-labelledby="{{ release_id }}-fixed">
           {{ typography("Fixed", variant="subsection-title", id=release_id ~ "-fixed", extra_class="mb-3") }}
           <ul class="mb-0 ps-4">
             <li>
-              Logical text alignment and catalog Sidebar placement follow RTL;
-              scrollbar thumb direction follows the controlled scrollport.
+              <a href="{{ site_href("components/field.html", root_path) }}">Field</a>
+              gives nested composite-control labels the same medium weight,
+              retaining existing label and inter-field spacing.
             </li>
             <li>
-              Native touch swipes remain usable at the revealed scrollbar edge;
-              failed initialization restores host state and releases created instances.
+              Enabled Input, Textarea and Combobox prompts share a readable
+              secondary-text colour in light and dark themes.
             </li>
             <li>
-              <a href="{{ site_href("charts.html", root_path) }}">Charts</a>
-              retains its common TOC without a second navigator; only the
-              first-chart gap is reduced by 16px. Long
-              <a href="{{ site_href("installation.html", root_path) }}">Installation</a>
-              URLs wrap using Bootstrap text-break.
+              <a href="{{ site_href("components/select.html", root_path) }}">Select</a>
+              distinguishes explicitly marked prompt options from selected values,
+              including native changes, direct assignments and form reset.
+            </li>
+            <li>
+              <a href="{{ site_href("components/datepicker.html", root_path) }}">Date Picker</a>
+              distinguishes empty prompts from single and partial-range selections.
+              Both prompts and selected dates use normal Input weight, while
+              hover, focus, validation and disabled states keep their native colours.
             </li>
           </ul>
         </section>
 
         <p class="small text-body-secondary mb-0">
-          Compatible with the public 1.3.0 package API. Component certification
+          Compatible with the public 1.4.0 package API. Component certification
           remains in preview.
         </p>
       {% endcall %}

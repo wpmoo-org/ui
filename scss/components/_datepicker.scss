@@ -9,6 +9,8 @@
 }
 
 .moo-datepicker__trigger {
+  // This Button displays a form value, not an action label.
+  --bs-btn-font-weight: #{$input-font-weight};
   width: 100%;
   justify-content: flex-start;
   text-align: start;
@@ -18,6 +20,10 @@
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.moo-datepicker__trigger:not(:disabled):not(.is-invalid):not(:hover, :active, :focus-visible, [aria-expanded="true"]) [data-datepicker-empty="true"] {
+  color: $input-placeholder-color;
 }
 
 .moo-datepicker__trigger.is-invalid {

@@ -10,8 +10,12 @@
   // gap-only model produces.
   > .form-label {
     margin-bottom: 0;
-    // $form-label-font-weight is unset (inherits normal body weight); the
-    // reference's own field label sits at a medium weight instead.
+  }
+
+  // Composite controls keep their associated labels inside their own roots.
+  // Apply the same Field treatment without changing checkbox/radio labels or
+  // removing the label-to-control margin inside those composite roots.
+  .form-label {
     font-weight: $font-weight-medium;
   }
 

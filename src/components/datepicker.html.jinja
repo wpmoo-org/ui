@@ -102,7 +102,8 @@
     {% if label %}<label class="form-label" for="{{ id }}-trigger">{{ label }}</label>{% endif %}
     <button class="btn btn-outline-secondary moo-datepicker__trigger{% if invalid %} is-invalid{% endif %}" id="{{ id }}-trigger" type="button" data-datepicker-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ popover_id }}"{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if disabled %} disabled{% endif %}>
       {{ render_icon("calendar", "inline-start") }}
-      <span data-datepicker-label>{{ datepicker_label(value, placeholder) }}</span>
+      {% set display_value = datepicker_label(value, "") | trim %}
+      <span data-datepicker-label data-datepicker-empty="{{ 'false' if display_value else 'true' }}">{{ display_value or placeholder }}</span>
     </button>
     <input type="hidden" name="{{ name }}" value="{{ value }}" data-datepicker-input{% if disabled %} disabled{% endif %}>
     {% if required %}
@@ -150,7 +151,8 @@
     {% if label %}<label class="form-label" for="{{ id }}-trigger">{{ label }}</label>{% endif %}
     <button class="btn btn-outline-secondary moo-datepicker__trigger{% if invalid %} is-invalid{% endif %}" id="{{ id }}-trigger" type="button" data-datepicker-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ popover_id }}"{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if disabled %} disabled{% endif %}>
       {{ render_icon("calendar-range", "inline-start") }}
-      <span data-datepicker-label>{{ datepicker_range_label(start_value, end_value, placeholder) }}</span>
+      {% set display_value = datepicker_label(start_value, "") | trim %}
+      <span data-datepicker-label data-datepicker-empty="{{ 'false' if display_value else 'true' }}">{{ datepicker_range_label(start_value, end_value, placeholder) }}</span>
     </button>
     <input type="hidden" name="{{ start_name }}" value="{{ start_value }}" data-datepicker-range-start{% if disabled %} disabled{% endif %}>
     <input type="hidden" name="{{ end_name }}" value="{{ end_value }}" data-datepicker-range-end{% if disabled %} disabled{% endif %}>

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from html.parser import HTMLParser
 
 from build import create_environment
 from tests.helpers import ROOT, CatalogTestCase
@@ -93,6 +94,29 @@ class SelectTests(CatalogTestCase):
                 'select(aria_label="Workspace", '
                 'options=[{"value": "ui", "label": "UI"}], dir="sideways")'
             )
+
+    def test_only_explicit_prompt_options_receive_placeholder_semantics(self) -> None:
+        output = self.render_select(
+            'select(aria_label="Workspace", options=['
+            '{"value": "", "label": "Account default"}, '
+            '{"value": 0, "label": "Zero"}, '
+            '{"value": "old", "label": "Unavailable", "disabled": true}, '
+            '{"value": "prompt", "label": "Choose", "placeholder": true}, '
+            '{"label": "Group", "options": ['
+            '{"value": "group-prompt", "label": "Choose group", "placeholder": true}'
+            ']}])'
+        )
+
+        options = []
+        parser = HTMLParser()
+        parser.handle_starttag = lambda tag, attrs: options.append(dict(attrs)) if tag == "option" else None
+        parser.feed(output)
+        by_value = {option["value"]: option for option in options}
+        for value in ("", "0", "old"):
+            self.assertNotIn("data-placeholder", by_value[value])
+        self.assertIn("disabled", by_value["old"])
+        for value in ("prompt", "group-prompt"):
+            self.assertEqual(by_value[value]["data-placeholder"], "true")
 
     def test_native_option_menu_uses_theme_tokens(self) -> None:
         components = COMPONENTS_AGGREGATE.read_text(encoding="utf-8")

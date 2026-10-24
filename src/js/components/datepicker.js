@@ -1117,6 +1117,7 @@ export default class MooDatepicker {
     setValidationValue(this._validationInput, value);
     syncDatepickerValidation(this._element, this._trigger, this._validationInput);
     this._element.dataset.datepickerValue = value;
+    this._label.dataset.datepickerEmpty = value ? "false" : "true";
     this._label.textContent = value
       ? formatDisplay(parseDate(value), this._config.locale)
       : this._placeholder;
@@ -1311,6 +1312,7 @@ export class MooDateRangePicker {
     syncDatepickerValidation(this._element, this._trigger, this._validationInput);
     this._element.dataset.datepickerStartValue = startValue || "";
     this._element.dataset.datepickerEndValue = endValue || "";
+    this._label.dataset.datepickerEmpty = startValue ? "false" : "true";
     if (startValue && endValue) {
       this._label.textContent = `${formatDisplay(parseDate(startValue), this._config.locale)} - ${formatDisplay(parseDate(endValue), this._config.locale)}`;
     } else if (startValue) {
