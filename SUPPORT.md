@@ -12,6 +12,13 @@ and component certification are independent: the certification manifest remains
 presence in the catalog does not by itself mean that it has completed
 certification.
 
+New catalog CodePen exports are live demos: Moo CSS and Moo ESM follow the
+latest stable npm tag on reload, subject to CDN caching. Stored HTML and inline
+demo logic do not update automatically. Existing explicitly pinned Pens keep
+their URLs; pin CSS and explicit module imports for immutable reproductions.
+Installation documentation, adapter locks and production dependencies remain
+version-pinned. This demo policy is not a new component-certification claim.
+
 ## Supported Public Surfaces
 
 Moo UI treats the following documented surfaces as public contracts:

@@ -13,6 +13,19 @@ remain unchanged. There is no new token, component prop, dependency, export,
 ESM behavior or adapter-specific override. This compatible visual correction
 is a patch to1.4.1, not a new public component or API release.
 
+New catalog CodePen exports deliberately follow npm's stable `@latest` tag for
+Moo CSS and Moo ESM, including inline DataTable/Chart demo imports. The shared
+demo loader already derives its Moo runtime version from the linked stylesheet;
+that preserves explicitly pinned saved Pens while new exports follow `latest`.
+This is a catalog delivery policy, not a package export/lifecycle change or
+permission to float installation docs, adapter locks or production dependencies.
+Updates take effect on reload subject to CDN caching; independent tag requests
+are not an atomic asset snapshot during publication. Stored markup and inline
+demo logic do not update automatically. Pin both CSS and explicit module imports
+when an immutable reproduction is needed. Existing saved versioned URLs are not
+retroactively rewritten, and Bootstrap's existing compatibility policy is unchanged.
+The live tag can advance across major versions; it is not a compatibility pin.
+
 The accepted appearance is protected by the Field parity browser contract in
 16 stylesheet/theme/direction/viewport profiles, with a visible error linked
 to its invalid control and both feedback roles following owner customization.

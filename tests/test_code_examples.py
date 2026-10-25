@@ -250,7 +250,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertEqual(
             payload["css_external"],
             (
-                f"https://unpkg.com/@wpmoo/ui@{build.PACKAGE_VERSION}/dist/assets/css/moo-ui.css;"
+                "https://unpkg.com/@wpmoo/ui@latest/dist/assets/css/moo-ui.css;"
                 "https://ui.wpmoo.org/assets/css/codepen-demo.css"
             ),
         )
