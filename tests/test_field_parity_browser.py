@@ -18,7 +18,7 @@ from tests.helpers.browser_harness import (
 
 
 COMPOSITION = """
-{% from "components/field.html.jinja" import field, field_group, form %}
+{% from "components/field.html.jinja" import field, field_description, field_error, field_group, form %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "components/select.html.jinja" import select %}
@@ -29,7 +29,11 @@ COMPOSITION = """
 <link rel="stylesheet" href="/dist/assets/css/moo-ui.css"></head><body>
 <main class="moo-ui p-3" data-bs-theme="{{ theme }}">
 {% call form() %}{% call field_group() %}
-{% call field() %}{{ input(id="text", label="Text", placeholder="Prompt") }}{% endcall %}
+{% call field(invalid=true) %}
+{{ input(id="text", label="Text", placeholder="Prompt", aria_invalid=true, describedby="text-help text-error") }}
+{{ field_description("text-help", "Shared field help.") }}
+{{ field_error("text-error", "Field validation feedback.") }}
+{% endcall %}
 {% call field() %}{{ textarea(id="notes", label="Notes", placeholder="Prompt") }}{% endcall %}
 {% call field() %}{{ select(id="choice", label="Choice", options=options) }}{% endcall %}
 {% call field() %}{{ combobox(id="combo", label="Search", placeholder="Prompt", items=[{"value":"a","label":"Alpha"}], show_clear=true) }}{% endcall %}
@@ -40,7 +44,7 @@ COMPOSITION = """
 {{ select(id="multiple", label="Multiple", options=options, multiple=true) }}
 {{ select(id="disabled", label="Disabled", options=options, disabled=true) }}
 {{ select(id="required", label="Required", options=options, required=true, invalid=true) }}
-{% endcall %}{% endcall %}</main>
+{% endcall %}{% endcall %}<small id="small-reference" class="text-body-secondary">Small reference</small></main>
 <script type="module">
 import Combobox from '/dist/js/combobox.js';
 import Datepicker, {MooDateRangePicker} from '/dist/js/datepicker.js';
@@ -137,6 +141,42 @@ class FieldParityBrowserTests(unittest.TestCase):
                     self.assertEqual(metrics[control], metrics["prompt"], control)
                 self.assertEqual(metrics["dateWeight"], metrics["inputWeight"])
                 self.assertGreaterEqual(metrics["contrast"], 4.5)
+                evidence.assert_clean()
+
+    def test_descriptions_follow_owner_small_scale_in_both_stylesheets(self):
+        for theme, direction, width, stylesheet in itertools.product(
+            ("light", "dark"), ("ltr", "rtl"), (390, 1440), ("moo-ui.css", "moo.css"),
+        ):
+            with self.subTest(theme=theme, direction=direction, width=width, stylesheet=stylesheet):
+                page, evidence = self.open_composition(theme, direction, width)
+                if stylesheet == "moo.css":
+                    page.locator('link[rel="stylesheet"]').evaluate("""e => new Promise(resolve => {
+                        e.addEventListener('load', resolve, {once: true});
+                        e.href = '/dist/assets/css/moo.css';
+                    })""")
+                helper = page.locator("#text-help")
+                reference = page.locator("#small-reference")
+                # Embedded Core deliberately omits Bootstrap utility output.
+                # Resolve the shared colour token without depending on utilities.
+                reference.evaluate("e => e.style.color = 'var(--bs-secondary-color)'")
+                label = page.locator('label[for="text"]')
+                error = page.locator("#text-error")
+                expect(error).to_be_visible()
+                expect(helper).to_have_css("font-size", reference.evaluate("e => getComputedStyle(e).fontSize"))
+                expect(error).to_have_css("font-size", reference.evaluate("e => getComputedStyle(e).fontSize"))
+                self.assertLess(
+                    helper.evaluate("e => parseFloat(getComputedStyle(e).fontSize)"),
+                    label.evaluate("e => parseFloat(getComputedStyle(e).fontSize)"),
+                )
+                self.assertEqual(page.locator("#text").get_attribute("aria-describedby").split(), ["text-help", "text-error"])
+                expect(helper).to_have_css("margin-top", "0px")
+                expect(helper).to_have_css("color", reference.evaluate("e => getComputedStyle(e).color"))
+                # Description and validation feedback share the same owner scale
+                # as Typography Small, including runtime customization.
+                page.locator("main").evaluate("e => e.style.setProperty('--moo-small-font-size', '1rem')")
+                expect(helper).to_have_css("font-size", reference.evaluate("e => getComputedStyle(e).fontSize"))
+                expect(helper).to_have_css("font-size", page.locator("html").evaluate("e => getComputedStyle(e).fontSize"))
+                expect(error).to_have_css("font-size", reference.evaluate("e => getComputedStyle(e).fontSize"))
                 evidence.assert_clean()
 
     def test_native_prompt_selection_reset_and_listbox_semantics(self):

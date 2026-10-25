@@ -61,11 +61,8 @@
 .field-description,
 .field-error {
   margin-top: 0;
-  // .form-text/.invalid-feedback both default to Bootstrap's smaller
-  // $font-size-sm scale; the reference's own description/error text sit
-  // at the same size as the label itself, which this project's own
-  // $font-size-base already matches exactly (0.875rem).
-  font-size: $font-size-base;
+  // Share Typography Small's owner-resolved scale without caller utilities.
+  font-size: var(--moo-small-font-size);
 }
 
 .field-group {
