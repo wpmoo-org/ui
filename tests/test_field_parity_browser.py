@@ -5,6 +5,7 @@ import subprocess
 import sys
 import unittest
 
+import sass
 from playwright.sync_api import expect, sync_playwright
 
 from build import create_environment
@@ -18,7 +19,7 @@ from tests.helpers.browser_harness import (
 
 
 COMPOSITION = """
-{% from "components/field.html.jinja" import field, field_group, form %}
+{% from "components/field.html.jinja" import field, field_description, field_error, field_group, form %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "components/select.html.jinja" import select %}
@@ -26,10 +27,15 @@ COMPOSITION = """
 {% from "components/datepicker.html.jinja" import datepicker, date_range_picker %}
 <!doctype html><html lang="en" dir="{{ direction }}"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="/dist/assets/css/moo-ui.css"></head><body>
+{% if bootstrap_css %}<style>{{ bootstrap_css | safe }}</style>{% endif %}
+<link rel="stylesheet" href="/dist/assets/css/{{ stylesheet }}"></head><body>
 <main class="moo-ui p-3" data-bs-theme="{{ theme }}">
 {% call form() %}{% call field_group() %}
-{% call field() %}{{ input(id="text", label="Text", placeholder="Prompt") }}{% endcall %}
+{% call field(invalid=true) %}
+{{ input(id="text", label="Text", placeholder="Prompt", aria_invalid=true, describedby="text-help text-error") }}
+{{ field_description("text-help", "Shared field help.") }}
+{{ field_error("text-error", "Field validation feedback.") }}
+{% endcall %}
 {% call field() %}{{ textarea(id="notes", label="Notes", placeholder="Prompt") }}{% endcall %}
 {% call field() %}{{ select(id="choice", label="Choice", options=options) }}{% endcall %}
 {% call field() %}{{ combobox(id="combo", label="Search", placeholder="Prompt", items=[{"value":"a","label":"Alpha"}], show_clear=true) }}{% endcall %}
@@ -40,7 +46,7 @@ COMPOSITION = """
 {{ select(id="multiple", label="Multiple", options=options, multiple=true) }}
 {{ select(id="disabled", label="Disabled", options=options, disabled=true) }}
 {{ select(id="required", label="Required", options=options, required=true, invalid=true) }}
-{% endcall %}{% endcall %}</main>
+{% endcall %}{% endcall %}<small id="small-reference" class="text-body-secondary">Small reference</small></main>
 <script type="module">
 import Combobox from '/dist/js/combobox.js';
 import Datepicker, {MooDateRangePicker} from '/dist/js/datepicker.js';
@@ -62,6 +68,9 @@ class FieldParityBrowserTests(unittest.TestCase):
         )
         if built.returncode:
             raise AssertionError(built.stderr)
+        cls.bootstrap_css = sass.compile(
+            filename=str(ROOT / "vendor/bootstrap/scss/bootstrap.scss"),
+        )
         server = serve_repository()
         cls.base_url = server.__enter__()
         cls.addClassCleanup(server.__exit__, None, None, None)
@@ -71,13 +80,15 @@ class FieldParityBrowserTests(unittest.TestCase):
         cls.browser = launch_certification_browser(cls.playwright)
         cls.addClassCleanup(cls.browser.close)
 
-    def open_composition(self, theme, direction, width):
+    def open_composition(self, theme, direction, width, stylesheet="moo-ui.css"):
         context = self.browser.new_context(viewport={"width": width, "height": 900})
         self.addCleanup(context.close)
         page = context.new_page()
         evidence = BrowserEvidence(page)
         html = create_environment().from_string(COMPOSITION).render(
             theme=theme, direction=direction,
+            stylesheet=stylesheet,
+            bootstrap_css=self.bootstrap_css if stylesheet == "moo.css" else "",
             options=[
                 {"value": "", "label": "Prompt", "placeholder": True},
                 {"label": "Group", "options": [{"value": "a", "label": "Alpha"}]},
@@ -137,6 +148,34 @@ class FieldParityBrowserTests(unittest.TestCase):
                     self.assertEqual(metrics[control], metrics["prompt"], control)
                 self.assertEqual(metrics["dateWeight"], metrics["inputWeight"])
                 self.assertGreaterEqual(metrics["contrast"], 4.5)
+                evidence.assert_clean()
+
+    def test_descriptions_follow_owner_small_scale_in_both_stylesheets(self):
+        for theme, direction, width, stylesheet in itertools.product(
+            ("light", "dark"), ("ltr", "rtl"), (390, 1440), ("moo-ui.css", "moo.css"),
+        ):
+            with self.subTest(theme=theme, direction=direction, width=width, stylesheet=stylesheet):
+                page, evidence = self.open_composition(theme, direction, width, stylesheet)
+                helper = page.locator("#text-help")
+                reference = page.locator("#small-reference")
+                label = page.locator('label[for="text"]')
+                error = page.locator("#text-error")
+                expect(error).to_be_visible()
+                expect(helper).to_have_css("font-size", reference.evaluate("e => getComputedStyle(e).fontSize"))
+                expect(error).to_have_css("font-size", reference.evaluate("e => getComputedStyle(e).fontSize"))
+                self.assertLess(
+                    helper.evaluate("e => parseFloat(getComputedStyle(e).fontSize)"),
+                    label.evaluate("e => parseFloat(getComputedStyle(e).fontSize)"),
+                )
+                self.assertEqual(page.locator("#text").get_attribute("aria-describedby").split(), ["text-help", "text-error"])
+                expect(helper).to_have_css("margin-top", "0px")
+                expect(helper).to_have_css("color", reference.evaluate("e => getComputedStyle(e).color"))
+                # Description and validation feedback share the same owner scale
+                # as Typography Small, including runtime customization.
+                page.locator("main").evaluate("e => e.style.setProperty('--moo-small-font-size', '1rem')")
+                expect(helper).to_have_css("font-size", reference.evaluate("e => getComputedStyle(e).fontSize"))
+                expect(helper).to_have_css("font-size", page.locator("html").evaluate("e => getComputedStyle(e).fontSize"))
+                expect(error).to_have_css("font-size", reference.evaluate("e => getComputedStyle(e).fontSize"))
                 evidence.assert_clean()
 
     def test_native_prompt_selection_reset_and_listbox_semantics(self):

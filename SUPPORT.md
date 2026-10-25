@@ -4,13 +4,20 @@ Moo UI Core is an open-source Bootstrap component system. This document defines
 the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
-Moo UI `1.4.1` is a compatible patch release target correcting nested Field
-labels, enabled placeholder contrast and empty Select/Date Picker presentation.
-The `1.4.0` package exports, dependencies and native form semantics remain intact. Package stability
+Moo UI `1.4.2` is a compatible patch release target aligning Field Description
+and Field Error with the existing owner-resolved Typography Small scale.
+The `1.4.1` package exports, dependencies and native form semantics remain intact. Package stability
 and component certification are independent: the certification manifest remains
 `preview`. Production certification is introduced incrementally; a component's
 presence in the catalog does not by itself mean that it has completed
 certification.
+
+New catalog CodePen exports are live demos: Moo CSS and Moo ESM follow the
+latest stable npm tag on reload, subject to CDN caching. Stored HTML and inline
+demo logic do not update automatically. Existing explicitly pinned Pens keep
+their URLs; pin CSS and explicit module imports for immutable reproductions.
+Installation documentation, adapter locks and production dependencies remain
+version-pinned. This demo policy is not a new component-certification claim.
 
 ## Supported Public Surfaces
 
@@ -195,9 +202,9 @@ conformance pass for that host. The runner needs Python 3 and Playwright
 only; no Moo UI build tooling is involved.
 
 The archive is reproducible byte-for-byte from the repository source at any
-time. Current development source targeting Moo UI 1.4.1 carries kit contract
+time. Current development source targeting Moo UI 1.4.2 carries kit contract
 version 1.0; its development archive hashes to SHA-256
-`aa515c3ef68874bd234b72b802d2edf81abb6d5236a0a6267921072ce89fcc2a`.
+`d989c9895f3e4be035f94dfc34a3f651d6ef4e33a63961dc61b4792a5ac67923`.
 The [released Moo UI 1.1.0 source](https://github.com/wpmoo-org/ui/releases/tag/v1.1.0)
 archive hashes to SHA-256
 `e4ab6c256ce4e2e1a3a82a42fdfbbf90f5c5871c14d4853fce928546a8cafbac`.

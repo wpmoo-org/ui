@@ -1081,7 +1081,7 @@ class CatalogContractTests(CatalogTestCase):
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
-        codepen_version = site_build.PACKAGE_VERSION
+        codepen_version = "latest"
         package_js_entrypoints = {
             file.removeprefix("dist/js/")
             for file in json.loads(
@@ -1105,7 +1105,7 @@ class CatalogContractTests(CatalogTestCase):
                     ):
                         self.assertIn(entrypoint, package_js_entrypoints)
 
-    def test_codepen_payloads_use_the_active_package_version(self) -> None:
+    def test_codepen_payloads_follow_latest_for_all_moo_assets(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
         self.assertEqual(site_build.PACKAGE_VERSION, package["version"])
 
@@ -1128,7 +1128,7 @@ class CatalogContractTests(CatalogTestCase):
                 ):
                     self.assertEqual(
                         package_versions,
-                        {site_build.PACKAGE_VERSION},
+                        {"latest"},
                     )
 
     def test_codepen_shows_interactive_examples_from_published_runtime_loader(self) -> None:
@@ -2847,9 +2847,9 @@ class CatalogContractTests(CatalogTestCase):
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        # CodePen exports use the active package version, accepting the brief
-        # CDN propagation window after the release tag is created.
-        codepen_version = site_build.PACKAGE_VERSION
+        # New CodePen exports follow the stable latest tag for both CSS and
+        # inline Moo module imports, independently of installation-doc pins.
+        codepen_version = "latest"
         registry = {
             component["slug"]: component
             for component in json.loads(
@@ -3876,8 +3876,9 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("documented Sass source entrypoints", introduction_text)
 
     def test_public_docs_limit_latest_to_readme_quick_demo(self) -> None:
-        # Drift class: only the README quick demo may float; rendered docs and
-        # machine handoff files must use versioned installation paths.
+        # Installation docs and machine handoff paths stay versioned; only the
+        # README quick demo floats here. Live CodePen payloads have a separate
+        # explicit all-Moo-assets latest contract above.
         paths = [
             ROOT / "README.md",
             ROOT / "site/public/llms.txt",
@@ -4368,8 +4369,7 @@ class CatalogContractTests(CatalogTestCase):
         release_links.feed(active_release)
         hrefs = {link.get("href") for link in release_links.links}
         self.assertEqual({
-            "../components/field/", "../components/select/",
-            "../components/datepicker/",
+            "../components/field/",
         }, hrefs)
 
         page_links = LinkParser()

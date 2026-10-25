@@ -89,6 +89,7 @@ AGGREGATE_JS_MODULES = ("moo-ui.js",)
 PUBLIC_ESM_AGGREGATE_MODULES = {"moo-ui", "moo-ui.min"}
 PACKAGE_MANIFEST = ROOT / "package.json"
 PACKAGE_VERSION = json.loads(PACKAGE_MANIFEST.read_text(encoding="utf-8"))["version"]
+CODEPEN_CDN_VERSION = "latest"
 RELEASE_MANIFEST_PATH = PACKAGE_DIST / "release-manifest.json"
 RELEASE_ARTIFACTS = (
     ("./moo.css", "dist/assets/css/moo.css"),
@@ -954,11 +955,11 @@ def _example_js_source(module_filename: str, init_call: str) -> str:
     # hand-duplicated here) so the export can't silently drift from
     # what's really shipping; only the relative import needs rewriting
     # to the CDN URL every other codepen_button() call already uses,
-    # matching PACKAGE_VERSION.
+    # matching the CodePen stylesheet's live release policy.
     source = (SITE_SRC / "js/catalog" / module_filename).read_text(encoding="utf-8")
     if EXAMPLE_JS_IMPORT not in source:
         fail(f"{module_filename}'s import line changed; update EXAMPLE_JS_IMPORT")
-    datatable_url = f"https://unpkg.com/@wpmoo/ui@{PACKAGE_VERSION}/dist/js/datatable.js"
+    datatable_url = f"https://unpkg.com/@wpmoo/ui@{CODEPEN_CDN_VERSION}/dist/js/datatable.js"
     source = source.replace(EXAMPLE_JS_IMPORT, "let DataTable;")
     source = source.replace("export function ", "function ")
     if re.search(r"^\s*export\b", source, re.MULTILINE):
@@ -1581,9 +1582,8 @@ def load_support_facts() -> dict[str, object]:
     }
 
 
-# CodePen exports intentionally use the active package version. The release
-# flow accepts the brief CDN propagation window after the package tag is
-# created and avoids a second synchronization merge just for CodePen URLs.
+# CodePen exports are live demos, not immutable installation examples. All Moo
+# assets follow the latest stable npm tag; installation docs keep PACKAGE_VERSION.
 
 
 def load_product_facts() -> dict[str, object]:
@@ -1593,7 +1593,7 @@ def load_product_facts() -> dict[str, object]:
     )
     return {
         "version": PACKAGE_VERSION,
-        "codepenCdnVersion": PACKAGE_VERSION,
+        "codepenCdnVersion": CODEPEN_CDN_VERSION,
         "license": package["license"],
         "bootstrapRange": package["peerDependencies"]["bootstrap"],
         "exports": package["exports"],

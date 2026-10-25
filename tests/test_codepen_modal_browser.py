@@ -4,6 +4,7 @@ import subprocess
 import sys
 import unittest
 
+import sass
 from playwright.sync_api import expect, sync_playwright
 
 from tests.helpers import codepen_payload_from_output
@@ -33,6 +34,9 @@ class CodePenModalBrowserTests(unittest.TestCase):
         )
         if result.returncode != 0:
             raise AssertionError(result.stderr)
+        cls.bootstrap_css = sass.compile(
+            filename=str(ROOT / "vendor/bootstrap/scss/bootstrap.scss"),
+        )
         cls.server = serve_repository()
         cls.base_url = cls.server.__enter__()
         cls.addClassCleanup(cls.server.__exit__, None, None, None)
@@ -56,6 +60,58 @@ class CodePenModalBrowserTests(unittest.TestCase):
             base_url=self.base_url,
         )
         return context, page, evidence
+
+    def test_runtime_version_follows_live_and_pinned_stylesheets(self) -> None:
+        payload = self.codepen_payload("slider", "Moo UI Slider - Default")
+        for version in ("latest", "1.4.1"):
+            for stylesheet in ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css"):
+                with self.subTest(version=version, stylesheet=stylesheet):
+                    context = self.browser.new_context()
+                    try:
+                        page = context.new_page()
+                        evidence = BrowserEvidence(page)
+                        imports = []
+                        css_url = f"https://unpkg.com/@wpmoo/ui@{version}/dist/assets/css/{stylesheet}"
+                        runtime_url = f"https://unpkg.com/@wpmoo/ui@{version}/dist/js/slider.js"
+
+                        def serve_runtime(route):
+                            imports.append(route.request.url)
+                            route.fulfill(
+                                path=ROOT / "dist/js/slider.js",
+                                content_type="application/javascript",
+                                headers={"Access-Control-Allow-Origin": "*"},
+                            )
+
+                        page.route("https://unpkg.com/@wpmoo/ui@*/dist/js/*", serve_runtime)
+                        page.route(css_url, lambda route: route.fulfill(
+                            path=ROOT / "dist/assets/css" / stylesheet,
+                            content_type="text/css",
+                            headers={"Access-Control-Allow-Origin": "*"},
+                        ))
+                        markup = (
+                            '<!doctype html><html lang="en"><head>'
+                            '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+                            f'<style>{self.bootstrap_css if stylesheet in ("moo.css", "moo.min.css") else ""}</style>'
+                            f'<link rel="stylesheet" href="{css_url}">'
+                            '<link rel="stylesheet" href="/site-dist/assets/css/codepen-demo.css">'
+                            '</head><body>' + str(payload["html"]) +
+                            '<script src="/site-dist/assets/js/bootstrap.bundle.min.js"></script>'
+                            '<script src="/site-dist/assets/js/codepen-demo.js"></script>'
+                            '</body></html>'
+                        )
+                        page.route("**/codepen-version-contract", lambda route: route.fulfill(
+                            content_type="text/html", body=markup,
+                        ))
+                        page.goto(f"{self.base_url}/codepen-version-contract", wait_until="networkidle")
+                        page.wait_for_function("""async url => {
+                            const {default: Slider} = await import(url);
+                            return Boolean(Slider.getInstance(document.querySelector('[data-slider]')));
+                        }""", arg=runtime_url)
+                        self.assertEqual(imports, [runtime_url])
+                        self._assert_slider_runtime(page)
+                        evidence.assert_clean()
+                    finally:
+                        context.close()
 
     def assert_modal_covers_codepen_viewport(
         self,
