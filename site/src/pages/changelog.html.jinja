@@ -27,7 +27,7 @@
           </div>
           {{ typography("Moo UI " ~ product.version, variant="section-title", id=release_id, extra_class="mb-0") }}
           <p class="text-body-secondary mb-0">
-            Consistent Field labels and readable empty-selection prompts.
+            A shared Small scale for Field descriptions and validation errors.
           </p>
         </header>
 
@@ -36,29 +36,18 @@
           <ul class="mb-0 ps-4">
             <li>
               <a href="{{ site_href("components/field.html", root_path) }}">Field</a>
-              gives nested composite-control labels the same medium weight,
-              retaining existing label and inter-field spacing.
+              Description and Field Error now share Typography Small's existing
+              owner-resolved font-size token in both full and scoped stylesheets.
             </li>
             <li>
-              Enabled Input, Textarea and Combobox prompts share a readable
-              secondary-text colour in light and dark themes.
-            </li>
-            <li>
-              <a href="{{ site_href("components/select.html", root_path) }}">Select</a>
-              distinguishes explicitly marked prompt options from selected values,
-              including native changes, direct assignments and form reset.
-            </li>
-            <li>
-              <a href="{{ site_href("components/datepicker.html", root_path) }}">Date Picker</a>
-              distinguishes empty prompts from single and partial-range selections.
-              Both prompts and selected dates use normal Input weight, while
-              hover, focus, validation and disabled states keep their native colours.
+              Both feedback roles follow owner font-size customization while
+              retaining their colours, spacing and accessible control associations.
             </li>
           </ul>
         </section>
 
         <p class="small text-body-secondary mb-0">
-          Compatible with the public 1.4.0 package API. Component certification
+          Compatible with the public 1.4.1 package API. Component certification
           remains in preview.
         </p>
       {% endcall %}

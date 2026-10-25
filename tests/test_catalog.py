@@ -4368,8 +4368,7 @@ class CatalogContractTests(CatalogTestCase):
         release_links.feed(active_release)
         hrefs = {link.get("href") for link in release_links.links}
         self.assertEqual({
-            "../components/field/", "../components/select/",
-            "../components/datepicker/",
+            "../components/field/",
         }, hrefs)
 
         page_links = LinkParser()

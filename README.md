@@ -217,9 +217,9 @@ calm.
 
 ## Status And Support
 
-The `1.4.1` patch release target aligns nested Field labels and readable empty
-prompts across form controls, with normal-weight Date Picker values. Native
-selection, validation, disabled states and the 1.4.0 package API remain intact.
+The `1.4.2` patch release target aligns Field Description and Field Error with
+the existing owner-resolved Typography Small scale. Feedback colours, spacing,
+accessible descriptions and the 1.4.1 package API remain intact.
 Component certification remains
 `preview`, with its documented manual and browser/device limits. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
@@ -246,4 +246,4 @@ The published `LICENSE` also retains the full MIT notices for bundled
 Chart.js and `@kurkle/color`.
 Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
 live in the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.4.1/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.4.2/THIRD_PARTY_NOTICES.md).

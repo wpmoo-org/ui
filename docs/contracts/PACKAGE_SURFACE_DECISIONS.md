@@ -3,6 +3,22 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.4.2 Compatible Fixes
+
+Field Description and Field Error consume the existing owner-resolved
+`--moo-small-font-size` token, matching Typography Small's default0.75rem and
+runtime customization in full and scoped stylesheets. Feedback colours, zero
+top margin, Field spacing, native validation, markup and ARIA associations
+remain unchanged. There is no new token, component prop, dependency, export,
+ESM behavior or adapter-specific override. This compatible visual correction
+is a patch to1.4.1, not a new public component or API release.
+
+The accepted appearance is protected by the Field parity browser contract in
+16 stylesheet/theme/direction/viewport profiles, with a visible error linked
+to its invalid control and both feedback roles following owner customization.
+Certification stays in preview. Release-specific validation is still required;
+merging the version bump to main starts the existing automatic release chain.
+
 ## 1.4.1 Compatible Fixes
 
 Field applies its existing medium label weight to nested composite-control
