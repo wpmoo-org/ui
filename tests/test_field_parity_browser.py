@@ -5,6 +5,7 @@ import subprocess
 import sys
 import unittest
 
+import sass
 from playwright.sync_api import expect, sync_playwright
 
 from build import create_environment
@@ -26,7 +27,8 @@ COMPOSITION = """
 {% from "components/datepicker.html.jinja" import datepicker, date_range_picker %}
 <!doctype html><html lang="en" dir="{{ direction }}"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="/dist/assets/css/moo-ui.css"></head><body>
+{% if bootstrap_css %}<style>{{ bootstrap_css | safe }}</style>{% endif %}
+<link rel="stylesheet" href="/dist/assets/css/{{ stylesheet }}"></head><body>
 <main class="moo-ui p-3" data-bs-theme="{{ theme }}">
 {% call form() %}{% call field_group() %}
 {% call field(invalid=true) %}
@@ -66,6 +68,9 @@ class FieldParityBrowserTests(unittest.TestCase):
         )
         if built.returncode:
             raise AssertionError(built.stderr)
+        cls.bootstrap_css = sass.compile(
+            filename=str(ROOT / "vendor/bootstrap/scss/bootstrap.scss"),
+        )
         server = serve_repository()
         cls.base_url = server.__enter__()
         cls.addClassCleanup(server.__exit__, None, None, None)
@@ -75,13 +80,15 @@ class FieldParityBrowserTests(unittest.TestCase):
         cls.browser = launch_certification_browser(cls.playwright)
         cls.addClassCleanup(cls.browser.close)
 
-    def open_composition(self, theme, direction, width):
+    def open_composition(self, theme, direction, width, stylesheet="moo-ui.css"):
         context = self.browser.new_context(viewport={"width": width, "height": 900})
         self.addCleanup(context.close)
         page = context.new_page()
         evidence = BrowserEvidence(page)
         html = create_environment().from_string(COMPOSITION).render(
             theme=theme, direction=direction,
+            stylesheet=stylesheet,
+            bootstrap_css=self.bootstrap_css if stylesheet == "moo.css" else "",
             options=[
                 {"value": "", "label": "Prompt", "placeholder": True},
                 {"label": "Group", "options": [{"value": "a", "label": "Alpha"}]},
@@ -148,17 +155,9 @@ class FieldParityBrowserTests(unittest.TestCase):
             ("light", "dark"), ("ltr", "rtl"), (390, 1440), ("moo-ui.css", "moo.css"),
         ):
             with self.subTest(theme=theme, direction=direction, width=width, stylesheet=stylesheet):
-                page, evidence = self.open_composition(theme, direction, width)
-                if stylesheet == "moo.css":
-                    page.locator('link[rel="stylesheet"]').evaluate("""e => new Promise(resolve => {
-                        e.addEventListener('load', resolve, {once: true});
-                        e.href = '/dist/assets/css/moo.css';
-                    })""")
+                page, evidence = self.open_composition(theme, direction, width, stylesheet)
                 helper = page.locator("#text-help")
                 reference = page.locator("#small-reference")
-                # Embedded Core deliberately omits Bootstrap utility output.
-                # Resolve the shared colour token without depending on utilities.
-                reference.evaluate("e => e.style.color = 'var(--bs-secondary-color)'")
                 label = page.locator('label[for="text"]')
                 error = page.locator("#text-error")
                 expect(error).to_be_visible()
