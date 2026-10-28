@@ -104,22 +104,25 @@
                 </a>
               </div>
             </div>
-            <div class="moo-block-preview__viewport position-relative overflow-hidden w-100 bg-body" data-moo-block-frame-viewport>
-              <div class="moo-block-preview__loading position-absolute top-0 bottom-0 start-0 end-0 z-1 d-flex align-items-center justify-content-center bg-body-tertiary text-body-secondary" data-moo-block-frame-loading aria-hidden="true">
-                <span class="moo-block-preview__loading-indicator d-inline-flex align-items-center gap-2">
-                  <span class="moo-block-preview__loading-spinner" aria-hidden="true"></span>
-                  Loading preview
-                </span>
+            <div class="moo-block-preview__viewport ratio overflow-hidden w-100 bg-body" style="--bs-aspect-ratio: min({{ frame_state.height / frame_state.width * 100 }}%, {{ frame_state.height }}px);" data-moo-block-frame-viewport>
+              {# Preserve the iframe's normal LTR/RTL flow inside the ratio child. #}
+              <div>
+                <div class="moo-block-preview__loading position-absolute top-0 bottom-0 start-0 end-0 z-1 d-flex align-items-center justify-content-center bg-body-tertiary text-body-secondary" data-moo-block-frame-loading aria-hidden="true">
+                  <span class="moo-block-preview__loading-indicator d-inline-flex align-items-center gap-2">
+                    <span class="moo-block-preview__loading-spinner" aria-hidden="true"></span>
+                    Loading preview
+                  </span>
+                </div>
+                <iframe
+                  class="moo-block-preview__frame d-block border-0"
+                  data-moo-block-frame
+                  src="{{ frame_state.src }}"
+                  title="{{ title }} preview"
+                  width="{{ frame_state.width }}"
+                  height="{{ frame_state.height }}"
+                  loading="lazy"
+                ></iframe>
               </div>
-              <iframe
-                class="moo-block-preview__frame d-block border-0"
-                data-moo-block-frame
-                src="{{ frame_state.src }}"
-                title="{{ title }} preview"
-                width="{{ frame_state.width }}"
-                height="{{ frame_state.height }}"
-                loading="lazy"
-              ></iframe>
             </div>
           </div>
         {% else %}

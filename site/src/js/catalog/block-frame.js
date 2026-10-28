@@ -55,7 +55,10 @@ export function initBlockFrames(root = document) {
     frame.style.width = `${width}px`;
     frame.style.height = `${height}px`;
     frame.style.transform = `scale(${scale})`;
-    viewport.style.height = `${Math.ceil(height * scale)}px`;
+    // Match the height reserved by Bootstrap's ratio helper before first paint.
+    viewport.style.setProperty(
+      "--bs-aspect-ratio", `min(${height / width * 100}%, ${height}px)`
+    );
     clampViewportScroll(viewport);
     updateSizeLabel(shell, width, height);
   };
