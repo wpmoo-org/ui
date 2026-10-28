@@ -4,18 +4,25 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{{ page_meta.description }}">
+    {% if page_meta.get("robots") %}
+    <meta name="robots" content="{{ page_meta.robots }}">
+    {% endif %}
     <meta property="og:site_name" content="{{ page_meta.site_name }}">
     <meta property="og:type" content="{{ page_meta.type }}">
     <meta property="og:title" content="{{ page_meta.title }}">
     <meta property="og:description" content="{{ page_meta.description }}">
+    {% if page_meta.url %}
     <meta property="og:url" content="{{ page_meta.url }}">
+    {% endif %}
     <meta property="og:image" content="{{ page_meta.image }}">
     <meta property="og:image:alt" content="{{ page_meta.image_alt }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ page_meta.title }}">
     <meta name="twitter:description" content="{{ page_meta.description }}">
     <meta name="twitter:image" content="{{ page_meta.image }}">
+    {% if page_meta.url %}
     <link rel="canonical" href="{{ page_meta.url }}">
+    {% endif %}
     <title>{% block title %}{{ page_meta.title }}{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{{ root_path }}favicon.svg">
     <link rel="icon" href="{{ root_path }}favicon.ico" sizes="any">

@@ -53,6 +53,7 @@ SITE_ROOT_ASSETS = tuple(
         "icon-192.png",
         "icon-512.png",
         "site.webmanifest",
+        "_headers",
     )
 )
 BOOTSTRAP = ROOT / "vendor/bootstrap"
@@ -901,9 +902,17 @@ def canonical_url(path: object) -> str:
 
 def pretty_output_path(path: Path) -> Path:
     path = Path(PUBLIC_PAGE_ROUTES.get(path.as_posix(), path.as_posix()))
-    if path.name == "index.html" or path.suffix != ".html":
+    if path == Path("404.html") or path.name == "index.html" or path.suffix != ".html":
         return path
     return path.with_suffix("") / "index.html"
+
+
+def is_indexable_page(path: Path) -> bool:
+    return (
+        path != Path("404.html")
+        and path.parts[:1] != ("acceptance",)
+        and "previews" not in path.parts
+    )
 
 
 def fail(message: str) -> None:
@@ -1201,6 +1210,8 @@ def page_metadata(
     if path == "index.html":
         slug = "index"
         entry = {"label": "Moo UI", "description": DEFAULT_META_DESCRIPTION}
+    elif path == "404.html":
+        kind = "not-found"
     elif path.startswith("components/") and path != "components/index.html":
         kind = "component"
         entry = _find_entry(catalog, slug)
@@ -1255,7 +1266,8 @@ def page_metadata(
         "site_name": SITE_NAME,
         "title": title,
         "description": description,
-        "url": canonical_url(canonical_path),
+        "url": "" if kind == "not-found" else canonical_url(canonical_path),
+        "robots": "" if is_indexable_page(logical_relative) else "noindex, follow",
         "image": image,
         "image_alt": image_alt,
         "type": "website" if kind == "doc" else "article",
@@ -2557,9 +2569,9 @@ def public_page_paths(layouts: list[dict[str, str]] | None = None) -> list[str]:
     paths: list[str] = []
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
-        if "previews" in relative.parts:
-            continue
         logical_relative = relative.with_suffix("")
+        if not is_indexable_page(logical_relative):
+            continue
         paths.append(logical_relative.as_posix())
     return paths
 
@@ -2644,7 +2656,7 @@ def render_pages(
         output_file = SITE_DIST / output_relative
         output_file.parent.mkdir(parents=True, exist_ok=True)
         depth = len(output_relative.parents) - 1
-        root_path = "../" * depth
+        root_path = "/" if logical_relative == Path("404.html") else "../" * depth
         # logical_relative.parent.name only identifies the top-level section
         # for pages exactly one level below PAGES; a page nested a level
         # deeper (examples/auth/sign-in.html.jinja) needs the first path

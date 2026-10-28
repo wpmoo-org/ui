@@ -1,0 +1,17 @@
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex, follow
+
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex, follow
+
+/acceptance/*
+  X-Robots-Tag: noindex, follow
+
+/blocks/previews/*
+  X-Robots-Tag: noindex, follow
+
+/layouts/previews/*
+  X-Robots-Tag: noindex, follow
+
+/404.html
+  X-Robots-Tag: noindex, follow

@@ -22,8 +22,8 @@
     "test:browser-smoke": ".venv/bin/python3 scripts/run-test-tier.py run browser-smoke",
     "test:browser-full": ".venv/bin/python3 scripts/run-test-tier.py run browser-full",
     "test:release": ".venv/bin/python3 scripts/run-test-tier.py run release",
-    "deploy": "wrangler deploy",
-    "preview": "wrangler dev"
+    "deploy": "wrangler pages deploy site-dist --project-name ui",
+    "preview": "wrangler pages dev site-dist"
   },
   "style": "dist/assets/css/moo-ui.css",
   "exports": {

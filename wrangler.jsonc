@@ -2,13 +2,5 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ui",
   "compatibility_date": "2026-07-21",
-  "observability": {
-    "enabled": true
-  },
-  "assets": {
-    "directory": "site-dist"
-  },
-  "compatibility_flags": [
-    "nodejs_compat"
-  ]
+  "pages_build_output_dir": "site-dist"
 }
