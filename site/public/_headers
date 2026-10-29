@@ -13,5 +13,8 @@ https://:version.:project.pages.dev/*
 /layouts/previews/*
   X-Robots-Tag: noindex, follow
 
+/tests/fixtures/certification/*
+  X-Robots-Tag: noindex, follow
+
 /404.html
   X-Robots-Tag: noindex, follow

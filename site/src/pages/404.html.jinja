@@ -1,5 +1,4 @@
 {% extends "layouts/base.html.jinja" %}
-{% from "components/button.html.jinja" import button %}
 {% from "components/empty.html.jinja" import empty %}
 {% from "components/typography.html.jinja" import typography %}
 
@@ -9,7 +8,7 @@
 {% block body %}
   <main id="main-content" class="container min-vh-100 d-flex flex-column align-items-center justify-content-center gap-3 py-5" tabindex="-1">
     {{ typography("Page not found", "page-title", extra_class="text-center") }}
-    {% set home_action %}{{ button("Back to Moo UI", element="a", href="/") }}{% endset %}
+    {% set home_action %}<a href="/">Back to Moo UI</a>{% endset %}
     {{ empty(description=page_meta.description, action=home_action, extra_class="border-0 w-100") }}
   </main>
 {% endblock %}

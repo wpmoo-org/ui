@@ -901,6 +901,7 @@ def canonical_url(path: object) -> str:
 
 
 def pretty_output_path(path: Path) -> Path:
+    """Map catalog routes to directory indexes, preserving the root 404 file."""
     path = Path(PUBLIC_PAGE_ROUTES.get(path.as_posix(), path.as_posix()))
     if path == Path("404.html") or path.name == "index.html" or path.suffix != ".html":
         return path
@@ -908,6 +909,7 @@ def pretty_output_path(path: Path) -> Path:
 
 
 def is_indexable_page(path: Path) -> bool:
+    """Return whether a logical catalog page belongs in public discovery."""
     return (
         path != Path("404.html")
         and path.parts[:1] != ("acceptance",)
@@ -1200,6 +1202,7 @@ def page_metadata(
     blocks: list[dict[str, str]],
     layouts: list[dict[str, str]],
 ) -> dict[str, str]:
+    """Build discovery and social metadata for one rendered catalog page."""
     path = logical_relative.as_posix()
     slug = logical_relative.stem
     kind = "doc"
@@ -2566,6 +2569,7 @@ def copy_site_metadata() -> None:
 
 
 def public_page_paths(layouts: list[dict[str, str]] | None = None) -> list[str]:
+    """List indexable template routes for the sitemap and public metadata."""
     paths: list[str] = []
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
@@ -2621,6 +2625,7 @@ def render_pages(
     version: str | None = None,
     layouts: list[dict[str, str]] | None = None,
 ) -> None:
+    """Render catalog documents with shared metadata and root-relative 404 assets."""
     environment = create_environment()
     catalog = load_catalog()
     sections = load_entries(SITE_REGISTRY, "sections.json")
