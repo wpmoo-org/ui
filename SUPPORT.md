@@ -4,9 +4,10 @@ Moo UI Core is an open-source Bootstrap component system. This document defines
 the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
-Moo UI `1.4.2` is a compatible patch release target aligning Field Description
-and Field Error with the existing owner-resolved Typography Small scale.
-The `1.4.1` package exports, dependencies and native form semantics remain intact. Package stability
+Moo UI `1.4.3` is a compatible patch release target fixing document-scrollbar
+first-paint geometry and restoring the host visibility baseline for explicit
+overlay native mode and disposal. The `1.4.2` package exports, Bootstrap peer
+range and native form semantics remain intact. Package stability
 and component certification are independent: the certification manifest remains
 `preview`. Production certification is introduced incrementally; a component's
 presence in the catalog does not by itself mean that it has completed
@@ -202,9 +203,9 @@ conformance pass for that host. The runner needs Python 3 and Playwright
 only; no Moo UI build tooling is involved.
 
 The archive is reproducible byte-for-byte from the repository source at any
-time. Current development source targeting Moo UI 1.4.2 carries kit contract
+time. Current development source targeting Moo UI 1.4.3 carries kit contract
 version 1.0; its development archive hashes to SHA-256
-`c68b062183e47d77e07e44af499515307ffb1e8a25592d06c5111cb4c30279b1`.
+`822b666ca47b771ff6fd163e3c9ef3c223f6e5c55b8c4533b36c5a310756f1f2`.
 The [released Moo UI 1.1.0 source](https://github.com/wpmoo-org/ui/releases/tag/v1.1.0)
 archive hashes to SHA-256
 `e4ab6c256ce4e2e1a3a82a42fdfbbf90f5c5871c14d4853fce928546a8cafbac`.

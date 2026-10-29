@@ -3,6 +3,16 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.4.3 Compatible Fixes
+
+Release 1.4.3 packages the accepted document-scrollbar first-paint and overlay
+visibility-baseline fixes, alongside catalog preview sizing, Pages hosting and
+technical SEO corrections. It preserves the 1.4.2 export paths, file inventory,
+Bootstrap peer range and explicit optional-module lifecycle. Certification stays
+in preview. The package, lockfile, banners, conformance assets and integrity
+records move together; merging the version bump starts the existing release
+chain after the normal PR gates.
+
 ## Document Scrollbar First Paint (2026-10-29)
 
 The shared state bootstrap prepares hidden native document-scrollbar geometry
@@ -26,8 +36,8 @@ build/watch/server entrypoint through `npm run dev`.
 
 The Python development server serves the generated files; it does not emulate
 Cloudflare's `_headers` or error-document routing. Verify those hosting rules
-through a Pages preview deployment. Public npm version, exports, file inventory,
-Bootstrap peers and component lifecycle contracts remain unchanged.
+through a Pages preview deployment. Wrangler retirement preserves public npm
+exports, file inventory, Bootstrap peers and component lifecycle contracts.
 
 UI CI, nightly certification and npm publishing pin Ubuntu 26.04 with
 Python 3.11.18, which has a matching official Actions toolcache artifact. This
