@@ -39,6 +39,7 @@ export function initBlockFrames(root = document) {
       viewport.scrollTop = 0;
     }
   };
+  /** Scale a preview's native canvas to the height reserved by its viewport. */
   const resize = (shell) => {
     const viewport = shell.querySelector("[data-moo-block-frame-viewport]");
     const frame = shell.querySelector("[data-moo-block-frame]");

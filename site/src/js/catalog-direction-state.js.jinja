@@ -7,6 +7,15 @@
     const sidebar = owner.querySelector?.("#catalog-sidebar");
     if (!sidebar) return false;
     if (sidebar.dataset.catalogDirectionBound === "") return true;
+    // Restore geometry as soon as the parser creates the catalog sidebar.
+    try {
+      const variant = window.localStorage.getItem("moo:sidebar-variant");
+      if (variant === "sidebar" || variant === "floating" || variant === "inset") {
+        sidebar.dataset.variant = variant;
+      }
+    } catch (_) {
+      // Restricted browsing contexts may deny localStorage.
+    }
     const configuredSide = sidebar.dataset.catalogConfiguredSide ?? sidebar.dataset.side;
     const ltrSide = configuredSide === "right" ? "right" : "left";
     sidebar.dataset.catalogConfiguredSide = ltrSide;

@@ -1,0 +1,32 @@
+{% extends "layouts/base.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/typography.html.jinja" import typography %}
+
+{% block title %}Overlay Scrollbar Preview — Moo UI{% endblock %}
+{% block font_preload %}{% endblock %}
+
+{% macro overlay_scrollbar_demo(controls=true) %}
+  <main id="main-content" class="container py-5"{% if controls %} data-overlay-scrollbar-demo{% endif %}>
+    {{ typography("Document scrollbar preview", variant="page-title", extra_class="mb-3") }}
+    <p class="lead">A quiet page scrollbar without a layout gutter. The document still owns scrolling.</p>
+    {% if controls %}
+    <div class="d-flex flex-wrap gap-2 mb-4" data-overlay-scrollbar-controls>
+      {{ button("Dark / light", variant="outline") }}
+      {{ button("LTR / RTL", variant="outline") }}
+      {{ button("Use native scrollbar", variant="outline") }}
+      <a class="align-self-center" href="{{ site_href("utils/overlay-scrollbar.html", root_path) }}">Back to documentation</a>
+    </div>
+    {% endif %}
+    <p>Scroll to reveal the thumb. Stop scrolling and it fades away while you read. With a mouse, move to the trailing edge to reveal it again. Drag the thumb, click the track, or focus it with Tab and use Arrow keys, Page Up/Down, Home or End.</p>
+    <p>Touch and wheel scrolling stay native. Reduced-motion preferences remove the fade transition. Forced-colors mode, printing and horizontal page overflow keep the native scrollbar instead. Disabling the enhancement restores it.</p>
+    {% for number in range(1, 17) %}
+      <section class="py-4 border-top">
+        {{ typography("Reading section " ~ number, variant="section-title", extra_class="mb-3") }}
+        <p>Read at your own pace. The scroll indicator stays out of the way until you need it. The page keeps its normal document structure, native scrolling, links and keyboard behavior.</p>
+        <p>Try another theme or direction, resize the viewport, and compare the same content with the native scrollbar. The indicator follows the page position without moving the reading column.</p>
+      </section>
+    {% endfor %}
+  </main>
+{% endmacro %}
+
+{% block body %}{{ overlay_scrollbar_demo() }}{% endblock %}
