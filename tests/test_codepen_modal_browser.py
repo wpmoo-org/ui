@@ -257,12 +257,13 @@ class CodePenModalBrowserTests(unittest.TestCase):
         expect(page.locator("[data-slider-output]").first).to_have_text("75")
 
     def test_js_component_codepen_payloads_initialize_component_runtimes(self) -> None:
+        """Check automatic initialization before interacting with async runtimes."""
         cases = [
-            ("chart", "Moo UI Basic"),
-            ("combobox", "Moo UI Combobox - Basic"),
-            ("context-menu", "Moo UI Context Menu - Basic"),
-            ("datepicker", "Moo UI Date Picker - Basic"),
-            ("slider", "Moo UI Slider - Default"),
+            ("chart", "Moo UI Basic", ".chart"),
+            ("combobox", "Moo UI Combobox - Basic", ".combobox"),
+            ("context-menu", "Moo UI Context Menu - Basic", ".context-menu"),
+            ("datepicker", "Moo UI Date Picker - Basic", "[data-datepicker]"),
+            ("slider", "Moo UI Slider - Default", "[data-slider]"),
         ]
         runtime_checks = {
             "chart": self._assert_chart_runtime,
@@ -272,12 +273,25 @@ class CodePenModalBrowserTests(unittest.TestCase):
             "slider": self._assert_slider_runtime,
         }
 
-        for component, title in cases:
+        for component, title, selector in cases:
             with self.subTest(component=component):
                 payload = self.codepen_payload(component, title)
                 self.assertEqual(str(payload["js"]).strip(), "")
                 context, page, evidence = self.render_component_codepen(payload)
                 try:
+                    page.wait_for_function(
+                        """
+                        async ({ url, selector }) => {
+                          const { default: Component } = await import(url);
+                          return Boolean(Component.getInstance(document.querySelector(selector)));
+                        }
+                        """,
+                        arg={
+                            "url": f"{self.base_url}/dist/js/{component}.js",
+                            "selector": selector,
+                        },
+                        timeout=5000,
+                    )
                     runtime_checks[component](page)
                     evidence.assert_clean()
                 finally:
