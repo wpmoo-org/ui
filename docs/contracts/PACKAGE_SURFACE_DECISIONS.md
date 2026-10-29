@@ -3,6 +3,19 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## Document Scrollbar First Paint (2026-10-29)
+
+The shared state bootstrap prepares hidden native document-scrollbar geometry
+for the explicit first-body document owner before content is parsed. It uses
+the existing `html.scrollbar-overlay-native` bridge without page-specific CSS
+or a second scrollbar implementation. Embedded and unmarked owners do not
+change document scrolling. The hidden-native default also applies without an
+overlay instance; native touch, wheel and keyboard scrolling remain available.
+Overlay initialization remains explicit; it adopts
+the pre-bootstrap visibility baseline so disposal and native-mode controls can
+restore the host's original scrollbar. Existing print, forced-color and
+horizontal-overflow fallbacks remain owned by the public scrollbar module.
+
 ## Catalog Hosting and Development (2026-10-29)
 
 The static catalog builds into `site-dist/` and the connected Cloudflare Pages
