@@ -300,6 +300,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
     def test_static_catalog_uses_python_development_without_worker_cli(
         self,
     ) -> None:
+        """Keep static catalog development independent of deployment tooling."""
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 
         self.assertEqual(build.SITE_DIST, ROOT / "site-dist")
@@ -424,6 +425,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
                 self.assertNotIn("/site-dist/", fixture)
 
     def test_site_pages_load_core_artifacts_from_public_asset_urls(self) -> None:
+        """Resolve error-page assets from the root and other assets by route."""
         assets = (
             "assets/css/moo-ui.min.css",
             "assets/css/catalog.min.css",
