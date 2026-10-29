@@ -79,9 +79,14 @@ class OverlayScrollbarBrowserTests(unittest.TestCase):
         self.assertEqual(exports, {'direct': 'function', 'aggregate': 'function'})
 
     def test_document_reveal_idle_width_and_accessible_position(self):
+        """Check idle hiding with the pointer away from either scrollbar edge."""
         for theme, direction in (('light', 'ltr'), ('dark', 'rtl')):
             with self.subTest(theme=theme, direction=direction):
                 page = self.open_fixture(theme=theme, direction=direction)
+                page.mouse.move(
+                    page.viewport_size['width'] / 2,
+                    page.viewport_size['height'] / 2,
+                )
                 bar = page.get_by_role('scrollbar', name='Reading position')
                 before = page.evaluate('document.documentElement.clientWidth')
                 page.evaluate('window.scrollTo({top:400,behavior:"instant"})')
