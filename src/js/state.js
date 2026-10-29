@@ -18,6 +18,12 @@
       owner.dataset?.mooDocumentOwner === "true" &&
       owner.parentElement === body &&
       owner === body?.firstElementChild;
+    if (documentOwner && ownerDocument.documentElement?.classList) {
+      const root = ownerDocument.documentElement;
+      owner.__mooNativeScrollbarBaseline ??= root.classList.contains("scrollbar-overlay-native");
+      // Resolve document scrollbar geometry before the parser paints content.
+      root.classList.add("scrollbar-overlay-native");
+    }
     const normalizeDirection = (value) =>
       value === "ltr" || value === "rtl" ? value : null;
     const ownerDirection = normalizeDirection(

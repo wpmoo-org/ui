@@ -12,6 +12,11 @@
   if (owner.matches?.('.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]')) {
     const body = ownerDocument?.body;
     const documentOwner = owner.dataset?.mooDocumentOwner === "true" && owner.parentElement === body && owner === body?.firstElementChild;
+    if (documentOwner && ownerDocument.documentElement?.classList) {
+      const root = ownerDocument.documentElement;
+      owner.__mooNativeScrollbarBaseline ?? (owner.__mooNativeScrollbarBaseline = root.classList.contains("scrollbar-overlay-native"));
+      root.classList.add("scrollbar-overlay-native");
+    }
     const normalizeDirection = (value) => value === "ltr" || value === "rtl" ? value : null;
     const ownerDirection = normalizeDirection(
       owner.getAttribute?.("dir") || owner.dir

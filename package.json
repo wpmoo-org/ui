@@ -21,9 +21,7 @@
     "test:quick": ".venv/bin/python3 scripts/run-test-tier.py run quick",
     "test:browser-smoke": ".venv/bin/python3 scripts/run-test-tier.py run browser-smoke",
     "test:browser-full": ".venv/bin/python3 scripts/run-test-tier.py run browser-full",
-    "test:release": ".venv/bin/python3 scripts/run-test-tier.py run release",
-    "deploy": "wrangler deploy",
-    "preview": "wrangler dev"
+    "test:release": ".venv/bin/python3 scripts/run-test-tier.py run release"
   },
   "style": "dist/assets/css/moo-ui.css",
   "exports": {
@@ -110,7 +108,6 @@
   "devDependencies": {
     "axe-core": "4.14.0",
     "chart.js": "4.5.1",
-    "esbuild": "0.28.2",
-    "wrangler": "^4.120.0"
+    "esbuild": "0.28.2"
   }
 }

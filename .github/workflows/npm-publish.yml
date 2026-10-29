@@ -22,7 +22,7 @@ concurrency:
 jobs:
   publish:
     name: publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # Use the same release-tier budget as UI CI. Full discovery alone reached
     # 44 minutes; setup, build, package verification and rehearsal need room
     # to finish before publishing.
@@ -38,7 +38,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.11.5"
+          python-version: "3.11.18"
           cache: pip
           cache-dependency-path: requirements-dev.txt
 

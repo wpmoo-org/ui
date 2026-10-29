@@ -184,7 +184,13 @@ const scrollbar = OverlayScrollbar.getOrCreateInstance(document.querySelector(".
 The module preserves native document/touch/wheel scrolling. Its thin thumb
 appears while scrolling, near the trailing mouse edge or on keyboard focus;
 show/hide never reserves a layout gutter. Initial activation removes any native
-gutter. By default it controls the standards-mode document. Pass
+gutter. The shared `state.js` bootstrap hides the native document scrollbar
+before first paint for the explicit `data-moo-document-owner="true"` owner.
+This default also applies when the optional overlay is not initialized; native
+touch, wheel and keyboard scrolling remain available. Embedded owners do not
+affect document scrollbars. Overlay initialization takes
+over that initial state; disposal restores the host's original native visibility.
+By default it controls the standards-mode document. Pass
 `scrollElement: element` for an existing native scrolling region belonging to
 the same theme owner; the catalog uses this for its Page main region. There is
 one instance per scroll target, without replacing or wrapping that target.

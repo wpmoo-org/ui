@@ -297,15 +297,18 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         self.assertFalse((ROOT / "scss/settings/_catalog.scss").exists())
         self.assertTrue((ROOT / "site/scss/catalog/_settings.scss").is_file())
 
-    def test_cloudflare_root_config_targets_site_dist_without_script_changes(
+    def test_static_catalog_uses_python_development_without_worker_cli(
         self,
     ) -> None:
-        wrangler = json.loads((ROOT / "wrangler.jsonc").read_text(encoding="utf-8"))
+        """Keep static catalog development independent of deployment tooling."""
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 
-        self.assertEqual(wrangler["assets"]["directory"], "site-dist")
-        self.assertEqual(package["scripts"]["deploy"], "wrangler deploy")
-        self.assertEqual(package["scripts"]["preview"], "wrangler dev")
+        self.assertEqual(build.SITE_DIST, ROOT / "site-dist")
+        self.assertEqual(package["scripts"]["dev"], ".venv/bin/python3 dev.py")
+        self.assertNotIn("wrangler", package["devDependencies"])
+        self.assertNotIn("deploy", package["scripts"])
+        self.assertNotIn("preview", package["scripts"])
+        self.assertFalse((ROOT / "wrangler.jsonc").exists())
         self.assertFalse((ROOT / "site/wrangler.jsonc").exists())
 
     def test_core_sass_include_paths_respect_ownership(self) -> None:
@@ -422,6 +425,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
                 self.assertNotIn("/site-dist/", fixture)
 
     def test_site_pages_load_core_artifacts_from_public_asset_urls(self) -> None:
+        """Resolve error-page assets from the root and other assets by route."""
         assets = (
             "assets/css/moo-ui.min.css",
             "assets/css/catalog.min.css",
@@ -437,7 +441,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             relative_path = path.relative_to(site_dist)
             if relative_path.parts[:3] == ("tests", "fixtures", "certification"):
                 continue
-            prefix = "../" * len(relative_path.parent.parts)
+            prefix = "/" if relative_path == Path("404.html") else "../" * len(relative_path.parent.parts)
             page = path.read_text(encoding="utf-8")
 
             for asset in assets:

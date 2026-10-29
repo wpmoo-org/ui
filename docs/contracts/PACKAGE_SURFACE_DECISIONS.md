@@ -3,6 +3,37 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## Document Scrollbar First Paint (2026-10-29)
+
+The shared state bootstrap prepares hidden native document-scrollbar geometry
+for the explicit first-body document owner before content is parsed. It uses
+the existing `html.scrollbar-overlay-native` bridge without page-specific CSS
+or a second scrollbar implementation. Embedded and unmarked owners do not
+change document scrolling. The hidden-native default also applies without an
+overlay instance; native touch, wheel and keyboard scrolling remain available.
+Overlay initialization remains explicit; it adopts
+the pre-bootstrap visibility baseline so disposal and native-mode controls can
+restore the host's original scrollbar. Existing print, forced-color and
+horizontal-overflow fallbacks remain owned by the public scrollbar module.
+
+## Catalog Hosting and Development (2026-10-29)
+
+The static catalog builds into `site-dist/` and the connected Cloudflare Pages
+project owns Git-based deployment. Wrangler is not a build or product-runtime
+dependency. Retire its development dependency, root configuration and optional
+CLI deploy/preview scripts. Local development keeps the existing Python
+build/watch/server entrypoint through `npm run dev`.
+
+The Python development server serves the generated files; it does not emulate
+Cloudflare's `_headers` or error-document routing. Verify those hosting rules
+through a Pages preview deployment. Public npm version, exports, file inventory,
+Bootstrap peers and component lifecycle contracts remain unchanged.
+
+UI CI, nightly certification and npm publishing pin Ubuntu 26.04 with
+Python 3.11.18, which has a matching official Actions toolcache artifact. This
+replaces the unsupported Python 3.11.5 / Ubuntu 26.04 combination. Existing
+test tiers, permissions, release guards and publication approval remain unchanged.
+
 ## 1.4.2 Compatible Fixes
 
 Field Description and Field Error consume the existing owner-resolved

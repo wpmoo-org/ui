@@ -44,7 +44,9 @@ export default class OverlayScrollbar {
     this._frame = 0;
     this._timer = 0;
     this._disposed = false;
-    this._originalNativeClass = this._root.classList.contains("scrollbar-overlay-native");
+    this._originalNativeClass = isDocument && typeof owner.__mooNativeScrollbarBaseline === "boolean"
+      ? owner.__mooNativeScrollbarBaseline
+      : this._root.classList.contains("scrollbar-overlay-native");
     this._originalId = this._root.getAttribute("id");
     this._forcedColors = this._window.matchMedia("(forced-colors: active)");
     this._bar = document.createElement("div");
