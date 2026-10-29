@@ -3,6 +3,24 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## Catalog Hosting and Development (2026-10-29)
+
+The static catalog builds into `site-dist/` and the connected Cloudflare Pages
+project owns Git-based deployment. Wrangler is not a build or product-runtime
+dependency. Retire its development dependency, root configuration and optional
+CLI deploy/preview scripts. Local development keeps the existing Python
+build/watch/server entrypoint through `npm run dev`.
+
+The Python development server serves the generated files; it does not emulate
+Cloudflare's `_headers` or error-document routing. Verify those hosting rules
+through a Pages preview deployment. Public npm version, exports, file inventory,
+Bootstrap peers and component lifecycle contracts remain unchanged.
+
+UI CI, nightly certification and npm publishing pin Ubuntu 26.04 with
+Python 3.11.18, which has a matching official Actions toolcache artifact. This
+replaces the unsupported Python 3.11.5 / Ubuntu 26.04 combination. Existing
+test tiers, permissions, release guards and publication approval remain unchanged.
+
 ## 1.4.2 Compatible Fixes
 
 Field Description and Field Error consume the existing owner-resolved
