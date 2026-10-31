@@ -211,3 +211,45 @@ class FloatingPanelContractTests(unittest.TestCase):
                 context.close()
             finally:
                 browser.close()
+
+    def test_opening_focuses_native_fields_and_explicit_tab_stops(self) -> None:
+        template = create_environment().from_string('''
+            {% from "components/card.html.jinja" import floating_panel %}
+            {% from "components/button.html.jinja" import button %}
+            {% from "components/input.html.jinja" import input %}
+            {% from "components/select.html.jinja" import select %}
+            {% from "components/textarea.html.jinja" import textarea %}
+            <!doctype html><html><body><main class="moo-ui" data-bs-theme="light">
+                {% call floating_panel("panel", "Fields") %}
+                    <div hidden>{{ button("Hidden action") }}</div>
+                    {{ input(aria_label="Unavailable", disabled=true) }}
+                    {% if kind == "input" %}{{ input(aria_label="Details", id="focus-target") }}
+                    {% elif kind == "select" %}{{ select(aria_label="Choice", id="focus-target", options=[{"value": "a", "label": "A"}]) }}
+                    {% elif kind == "textarea" %}{{ textarea(aria_label="Notes", id="focus-target") }}
+                    {% else %}<div id="focus-target" tabindex="0">Details</div>{% endif %}
+                {% endcall %}
+                {{ button("Open", floating_panel_open="panel") }}
+            </main></body></html>
+        ''')
+        module_url = "data:text/javascript;base64," + base64.b64encode(
+            (ROOT / "src/js/components/floating-panel.js").read_bytes()
+        ).decode()
+        with sync_playwright() as playwright:
+            browser = launch_certification_browser(playwright)
+            try:
+                for kind in ("input", "select", "textarea", "tabstop"):
+                    with self.subTest(kind=kind):
+                        page = browser.new_page()
+                        html = template.render(kind=kind)
+                        page.route("http://floating.invalid/**", lambda route: route.fulfill(
+                            body=html, content_type="text/html"))
+                        page.goto("http://floating.invalid/probe")
+                        page.evaluate('''async url => {
+                            const { default: Panel } = await import(url);
+                            Panel.getOrCreateInstance(document.getElementById("panel"));
+                        }''', module_url)
+                        page.get_by_role("button", name="Open", exact=True).click()
+                        expect(page.locator("#focus-target")).to_be_focused()
+                        page.close()
+            finally:
+                browser.close()

@@ -119,7 +119,7 @@
     {% endset %}
     {{ render_example(
         "card-floating-panel", "Floating panel",
-        "Compose a non-modal, viewport-fixed onboarding Card with <code>floating_panel</code>. This static checklist shows two completed tasks out of five; its links lead to related documentation. Collapse the list, dismiss the widget, or reopen it here. The demo remembers dismissal in this browser across reloads; applications own task state and should provide their own account-specific <code>storage_key</code>. Initialize the public ESM module explicitly, using a bundler or import map for the package import shown below. No backdrop or page scroll lock is added.",
+        "Compose a non-modal, viewport-fixed onboarding Card using <code>data-floating-panel</code>. This static checklist shows two completed tasks out of five; its links lead to related documentation. Collapse the list, dismiss the widget, or reopen it here. The demo remembers dismissal in this browser across reloads; applications own task state and should provide their own account-and-surface-specific <code>data-floating-panel-key</code>. Initialize the public ESM module explicitly, using a bundler or import map for the package import shown below. No backdrop or page scroll lock is added.",
         panel_trigger,
         portal_content=panel_content,
         source_content=panel_source,

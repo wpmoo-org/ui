@@ -81,8 +81,8 @@ export default class FloatingPanel {
     }
     this.setVisible(opening);
     if (opening) {
-      [...this.panel.querySelectorAll("button:not(:disabled), a[href]")]
-        .find(canFocus)?.focus({ preventScroll: true });
+      [...this.panel.querySelectorAll("button, a[href], input:not([type='hidden']), select, textarea, [tabindex]")]
+        .find(control => control.tabIndex >= 0 && canFocus(control))?.focus({ preventScroll: true });
     } else {
       const launchers = this.launchers().filter(canFocus);
       const launcher = launchers.includes(this.launcher) ? this.launcher : launchers[0];
