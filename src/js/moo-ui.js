@@ -10,6 +10,7 @@ import Slider from "./components/slider.js";
 import TableOfContents from "./components/toc.js";
 import OverlayScrollbar from "./components/overlay-scrollbar.js";
 import { initSheets } from "./components/sheet.js";
+import FloatingPanel from "./components/floating-panel.js";
 
 async function loadChart() {
   const { default: Chart } = await import("./chart.js");
@@ -17,6 +18,7 @@ async function loadChart() {
 }
 
 const MooUI = {
+  FloatingPanel,
   loadChart,
   Combobox,
   ContextMenu,
@@ -32,6 +34,7 @@ const MooUI = {
 };
 
 export {
+  FloatingPanel,
   loadChart,
   Combobox,
   ContextMenu,

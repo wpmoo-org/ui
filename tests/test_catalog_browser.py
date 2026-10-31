@@ -59,6 +59,125 @@ class CatalogBrowserTests(unittest.TestCase):
         cls.browser = launch_certification_browser(cls.playwright)
         cls.addClassCleanup(cls.browser.close)
 
+    def test_card_floating_checklist_keeps_its_composed_public_contract(self) -> None:
+        for theme, direction, width in itertools.product(
+            ("light", "dark"), ("ltr", "rtl"), (390, 1061, 1440),
+        ):
+            with self.subTest(theme=theme, direction=direction, width=width):
+                context = self.browser.new_context(viewport={"width": width, "height": 1195})
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    page.goto(f"{self.base_url}/site-dist/components/card/index.html")
+                    panel = page.locator("#card-preparation-panel")
+                    expect(panel).to_have_attribute("data-floating-panel-ready", "true")
+                    panel.evaluate("""(element, state) => {
+                        const owner = element.closest('.moo-ui');
+                        owner.setAttribute('data-bs-theme', state.theme);
+                        owner.setAttribute('dir', state.direction);
+                    }""", {"theme": theme, "direction": direction})
+                    expect(panel).to_be_visible()
+                    progress = panel.get_by_role("progressbar")
+                    expect(progress).to_have_attribute("aria-valuenow", "2")
+                    expect(progress).to_have_attribute("aria-valuemax", "5")
+                    expect(panel.locator(".nav-item")).to_have_count(5)
+                    expect(panel.locator("a[href]")).to_have_count(0)
+                    expect(panel.locator('.nav-link[aria-disabled="true"][tabindex="-1"]')).to_have_count(5)
+                    expect(panel.locator(".badge")).to_have_text("Demo")
+                    original_url = page.url
+                    panel.locator(".nav-item").nth(2).click()
+                    self.assertEqual(page.url, original_url)
+                    completed = panel.locator('[data-nav-completed="true"] a')
+                    expect(completed).to_have_count(2)
+                    self.assertTrue(completed.evaluate_all("elements => elements.every(e => getComputedStyle(e).textDecorationLine.includes('line-through'))"))
+                    box = panel.bounding_box()
+                    self.assertGreaterEqual(box["x"], -1)
+                    self.assertLessEqual(box["x"] + box["width"], width + 1)
+                    self.assert_floating_panel_above_content(page, width, direction)
+                    toggle = panel.get_by_role("button", name="Toggle preparation steps")
+                    content = panel.locator("#card-preparation-steps")
+                    toggle.focus()
+                    toggle.press("Enter")
+                    expect(content).to_be_hidden()
+                    expect(content).not_to_have_class(re.compile(r"\bcollapsing\b"))
+                    self.assert_floating_panel_above_content(page, width, direction)
+                    toggle.press("Enter")
+                    expect(content).to_be_visible()
+                    expect(content).not_to_have_class(re.compile(r"\bcollapsing\b"))
+                    dismiss = panel.get_by_role("button", name="Dismiss forever")
+                    dismiss.focus()
+                    dismiss.press("Enter")
+                    expect(panel).to_be_hidden()
+                    launcher = page.locator('[data-floating-panel-open="card-preparation-panel"]')
+                    expect(launcher).to_be_focused()
+                    launcher.press("Enter")
+                    expect(panel).to_be_visible()
+                    expect(toggle).to_be_focused()
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def assert_floating_panel_above_content(self, page, width: int, direction: str) -> None:
+        action = create_environment().from_string(
+            '{% from "components/button.html.jinja" import button %}'
+            '{{ button("Background action", extra_class="position-absolute bottom-0 start-50 translate-middle-x") }}'
+        ).render()
+        page.evaluate("""markup => {
+            if (document.querySelector('[data-floating-layer-probe]')) return;
+            // Keep a real preview's ancestors; only the probe geometry is controlled.
+            const background = [...document.querySelectorAll('.moo-example__preview')]
+                .filter(element => element.checkVisibility({checkOpacity: true, checkVisibilityCSS: true}) &&
+                    element.querySelector('button, input, select, textarea')).at(-1);
+            if (!background) throw new Error('An interactive catalog preview is required');
+            background.dataset.floatingLayerProbe = '';
+            background.dataset.floatingLayerClicks = '0';
+            background.classList.add('position-fixed', 'top-0', 'start-0', 'w-100', 'h-100', 'bg-body');
+            const template = document.createElement('template');
+            template.innerHTML = markup;
+            const action = template.content.firstElementChild;
+            action.dataset.floatingLayerAction = '';
+            action.addEventListener('click', () => {
+                background.dataset.floatingLayerClicks = String(Number(background.dataset.floatingLayerClicks) + 1);
+            });
+            background.append(action);
+        }""", action)
+        page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
+        result = page.evaluate("""() => {
+            const panel = document.querySelector('#card-preparation-panel');
+            const card = panel.querySelector('.card').getBoundingClientRect();
+            const preview = document.querySelector('[data-floating-layer-probe]');
+            const background = preview.getBoundingClientRect();
+            const left = Math.max(card.left, background.left);
+            const right = Math.min(card.right, background.right);
+            const top = Math.max(card.top, background.top);
+            const bottom = Math.min(card.bottom, background.bottom, innerHeight);
+            const overlap = right > left && bottom > top;
+            const hits = [.2, .5, .8].flatMap(tx => [.2, .5, .8].map(ty => {
+                const x = overlap ? left + (right - left) * tx : card.left + card.width * tx;
+                const y = overlap ? top + (bottom - top) * ty : card.top + card.height * ty;
+                const hit = document.elementFromPoint(x, y);
+                return Boolean(hit && panel.contains(hit));
+            }));
+            const outside = document.elementFromPoint(innerWidth / 2, card.top + card.height / 2);
+            return {overlap, hits, left: card.left, right: card.right,
+                outsidePassesThrough: Boolean(outside && preview.contains(outside))};
+        }""")
+        self.assertTrue(all(result["hits"]), result)
+        self.assertTrue(result["overlap"], result)
+        if result["right"] - result["left"] < width / 2:
+            self.assertTrue(result["outsidePassesThrough"], result)
+            preview = page.locator('[data-floating-layer-probe]')
+            previous = int(preview.get_attribute('data-floating-layer-clicks'))
+            page.locator('[data-floating-layer-action]').click()
+            expect(preview).to_have_attribute('data-floating-layer-clicks', str(previous + 1))
+        self.assertGreaterEqual(result["left"], 0)
+        self.assertLessEqual(result["right"], width)
+        center = (result["left"] + result["right"]) / 2
+        if direction == "ltr":
+            self.assertGreaterEqual(center, width / 2)
+        else:
+            self.assertLessEqual(center, width / 2)
+
     def test_toc_document_preview_keeps_fragment_navigation_inside_its_frame(self) -> None:
         context = self.browser.new_context(viewport={"width": 1540, "height": 1314})
         self.addCleanup(context.close)

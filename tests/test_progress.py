@@ -9,6 +9,19 @@ PAGE = ROOT / "site/src/pages/components/progress.html.jinja"
 
 
 class ProgressTests(CatalogTestCase):
+    def test_circle_keeps_exact_fraction_and_accessible_values(self) -> None:
+        from xml.etree import ElementTree
+
+        for value in (0, 1, 3):
+            ring = ElementTree.fromstring(self.render_progress(
+                f'progress({value}, max=3, aria_label="Preparation", variant="circle")'
+            )).find('.//{http://www.w3.org/2000/svg}svg')
+            self.assertEqual(ring.get('aria-valuenow'), str(value))
+            self.assertEqual(ring.get('aria-valuemax'), '3')
+            arc = ring.find('{http://www.w3.org/2000/svg}circle[@stroke-dashoffset]')
+            self.assertIsNotNone(arc)
+            self.assertAlmostEqual(float(arc.get('stroke-dashoffset')), 100 - value / 3 * 100)
+
     def render_progress(self, call: str) -> str:
         self.assertTrue(COMPONENT.is_file(), "Progress macro is not implemented")
         template = create_environment().from_string(

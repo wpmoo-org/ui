@@ -66,6 +66,7 @@ JS_CATALOG = SITE_SRC / "js/catalog"
 CATALOG_STATE_MODULES = ("catalog-theme-state", "catalog-direction-state")
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
+    "floating-panel.js",
     "overlay-scrollbar.js",
     "combobox.js",
     "context-menu.js",

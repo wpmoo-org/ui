@@ -39,7 +39,7 @@ COMPONENT_MACROS_BY_FILE = {
     "breadcrumb.html.jinja": {"breadcrumb"},
     "button.html.jinja": {"icon", "button"},
     "button_group.html.jinja": {"button_group"},
-    "card.html.jinja": {"card"},
+    "card.html.jinja": {"card", "floating_panel"},
     "chart.html.jinja": {"chart"},
     "checkbox.html.jinja": {"checkbox"},
     "close_button.html.jinja": {"close_button"},

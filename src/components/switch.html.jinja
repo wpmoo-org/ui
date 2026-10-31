@@ -1,5 +1,6 @@
-{% macro switch(id, label="", aria_label="", labelledby="", checked=false, disabled=false, invalid=false, description="", describedby="", extra_class="", label_wrapper=false) -%}
+{% macro switch(id, label="", aria_label="", labelledby="", checked=false, disabled=false, invalid=false, description="", describedby="", extra_class="", label_wrapper=false, name="", value=none) -%}
   {% if not id | trim %}{{ fail("Switch id is required") }}{% endif %}
+  {% if name is not string or (name and not name | trim) or (value is not none and value is not string) %}{{ fail("Switch name and value must be native strings") }}{% endif %}
   {% set has_label = label | trim %}
   {% set has_aria_label = aria_label | trim %}
   {% set has_labelledby = labelledby | trim %}
@@ -8,7 +9,7 @@
   {% set wrapper_tag = "label" if label_wrapper else "div" %}
   {% set aria_describedby = ((describedby ~ " ") if describedby else "") ~ ((id ~ "-description") if description else "") %}
   <{{ wrapper_tag }} class="form-check form-switch{% if extra_class %} {{ extra_class }}{% endif %}">
-    <input class="form-check-input{% if invalid %} is-invalid{% endif %}" type="checkbox" role="switch" id="{{ id }}"{% if checked %} checked{% endif %}{% if disabled %} disabled{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if has_labelledby %} aria-labelledby="{{ labelledby }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if aria_describedby | trim %} aria-describedby="{{ aria_describedby | trim }}"{% endif %}>
+    <input class="form-check-input{% if invalid %} is-invalid{% endif %}" type="checkbox" role="switch" id="{{ id }}"{% if name %} name="{{ name }}"{% endif %}{% if value is not none %} value="{{ value }}"{% endif %}{% if checked %} checked{% endif %}{% if disabled %} disabled{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if has_labelledby %} aria-labelledby="{{ labelledby }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if aria_describedby | trim %} aria-describedby="{{ aria_describedby | trim }}"{% endif %}>
     {% if has_label %}<label class="form-check-label" for="{{ id }}">{{ label }}</label>{% endif %}
   </{{ wrapper_tag }}>
   {% if description %}<div class="form-text" id="{{ id }}-description">{{ description }}</div>{% endif %}

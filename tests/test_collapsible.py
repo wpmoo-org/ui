@@ -9,6 +9,13 @@ PAGE = ROOT / "site/src/pages/components/collapsible.html.jinja"
 
 
 class CollapsibleTests(CatalogTestCase):
+    def test_composed_header_and_unframed_content(self) -> None:
+        output = self.render_collapsible(
+            'collapsible("panel", "Details", "Body", header_content="<Summary>", content_class="border-0 p-0")'
+        )
+        self.assertIn('&lt;Summary&gt;', output)
+        self.assertIn('class="collapsible-content border-0 p-0"', output)
+
     def render_collapsible(self, call: str) -> str:
         self.assertTrue(COMPONENT.is_file(), "Collapsible macro is not implemented")
         template = create_environment().from_string(

@@ -72,7 +72,9 @@
   dialog_target="",
   dismiss="",
   toast_target="",
-  sheet_target=""
+  sheet_target="",
+  floating_panel_open="",
+  floating_panel_dismiss=""
 ) -%}
   {% if variant not in button_variants %}{{ fail("Unknown button variant: " ~ variant) }}{% endif %}
   {% if size not in button_sizes %}{{ fail("Unknown button size: " ~ size) }}{% endif %}
@@ -88,6 +90,7 @@
   {% if collapse_target and (toggle or dropdown) %}{{ fail("Button collapse_target cannot combine with toggle or dropdown") }}{% endif %}
   {% if collapse_open and not collapse_target %}{{ fail("Button collapse_open requires collapse_target") }}{% endif %}
   {% if not label | trim and not aria_label | trim %}{{ fail("Button without a visible label requires aria_label") }}{% endif %}
+  {% if (floating_panel_open or floating_panel_dismiss) and (element != "button" or type != "button" or floating_panel_open and floating_panel_dismiss or toggle or dropdown or collapse_target or tooltip or popover_content or dialog_target or dismiss or toast_target or sheet_target) %}{{ fail("Floating panel controls require an independent plain button") }}{% endif %}
   {% if tooltip_placement not in button_tooltip_placements %}{{ fail("Unknown button tooltip placement: " ~ tooltip_placement) }}{% endif %}
   {% if tooltip and element not in ("button", "a") %}{{ fail("Button tooltip requires element=button or element=a") }}{% endif %}
   {% if tooltip and (toggle or dropdown or collapse_target) %}{{ fail("Button tooltip cannot combine with toggle, dropdown, or collapse_target; a Bootstrap element holds only one plugin instance") }}{% endif %}
@@ -121,7 +124,7 @@
   {% elif element == "input" %}
     <input class="{{ classes }}" type="{{ type }}" value="{{ label }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
   {% else %}
-    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}{% if dropdown %} data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% if dropdown_auto_close %} data-bs-auto-close="{{ dropdown_auto_close }}"{% endif %}{% endif %}{% if collapse_target %} data-bs-toggle="collapse" data-bs-target="#{{ collapse_target }}" aria-expanded="{{ "true" if collapse_open else "false" }}" aria-controls="{{ collapse_target }}"{% endif %}{% if tooltip %} data-bs-toggle="tooltip" data-bs-title="{{ tooltip }}" data-bs-placement="{{ tooltip_placement }}"{% if tooltip_html %} data-bs-html="true"{% endif %}{% endif %}{% if popover_content %} data-bs-toggle="popover"{% if popover_title %} data-bs-title="{{ popover_title }}"{% endif %} data-bs-content="{{ popover_content }}" data-bs-placement="{{ popover_placement }}"{% if popover_html %} data-bs-html="true"{% endif %}{% endif %}{% if dialog_target %} data-bs-toggle="modal" data-bs-target="#{{ dialog_target }}"{% endif %}{% if sheet_target %} data-bs-toggle="offcanvas" data-bs-target="#{{ sheet_target }}"{% endif %}{% if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}{% if toast_target %} data-toast-target="#{{ toast_target }}"{% endif %}{% if loading %} aria-busy="true"{% endif %}>
+    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}{% if dropdown %} data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% if dropdown_auto_close %} data-bs-auto-close="{{ dropdown_auto_close }}"{% endif %}{% endif %}{% if collapse_target %} data-bs-toggle="collapse" data-bs-target="#{{ collapse_target }}" aria-expanded="{{ "true" if collapse_open else "false" }}" aria-controls="{{ collapse_target }}"{% endif %}{% if tooltip %} data-bs-toggle="tooltip" data-bs-title="{{ tooltip }}" data-bs-placement="{{ tooltip_placement }}"{% if tooltip_html %} data-bs-html="true"{% endif %}{% endif %}{% if popover_content %} data-bs-toggle="popover"{% if popover_title %} data-bs-title="{{ popover_title }}"{% endif %} data-bs-content="{{ popover_content }}" data-bs-placement="{{ popover_placement }}"{% if popover_html %} data-bs-html="true"{% endif %}{% endif %}{% if dialog_target %} data-bs-toggle="modal" data-bs-target="#{{ dialog_target }}"{% endif %}{% if sheet_target %} data-bs-toggle="offcanvas" data-bs-target="#{{ sheet_target }}"{% endif %}{% if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}{% if toast_target %} data-toast-target="#{{ toast_target }}"{% endif %}{% if loading %} aria-busy="true"{% endif %}{% if floating_panel_open %} data-floating-panel-open="{{ floating_panel_open }}"{% endif %}{% if floating_panel_dismiss %} data-floating-panel-dismiss="{{ floating_panel_dismiss }}"{% endif %}>
       {% if loading %}{{ icon("loader-circle", "inline-start") }}{% elif icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
       {{ label }}
       {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}
