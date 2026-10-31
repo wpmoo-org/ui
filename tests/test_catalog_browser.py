@@ -119,20 +119,19 @@ class CatalogBrowserTests(unittest.TestCase):
 
     def assert_floating_panel_above_content(self, page, width: int, direction: str) -> None:
         page.evaluate("""() => {
-            const panel = document.querySelector('#card-preparation-panel .card');
-            const background = document.querySelector('[data-card-spacing] .card');
-            let scroll = background.parentElement;
-            while (scroll && !(scroll.scrollHeight > scroll.clientHeight &&
-                /auto|scroll/.test(getComputedStyle(scroll).overflowY))) scroll = scroll.parentElement;
-            scroll ||= document.scrollingElement;
-            scroll.scrollTop += background.getBoundingClientRect().top -
-                (panel.getBoundingClientRect().top + 12);
+            if (document.querySelector('[data-floating-layer-probe]')) return;
+            // Exercise the real preview stacking rules with test-owned geometry.
+            const background = document.createElement('div');
+            background.dataset.floatingLayerProbe = '';
+            background.className = 'moo-example__preview position-fixed top-0 start-0 w-100 h-100 bg-body';
+            background.setAttribute('aria-hidden', 'true');
+            document.querySelector('#card-preparation-panel').parentElement.append(background);
         }""")
         page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
         result = page.evaluate("""() => {
             const panel = document.querySelector('#card-preparation-panel');
             const card = panel.querySelector('.card').getBoundingClientRect();
-            const background = document.querySelector('[data-card-spacing] .card').getBoundingClientRect();
+            const background = document.querySelector('[data-floating-layer-probe]').getBoundingClientRect();
             const left = Math.max(card.left, background.left);
             const right = Math.min(card.right, background.right);
             const top = Math.max(card.top, background.top);
@@ -149,9 +148,8 @@ class CatalogBrowserTests(unittest.TestCase):
                 outsidePassesThrough: Boolean(outside && !panel.contains(outside))};
         }""")
         self.assertTrue(all(result["hits"]), result)
-        if width == 1061:
-            self.assertTrue(result["overlap"], result)
-        if width >= 1061:
+        self.assertTrue(result["overlap"], result)
+        if result["right"] - result["left"] < width / 2:
             self.assertTrue(result["outsidePassesThrough"], result)
         self.assertGreaterEqual(result["left"], 0)
         self.assertLessEqual(result["right"], width)
