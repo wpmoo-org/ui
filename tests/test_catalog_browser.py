@@ -61,10 +61,10 @@ class CatalogBrowserTests(unittest.TestCase):
 
     def test_card_floating_checklist_keeps_its_composed_public_contract(self) -> None:
         for theme, direction, width in itertools.product(
-            ("light", "dark"), ("ltr", "rtl"), (390, 1440),
+            ("light", "dark"), ("ltr", "rtl"), (390, 1061, 1440),
         ):
             with self.subTest(theme=theme, direction=direction, width=width):
-                context = self.browser.new_context(viewport={"width": width, "height": 900})
+                context = self.browser.new_context(viewport={"width": width, "height": 1195})
                 try:
                     page = context.new_page()
                     evidence = BrowserEvidence(page)
@@ -81,18 +81,26 @@ class CatalogBrowserTests(unittest.TestCase):
                     expect(progress).to_have_attribute("aria-valuenow", "2")
                     expect(progress).to_have_attribute("aria-valuemax", "5")
                     expect(panel.locator(".nav-item")).to_have_count(5)
+                    expect(panel.locator("a[href]")).to_have_count(0)
+                    expect(panel.locator('.nav-link[aria-disabled="true"][tabindex="-1"]')).to_have_count(5)
+                    expect(panel.locator(".badge")).to_have_text("Demo")
+                    original_url = page.url
+                    panel.locator(".nav-item").nth(2).click()
+                    self.assertEqual(page.url, original_url)
                     completed = panel.locator('[data-nav-completed="true"] a')
                     expect(completed).to_have_count(2)
                     self.assertTrue(completed.evaluate_all("elements => elements.every(e => getComputedStyle(e).textDecorationLine.includes('line-through'))"))
                     box = panel.bounding_box()
                     self.assertGreaterEqual(box["x"], -1)
                     self.assertLessEqual(box["x"] + box["width"], width + 1)
+                    self.assert_floating_panel_above_content(page, width, direction)
                     toggle = panel.get_by_role("button", name="Toggle preparation steps")
                     content = panel.locator("#card-preparation-steps")
                     toggle.focus()
                     toggle.press("Enter")
                     expect(content).to_be_hidden()
                     expect(content).not_to_have_class(re.compile(r"\bcollapsing\b"))
+                    self.assert_floating_panel_above_content(page, width, direction)
                     toggle.press("Enter")
                     expect(content).to_be_visible()
                     expect(content).not_to_have_class(re.compile(r"\bcollapsing\b"))
@@ -108,6 +116,50 @@ class CatalogBrowserTests(unittest.TestCase):
                     evidence.assert_clean()
                 finally:
                     context.close()
+
+    def assert_floating_panel_above_content(self, page, width: int, direction: str) -> None:
+        page.evaluate("""() => {
+            const panel = document.querySelector('#card-preparation-panel .card');
+            const background = document.querySelector('.card-spacing-demo');
+            let scroll = background.parentElement;
+            while (scroll && !(scroll.scrollHeight > scroll.clientHeight &&
+                /auto|scroll/.test(getComputedStyle(scroll).overflowY))) scroll = scroll.parentElement;
+            scroll ||= document.scrollingElement;
+            scroll.scrollTop += background.getBoundingClientRect().top -
+                (panel.getBoundingClientRect().top + 12);
+        }""")
+        page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
+        result = page.evaluate("""() => {
+            const panel = document.querySelector('#card-preparation-panel');
+            const card = panel.querySelector('.card').getBoundingClientRect();
+            const background = document.querySelector('.card-spacing-demo').getBoundingClientRect();
+            const left = Math.max(card.left, background.left);
+            const right = Math.min(card.right, background.right);
+            const top = Math.max(card.top, background.top);
+            const bottom = Math.min(card.bottom, background.bottom, innerHeight);
+            const overlap = right > left && bottom > top;
+            const hits = [.2, .5, .8].flatMap(tx => [.2, .5, .8].map(ty => {
+                const x = overlap ? left + (right - left) * tx : card.left + card.width * tx;
+                const y = overlap ? top + (bottom - top) * ty : card.top + card.height * ty;
+                const hit = document.elementFromPoint(x, y);
+                return Boolean(hit && panel.contains(hit));
+            }));
+            const outside = document.elementFromPoint(innerWidth / 2, card.top + card.height / 2);
+            return {overlap, hits, left: card.left, right: card.right,
+                outsidePassesThrough: Boolean(outside && !panel.contains(outside))};
+        }""")
+        self.assertTrue(all(result["hits"]), result)
+        if width == 1061:
+            self.assertTrue(result["overlap"], result)
+        if width >= 1061:
+            self.assertTrue(result["outsidePassesThrough"], result)
+        self.assertGreaterEqual(result["left"], 0)
+        self.assertLessEqual(result["right"], width)
+        center = (result["left"] + result["right"]) / 2
+        if direction == "ltr":
+            self.assertGreaterEqual(center, width / 2)
+        else:
+            self.assertLessEqual(center, width / 2)
 
     def test_toc_document_preview_keeps_fragment_navigation_inside_its_frame(self) -> None:
         context = self.browser.new_context(viewport={"width": 1540, "height": 1314})

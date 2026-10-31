@@ -75,25 +75,28 @@
             <div class="d-flex align-items-center gap-2">
                 {{ progress(2, max=5, aria_label="Getting started progress", variant="circle") }}
                 <div>
-                    <h3 class="h6 mb-0">Get started</h3>
+                    <div class="d-flex align-items-center gap-2">
+                        <h3 class="h6 mb-0">Get started</h3>
+                        {{ badge("Demo", variant="secondary") }}
+                    </div>
                     <span class="small text-body-secondary">2 of 5 complete</span>
                 </div>
             </div>
         {% endset %}
         {% set panel_steps %}
             {% call nav_menu("Getting started tasks", vertical=true) %}
-                {{ nav_item("Install Moo UI", href=root_path ~ "installation/", icon="circle-check", completed=true,
+                {{ nav_item("Install Moo UI", disabled=true, icon="circle-check", completed=true,
                     extra_class="text-decoration-line-through text-body-secondary") }}
-                {{ nav_item("Add the checklist widget", href="#floating-panel", icon="circle-check", completed=true,
+                {{ nav_item("Add the checklist widget", disabled=true, icon="circle-check", completed=true,
                     extra_class="text-decoration-line-through text-body-secondary") }}
-                {{ nav_item("Set your 3–5 tasks", href=root_path ~ "components/navigation/", icon="circle", end_icon="chevron-right",
+                {{ nav_item("Set your 3–5 tasks", disabled=true, icon="circle",
                     extra_class="bg-body-tertiary") }}
-                {{ nav_item("Connect to your db", href=root_path ~ "components/form/", icon="circle") }}
-                {{ nav_item("Drop it in your dashboard", href=root_path ~ "components/sidebar/", icon="circle") }}
+                {{ nav_item("Connect to your db", disabled=true, icon="circle") }}
+                {{ nav_item("Drop it in your dashboard", disabled=true, icon="circle") }}
             {% endcall %}
         {% endset %}
         {% set panel_footer %}
-            <p class="small text-body-secondary mb-0">Dismiss this widget for this browser. You can reopen it anytime using “Open preparation panel” in this example.</p>
+            <p class="small text-body-secondary mb-0">Example tasks only — no setup actions are connected. Dismissal is saved in this browser; reopen the widget using “Open preparation panel”.</p>
             {{ button("Dismiss forever", variant="ghost", size="sm", extra_class="w-100 text-body-secondary",
                 floating_panel_dismiss="card-preparation-panel") }}
         {% endset %}
@@ -119,7 +122,7 @@
     {% endset %}
     {{ render_example(
         "card-floating-panel", "Floating panel",
-        "Compose a non-modal, viewport-fixed onboarding Card using <code>data-floating-panel</code>. This static checklist shows two completed tasks out of five; its links lead to related documentation. Collapse the list, dismiss the widget, or reopen it here. The demo remembers dismissal in this browser across reloads; applications own task state and should provide their own account-and-surface-specific <code>data-floating-panel-key</code>. Initialize the public ESM module explicitly, using a bundler or import map for the package import shown below. No backdrop or page scroll lock is added.",
+        "Compose a non-modal, viewport-fixed onboarding Card using <code>data-floating-panel</code>. This demo shows two completed tasks out of five. Task rows are non-interactive examples: they do not navigate or change application data. The working controls collapse the list, dismiss the widget, or reopen it here. The demo remembers dismissal in this browser across reloads; applications own task state and should provide their own account-and-surface-specific <code>data-floating-panel-key</code>. Initialize the public ESM module explicitly, using a bundler or import map for the package import shown below. No backdrop or page scroll lock is added.",
         panel_trigger,
         portal_content=panel_content,
         source_content=panel_source,
