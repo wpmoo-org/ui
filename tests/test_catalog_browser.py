@@ -120,7 +120,7 @@ class CatalogBrowserTests(unittest.TestCase):
     def assert_floating_panel_above_content(self, page, width: int, direction: str) -> None:
         page.evaluate("""() => {
             const panel = document.querySelector('#card-preparation-panel .card');
-            const background = document.querySelector('.card-spacing-demo');
+            const background = document.querySelector('[data-card-spacing] .card');
             let scroll = background.parentElement;
             while (scroll && !(scroll.scrollHeight > scroll.clientHeight &&
                 /auto|scroll/.test(getComputedStyle(scroll).overflowY))) scroll = scroll.parentElement;
@@ -132,7 +132,7 @@ class CatalogBrowserTests(unittest.TestCase):
         result = page.evaluate("""() => {
             const panel = document.querySelector('#card-preparation-panel');
             const card = panel.querySelector('.card').getBoundingClientRect();
-            const background = document.querySelector('.card-spacing-demo').getBoundingClientRect();
+            const background = document.querySelector('[data-card-spacing] .card').getBoundingClientRect();
             const left = Math.max(card.left, background.left);
             const right = Math.min(card.right, background.right);
             const top = Math.max(card.top, background.top);
