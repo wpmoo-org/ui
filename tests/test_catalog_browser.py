@@ -118,20 +118,35 @@ class CatalogBrowserTests(unittest.TestCase):
                     context.close()
 
     def assert_floating_panel_above_content(self, page, width: int, direction: str) -> None:
-        page.evaluate("""() => {
+        action = create_environment().from_string(
+            '{% from "components/button.html.jinja" import button %}'
+            '{{ button("Background action", extra_class="position-absolute bottom-0 start-50 translate-middle-x") }}'
+        ).render()
+        page.evaluate("""markup => {
             if (document.querySelector('[data-floating-layer-probe]')) return;
-            // Exercise the real preview stacking rules with test-owned geometry.
-            const background = document.createElement('div');
+            // Keep a real preview's ancestors; only the probe geometry is controlled.
+            const background = [...document.querySelectorAll('.moo-example__preview')]
+                .filter(element => element.checkVisibility({checkOpacity: true, checkVisibilityCSS: true}) &&
+                    element.querySelector('button, input, select, textarea')).at(-1);
+            if (!background) throw new Error('An interactive catalog preview is required');
             background.dataset.floatingLayerProbe = '';
-            background.className = 'moo-example__preview position-fixed top-0 start-0 w-100 h-100 bg-body';
-            background.setAttribute('aria-hidden', 'true');
-            document.querySelector('#card-preparation-panel').parentElement.append(background);
-        }""")
+            background.dataset.floatingLayerClicks = '0';
+            background.classList.add('position-fixed', 'top-0', 'start-0', 'w-100', 'h-100', 'bg-body');
+            const template = document.createElement('template');
+            template.innerHTML = markup;
+            const action = template.content.firstElementChild;
+            action.dataset.floatingLayerAction = '';
+            action.addEventListener('click', () => {
+                background.dataset.floatingLayerClicks = String(Number(background.dataset.floatingLayerClicks) + 1);
+            });
+            background.append(action);
+        }""", action)
         page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
         result = page.evaluate("""() => {
             const panel = document.querySelector('#card-preparation-panel');
             const card = panel.querySelector('.card').getBoundingClientRect();
-            const background = document.querySelector('[data-floating-layer-probe]').getBoundingClientRect();
+            const preview = document.querySelector('[data-floating-layer-probe]');
+            const background = preview.getBoundingClientRect();
             const left = Math.max(card.left, background.left);
             const right = Math.min(card.right, background.right);
             const top = Math.max(card.top, background.top);
@@ -145,12 +160,16 @@ class CatalogBrowserTests(unittest.TestCase):
             }));
             const outside = document.elementFromPoint(innerWidth / 2, card.top + card.height / 2);
             return {overlap, hits, left: card.left, right: card.right,
-                outsidePassesThrough: Boolean(outside && !panel.contains(outside))};
+                outsidePassesThrough: Boolean(outside && preview.contains(outside))};
         }""")
         self.assertTrue(all(result["hits"]), result)
         self.assertTrue(result["overlap"], result)
         if result["right"] - result["left"] < width / 2:
             self.assertTrue(result["outsidePassesThrough"], result)
+            preview = page.locator('[data-floating-layer-probe]')
+            previous = int(preview.get_attribute('data-floating-layer-clicks'))
+            page.locator('[data-floating-layer-action]').click()
+            expect(preview).to_have_attribute('data-floating-layer-clicks', str(previous + 1))
         self.assertGreaterEqual(result["left"], 0)
         self.assertLessEqual(result["right"], width)
         center = (result["left"] + result["right"]) / 2
