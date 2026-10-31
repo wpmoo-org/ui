@@ -1,7 +1,8 @@
-{% macro progress(value, max=100, aria_label="", show_label=false, extra_class="") -%}
+{% macro progress(value, max=100, aria_label="", show_label=false, extra_class="", variant="bar") -%}
   {% if not aria_label | trim %}{{ fail("Progress aria_label is required") }}{% endif %}
   {% if max <= 0 %}{{ fail("Progress max must be positive") }}{% endif %}
   {% if value < 0 or value > max %}{{ fail("Progress value must be between 0 and max") }}{% endif %}
+  {% if variant not in ["bar", "circle"] %}{{ fail("Progress variant must be bar or circle") }}{% endif %}
   {% set percent = (value / max * 100) | round | int %}
   <div>
     {% if show_label %}
@@ -10,6 +11,15 @@
         <span class="text-body-secondary">{{ percent }}%</span>
       </div>
     {% endif %}
+    {% if variant == "circle" %}
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="2.5em" height="2.5em"
+      class="d-block flex-shrink-0{% if extra_class %} {{ extra_class }}{% endif %}"
+      role="progressbar" aria-label="{{ aria_label }}" aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ max }}" focusable="false">
+      <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="3" class="opacity-25" />
+      <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+        pathLength="100" stroke-dasharray="100" stroke-dashoffset="{{ 100 - value / max * 100 }}" transform="rotate(-90 18 18)" />
+    </svg>
+    {% else %}
     <div
       class="progress{% if extra_class %} {{ extra_class }}{% endif %}"
       role="progressbar"
@@ -20,5 +30,6 @@
     >
       <div class="progress-bar" style="width: {{ percent }}%"></div>
     </div>
+    {% endif %}
   </div>
 {%- endmacro %}

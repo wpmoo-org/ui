@@ -12,6 +12,20 @@ PAGE = ROOT / "site/src/pages/components/navigation.html.jinja"
 
 
 class NavigationTests(CatalogTestCase):
+    def test_icon_utilities_are_scoped_escaped_and_optional(self) -> None:
+        template = create_environment().from_string(
+            '{% from "components/navigation.html.jinja" import nav_item %}'
+            '{{ nav_item("Saved", icon="folder-open", completed=true, icon_class=classes) }}'
+        )
+        self.assertIn('class="nav-link-icon" aria-hidden="true"', template.render(classes=''))
+        self.assertIn('class="nav-link-icon text-bg-success border-0" aria-hidden="true"',
+                      template.render(classes='text-bg-success border-0'))
+        output = template.render(classes='x" onmouseover="bad')
+        self.assertIn('x&#34; onmouseover=&#34;bad', output)
+        self.assertIn('<a class="nav-link"', output)
+        with self.assertRaisesRegex(ValueError, "Navigation item icon_class must be a string"):
+            template.render(classes=[])
+
     def render_navigation(self, template_source: str) -> str:
         self.assertTrue(COMPONENT.is_file(), "Navigation macro is not implemented")
         template = create_environment().from_string(

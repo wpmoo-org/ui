@@ -2,11 +2,11 @@
 
 Moo UI is primarily a CSS-first Bootstrap component system with optional public
 ESM modules for documented gaps such as Chart, Combobox, Context Menu,
-DataTable, Date Picker, Slider, and Sidebar.
+DataTable, Date Picker, FloatingPanel, Slider, and Sidebar.
 
 ## Supported Versions
 
-Security review covers the `1.4.2` stable line and the `1.4.3` release target. Older
+Security review covers the `1.4.3` stable line and the `1.5.0` release target. Older
 tags remain available for source inspection, but fixes are prepared against the
 current development branch.
 

@@ -168,6 +168,22 @@ import { initSheets } from "@wpmoo/ui/sheet.js";
 initSheets(document);
 ```
 
+For a non-modal floating Card, initialize the optional controller explicitly:
+
+```js
+import FloatingPanel from "@wpmoo/ui/floating-panel.js";
+const panel = FloatingPanel.getOrCreateInstance(document.getElementById("onboarding"));
+// panel.dispose(); // release listeners and restore the original hidden/ARIA state
+```
+
+Use an id on the `data-floating-panel` element. Plain buttons target that id with
+`data-floating-panel-open` or, inside the panel, `data-floating-panel-dismiss`.
+Controls share the panel's nearest `.moo-ui` boundary. An optional
+`data-floating-panel-key` remembers dismissal in browser local storage; use an
+application-owned, account-specific key when appropriate. This is a local UI
+preference, not authorization or server-side task state. See the
+[Card example](https://ui.wpmoo.org/components/card/#floating-panel) for markup.
+
 For an opt-in document overlay scrollbar, load the stylesheet first and pass
 the resolved page theme owner explicitly:
 
@@ -223,10 +239,11 @@ calm.
 
 ## Status And Support
 
-The `1.4.3` patch release target prepares native-hidden document scrolling
-before first paint and preserves the original visibility for explicit overlay
-native mode and disposal. Public exports and Bootstrap compatibility remain
-unchanged from 1.4.2.
+The `1.5.0` minor release target adds an optional FloatingPanel ESM module and
+a composed onboarding checklist. Progress gains a circular variant; Collapsible
+supports composed headers, Navigation supports icon utilities, and Switch keeps
+native form names and values. Existing exports and Bootstrap compatibility are
+preserved; `@wpmoo/ui/floating-panel.js` is an additive public entrypoint.
 Component certification remains
 `preview`, with its documented manual and browser/device limits. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
@@ -253,4 +270,4 @@ The published `LICENSE` also retains the full MIT notices for bundled
 Chart.js and `@kurkle/color`.
 Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
 live in the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.4.3/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.5.0/THIRD_PARTY_NOTICES.md).

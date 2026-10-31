@@ -44,6 +44,7 @@
       <p>Use <code>.form-switch</code> for a single setting that can be on or off and takes effect like a mode, preference, or feature flag. Render it as a native checkbox with <code>role="switch"</code>, keep the visible label tied to the input, and store the checked state on the native control.</p>
       <p>Use <code>.field</code> when the switch needs supporting copy, grouping, disabled state, or validation. The label should name the setting, while the description explains the consequence of turning it on or off; avoid writing a switch label as a question that becomes confusing in both states.</p>
       <p>Switches inherit the Bootstrap checks/radios contract through <code>.form-check</code> and <code>.form-switch</code>. Use disabled and invalid states on the input itself, and group related switches in a fieldset when they answer one larger settings question.</p>
+      <p>Use <code>name</code> and optional string <code>value</code> to include a checked switch in native form submission. Unchecked or disabled switches are omitted by the browser. Persist preferences in the owning application; Switch adds no storage or submission JavaScript.</p>
     {% endset %}
     {{ render_component_intro(
       intro,

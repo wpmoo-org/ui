@@ -39,16 +39,17 @@
   </nav>
 {%- endmacro %}
 
-{% macro nav_item(label, href="#", active=false, disabled=false, icon="", end_icon="", badge_label="", badge_variant="secondary", description="", completed=false, completed_label="Completed", extra_class="") -%}
+{% macro nav_item(label, href="#", active=false, disabled=false, icon="", end_icon="", badge_label="", badge_variant="secondary", description="", completed=false, completed_label="Completed", extra_class="", icon_class="") -%}
   {% if not label | trim %}{{ fail("Navigation item label is required") }}{% endif %}
   {% if extra_class is not string %}{{ fail("Navigation item extra_class must be a string") }}{% endif %}
+  {% if icon_class is not string %}{{ fail("Navigation item icon_class must be a string") }}{% endif %}
   {% set classes = "nav-link" %}
   {% if active %}{% set classes = classes ~ " active" %}{% endif %}
   {% if disabled %}{% set classes = classes ~ " disabled" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ (extra_class | forceescape) %}{% endif %}
   <li class="nav-item"{% if completed %} data-nav-completed="true"{% endif %}>
     <a class="{{ classes }}"{% if not disabled %} href="{{ href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}{% if active %} aria-current="page"{% endif %}>
-      {% if icon %}<span class="nav-link-icon" aria-hidden="true">{{ render_icon(icon, "inline-start") }}</span>{% endif %}
+      {% if icon %}<span class="nav-link-icon{% if icon_class %} {{ icon_class | forceescape }}{% endif %}" aria-hidden="true">{{ render_icon(icon, "inline-start") }}</span>{% endif %}
       <span>
         {{ label }}
         {% if description %}<span class="nav-link-description d-block small">{{ description }}</span>{% endif %}

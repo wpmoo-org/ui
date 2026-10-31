@@ -42,6 +42,18 @@
       preview_class="moo-example__preview--narrow"
     ) }}
 
+    {% set circle %}
+      <div class="d-flex align-items-center gap-3">
+        {{ progress(1, max=3, aria_label="Preparation", variant="circle") }}
+        <span>1 of 3 required steps complete</span>
+      </div>
+    {% endset %}
+    {{ render_component_example("progress", "Progress",
+      "circle", "Circle",
+      "Use <code>variant='circle'</code> for a compact summary. The SVG keeps fractional progress and accessible numeric values; nearby text explains what the count measures. The default remains the native Bootstrap bar.",
+      circle
+    ) }}
+
     {% set values %}
       <div class="d-grid gap-3">
         {{ progress(20, aria_label="Step 1 progress") }}

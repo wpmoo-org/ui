@@ -23,42 +23,40 @@
         <header class="d-flex flex-column gap-3">
           <div class="d-flex flex-wrap align-items-center gap-3 small text-body-secondary">
             {{ badge("v" ~ product.version, variant="dark") }}
-            <span>Patch release</span>
+            <span>Minor release</span>
           </div>
           {{ typography("Moo UI " ~ product.version, variant="section-title", id=release_id, extra_class="mb-0") }}
           <p class="text-body-secondary mb-0">
-            Stable first-paint geometry, Pages hosting and crawler metadata.
+            Floating onboarding checklists and additive component composition.
           </p>
         </header>
 
-        <section aria-labelledby="{{ release_id }}-fixed">
-          {{ typography("Fixed", variant="subsection-title", id=release_id ~ "-fixed", extra_class="mb-3") }}
+        <section aria-labelledby="{{ release_id }}-added">
+          {{ typography("Added", variant="subsection-title", id=release_id ~ "-added", extra_class="mb-3") }}
           <ul class="mb-0 ps-4">
             <li>
-              The shared document-owner bootstrap hides native scrollbar geometry
-              before paint. Explicit overlay native mode and disposal restore the
-              host's original visibility baseline.
+              <a href="{{ site_href("components/card.html", root_path) }}#floating-panel">FloatingPanel</a>
+              provides explicit non-modal panel initialization, dismissal persistence,
+              reopening and disposal through a new optional public ESM entrypoint.
             </li>
             <li>
-              <a href="{{ site_href("layout.html", root_path) }}">Layout</a>
-              previews reserve their initial scaled height, and Examples restores
-              saved Floating and Inset sidebar geometry before paint.
+              <a href="{{ site_href("components/progress.html", root_path) }}">Progress</a>
+              adds a circular variant with fractional values and accessible progress.
             </li>
             <li>
-              <a href="{{ site_href("utils/overlay-scrollbar.html", root_path) }}">Overlay Scrollbar</a>
-              documentation uses the catalog shell with an Open standalone example.
+              <a href="{{ site_href("components/collapsible.html", root_path) }}">Collapsible</a>
+              supports composed headers and content utilities; Navigation supports
+              icon-frame utilities for task lists.
             </li>
             <li>
-              The catalog runs on Cloudflare Pages with canonical metadata, filtered
-              discovery, technical-page noindex and a native 404 home link. Unused
-              Wrangler tooling is retired, and CodePen checks wait for real runtime
-              initialization before interaction.
+              <a href="{{ site_href("components/switch.html", root_path) }}">Switch</a>
+              accepts native form names and values without adding submission JavaScript.
             </li>
           </ul>
         </section>
 
         <p class="small text-body-secondary mb-0">
-          Compatible with the public 1.4.2 package API. Component certification
+          Additive to the public 1.4.3 package API. Component certification
           remains in preview.
         </p>
       {% endcall %}

@@ -21,6 +21,7 @@ const FEATURE_SELECTORS = {
   contextMenu: ".context-menu",
   datatable: ".datatable",
   datepicker: "[data-datepicker], [data-datepicker-range], [data-calendar]",
+  floatingPanel: "[data-floating-panel]",
   slider: "[data-slider]",
   tableOfContents: "[data-toc]",
   overlayScrollbar: '[data-overlay-scrollbar-demo], [data-moo-shell="catalog"]',
@@ -186,6 +187,18 @@ export function initCatalog(root = document) {
         .map((element) => TableOfContents.getOrCreateInstance(element));
       const view = root.defaultView || root.ownerDocument.defaultView;
       root.dispatchEvent(new view.Event("moo:catalog-toc-ready"));
+      return () => instances.forEach((instance) => instance.dispose());
+    },
+  );
+
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.floatingPanel,
+    () => import("../../../../src/js/components/floating-panel.js"),
+    ({ default: FloatingPanel }) => {
+      const instances = Array.from(root.querySelectorAll(FEATURE_SELECTORS.floatingPanel))
+        .map((element) => FloatingPanel.getOrCreateInstance(element));
       return () => instances.forEach((instance) => instance.dispose());
     },
   );

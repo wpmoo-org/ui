@@ -1,13 +1,16 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/badge.html.jinja" import badge %}
 {% from "components/button.html.jinja" import button %}
-{% from "components/card.html.jinja" import card %}
+{% from "components/card.html.jinja" import card, floating_panel %}
+{% from "components/collapsible.html.jinja" import collapsible %}
+{% from "components/progress.html.jinja" import progress %}
 {% from "components/field.html.jinja" import field, field_group %}
 {% from "components/input.html.jinja" import input %}
+{% from "components/navigation.html.jinja" import nav_menu, nav_item %}
 {% from "components/toggle_group.html.jinja" import toggle_group %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_example, render_rtl_example with context %}
 
 {% block title %}Card — Moo UI{% endblock %}
 
@@ -62,6 +65,66 @@
       "Use <code>size=\"sm\"</code> to tighten the card rhythm for compact surfaces. Sections and the inline inset share one spacing token.",
       size_sm,
       preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set panel_trigger %}
+        {{ button("Open preparation panel", variant="outline", floating_panel_open="card-preparation-panel") }}
+    {% endset %}
+    {% set panel_content %}
+        {% set panel_summary %}
+            <div class="d-flex align-items-center gap-2">
+                {{ progress(2, max=5, aria_label="Getting started progress", variant="circle") }}
+                <div>
+                    <h3 class="h6 mb-0">Get started</h3>
+                    <span class="small text-body-secondary">2 of 5 complete</span>
+                </div>
+            </div>
+        {% endset %}
+        {% set panel_steps %}
+            {% call nav_menu("Getting started tasks", vertical=true) %}
+                {{ nav_item("Install Moo UI", href=root_path ~ "installation/", icon="circle-check", completed=true,
+                    extra_class="text-decoration-line-through text-body-secondary") }}
+                {{ nav_item("Add the checklist widget", href="#floating-panel", icon="circle-check", completed=true,
+                    extra_class="text-decoration-line-through text-body-secondary") }}
+                {{ nav_item("Set your 3–5 tasks", href=root_path ~ "components/navigation/", icon="circle", end_icon="chevron-right",
+                    extra_class="bg-body-tertiary") }}
+                {{ nav_item("Connect to your db", href=root_path ~ "components/form/", icon="circle") }}
+                {{ nav_item("Drop it in your dashboard", href=root_path ~ "components/sidebar/", icon="circle") }}
+            {% endcall %}
+        {% endset %}
+        {% set panel_footer %}
+            <p class="small text-body-secondary mb-0">Dismiss this widget for this browser. You can reopen it anytime using “Open preparation panel” in this example.</p>
+            {{ button("Dismiss forever", variant="ghost", size="sm", extra_class="w-100 text-body-secondary",
+                floating_panel_dismiss="card-preparation-panel") }}
+        {% endset %}
+        {% call floating_panel("card-preparation-panel", "Get started", storage_key="catalog-card-preparation") %}
+            {% call card(size="sm", footer=panel_footer, footer_class="flex-column align-items-stretch gap-2 bg-body-tertiary") %}
+                {{ collapsible("card-preparation-steps", "Preparation steps", panel_steps,
+                    header_content=panel_summary, content_class="border-0 p-0", open=true,
+                    trigger_aria_label="Toggle preparation steps") }}
+            {% endcall %}
+        {% endcall %}
+    {% endset %}
+    {% set panel_source %}
+        {{ panel_trigger }}
+        {{ panel_content }}
+        <script type="module">
+            import FloatingPanel from "@wpmoo/ui/floating-panel.js";
+
+            const panel = FloatingPanel.getOrCreateInstance(
+                document.getElementById("card-preparation-panel"),
+            );
+            // Call panel.dispose() when your application releases this surface.
+        </script>
+    {% endset %}
+    {{ render_example(
+        "card-floating-panel", "Floating panel",
+        "Compose a non-modal, viewport-fixed onboarding Card with <code>floating_panel</code>. This static checklist shows two completed tasks out of five; its links lead to related documentation. Collapse the list, dismiss the widget, or reopen it here. The demo remembers dismissal in this browser across reloads; applications own task state and should provide their own account-specific <code>storage_key</code>. Initialize the public ESM module explicitly, using a bundler or import map for the package import shown below. No backdrop or page scroll lock is added.",
+        panel_trigger,
+        portal_content=panel_content,
+        source_content=panel_source,
+        toolbar_label="Card",
+        toolbar_icon="panel-bottom"
     ) }}
 
     {% set spacing_login %}

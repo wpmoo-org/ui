@@ -108,6 +108,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/datatable.js",
     "dist/js/slider.js",
     "dist/js/sheet.js",
+    "dist/js/floating-panel.js",
     "dist/js/toc.js",
     "dist/js/overlay-scrollbar.js",
     "dist/js/table-of-contents.js",
@@ -137,6 +138,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./datatable.js": "./dist/js/datatable.js",
     "./slider.js": "./dist/js/slider.js",
     "./sheet.js": "./dist/js/sheet.js",
+    "./floating-panel.js": "./dist/js/floating-panel.js",
     "./toc.js": "./dist/js/toc.js",
     "./overlay-scrollbar.js": "./dist/js/overlay-scrollbar.js",
     "./table-of-contents.js": "./dist/js/table-of-contents.js",
@@ -489,6 +491,7 @@ class PackageMetadataTests(unittest.TestCase):
                 "datatable.js",
                 "slider.js",
                 "sheet.js",
+                "floating-panel.js",
                 "toc.js",
                 "overlay-scrollbar.js",
                 "table-of-contents.js",
@@ -685,6 +688,7 @@ import Toc from "@wpmoo/ui/toc.js";
 import OverlayScrollbar from "@wpmoo/ui/overlay-scrollbar.js";
 import LegacyToc from "@wpmoo/ui/table-of-contents.js";
 import { initSheets } from "@wpmoo/ui/sheet.js";
+import FloatingPanel from "@wpmoo/ui/floating-panel.js";
 import MooUI, {
   loadChart as AggregateLoadChart,
   Combobox as AggregateCombobox,
@@ -697,10 +701,12 @@ import MooUI, {
   Slider as AggregateSlider,
   OverlayScrollbar as AggregateOverlayScrollbar,
   initSheets as AggregateInitSheets,
+  FloatingPanel as AggregateFloatingPanel,
 } from "@wpmoo/ui/moo-ui.js";
 import MooUIMinified, {
   loadChart as MinifiedAggregateLoadChart,
   Datepicker as MinifiedAggregateDatepicker,
+  FloatingPanel as MinifiedAggregateFloatingPanel,
 } from "@wpmoo/ui/moo-ui.min.js";
 import Chart from "@wpmoo/ui/chart.js";
 import ChartMinified from "@wpmoo/ui/chart.min.js";
@@ -732,6 +738,12 @@ if (
   typeof initSheets !== "function" ||
   typeof AggregateInitSheets !== "function" ||
   MooUI.initSheets !== AggregateInitSheets ||
+  typeof FloatingPanel.getOrCreateInstance !== "function" ||
+  typeof FloatingPanel.getInstance !== "function" ||
+  typeof AggregateFloatingPanel.getOrCreateInstance !== "function" ||
+  typeof MinifiedAggregateFloatingPanel.getOrCreateInstance !== "function" ||
+  MooUI.FloatingPanel !== AggregateFloatingPanel ||
+  MooUIMinified.FloatingPanel !== MinifiedAggregateFloatingPanel ||
   typeof AggregateChart.getOrCreateInstance !== "function" ||
   typeof AggregateDatepicker.getOrCreateInstance !== "function" ||
   typeof MooCalendar !== "function" ||
@@ -960,6 +972,7 @@ for (const specifier of [
             "context-menu.js",
             "datatable.js",
             "sheet.js",
+            "floating-panel.js",
             "slider.js",
             "toc.js",
             "overlay-scrollbar.js",

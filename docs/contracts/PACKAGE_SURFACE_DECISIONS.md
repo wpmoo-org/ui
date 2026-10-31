@@ -3,6 +3,45 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.5.0 Additive Component Features
+
+Release 1.5.0 adds `@wpmoo/ui/floating-panel.js` and the named `FloatingPanel`
+export on the aggregate Moo UI module. Initialization is explicit through
+`FloatingPanel.getOrCreateInstance(panel)`; `dispose()` releases listeners and
+restores the original hidden state and launcher ARIA attributes. Merely importing
+the module never scans or changes the document.
+`FloatingPanel.getInstance(panel)` returns the current controller or `null`
+without initializing one. Reinitialization rereads available persistent storage;
+in-memory entries retain only unsaved local intent after a storage write fails.
+
+The non-modal panel uses `data-floating-panel` with an element id. Plain Button
+controls target that id with `data-floating-panel-open` and
+`data-floating-panel-dismiss`; dismiss controls belong inside the panel. Controls
+and panel share the nearest `.moo-ui` boundary. An optional
+`data-floating-panel-key` persists dismissal in browser local storage under the
+`moo-floating-panel:` prefix, with in-memory fallback when storage is unavailable.
+Applications own account-specific keys, task state and authorization; persistence
+is a UI preference, not a server-side account setting. There is no backdrop,
+focus trap or page scroll lock. The Card catalog composes the public module with
+Progress, Collapsible and Navigation; it does not implement a second controller.
+Storage keys identify a preference across the origin, not a DOM owner: use
+distinct account-and-surface keys for independent preferences. Disposal does not
+erase the saved preference; reinitialization intentionally reapplies it. Keyboard
+users activate the ordinary dismiss button; this non-modal persistent surface
+does not claim dialog-style Escape dismissal.
+Keyed markup starts hidden until explicit initialization resolves the preference,
+avoiding a flash of a previously dismissed panel. Unkeyed markup remains visible
+without JavaScript. Dismissal returns focus to the usable opening launcher, or
+an enabled, visible same-owner fallback.
+
+Progress adds an opt-in SVG circle with exact fractional progress and numeric
+ARIA values. Collapsible adds a trusted composed header and content utilities;
+Navigation adds escaped icon-frame utilities. Switch adds native string `name`
+and optional `value` attributes without submission or persistence JavaScript.
+Defaults, existing exports, Sass/CSS surfaces, Bootstrap peers and dependency
+versions are preserved. This additive public runtime/export is a minor release,
+not a patch. Certification remains in preview.
+
 ## 1.4.3 Compatible Fixes
 
 Release 1.4.3 packages the accepted document-scrollbar first-paint and overlay

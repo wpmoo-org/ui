@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/collapsible.html.jinja" import collapsible %}
+{% from "components/progress.html.jinja" import progress %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -45,6 +46,24 @@
       "Basic",
       "The trigger line stays fixed while details expand directly below without affecting horizontal measure.",
       basic,
+      preview_class="moo-example__preview--narrow moo-example__preview--top-aligned"
+    ) }}
+
+    {% set summary %}
+      <div class="d-flex align-items-center gap-3">
+        {{ progress(1, max=3, aria_label="Preparation", variant="circle") }}
+        <span>Preparation: 1 of 3 complete</span>
+      </div>
+    {% endset %}
+    {% set compact %}
+      {{ collapsible("compact-preparation", "Preparation", "Saved details remain available.",
+        header_content=summary, content_class="border-0 p-0", open=true,
+        trigger_aria_label="Toggle preparation") }}
+    {% endset %}
+    {{ render_component_example("collapsible", "Collapsible",
+      "composed-header", "Composed header",
+      "An optional trusted <code>header_content</code> capture replaces only the heading presentation. <code>title</code> stays required; provide a matching accessible trigger name. <code>content_class</code> adds Bootstrap utilities without changing default callers or Collapse behavior.",
+      compact,
       preview_class="moo-example__preview--narrow moo-example__preview--top-aligned"
     ) }}
 

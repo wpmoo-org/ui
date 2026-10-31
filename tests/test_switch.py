@@ -30,6 +30,13 @@ class SwitchTests(CatalogTestCase):
             ' for="s1">Airplane mode</label> </div>',
         )
 
+    def test_switch_supports_native_escaped_form_names_and_values(self) -> None:
+        output = self.render_switch('switch("native", label="Enable", name="enabled", value="1", checked=true)')
+        self.assertIn('name="enabled" value="1"', output)
+        escaped = self.render_switch('switch("escaped", label="Enable", name=\'a"<&\', value=\'b"<&\')')
+        self.assertIn('name="a&#34;&lt;&amp;"', escaped)
+        self.assertIn('value="b&#34;&lt;&amp;"', escaped)
+
     def test_switch_checked_and_disabled_are_space_separated(self) -> None:
         output = self.render_switch(
             'switch("s2", label="Airplane mode", checked=true, disabled=true)'

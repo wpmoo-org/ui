@@ -1,5 +1,15 @@
 {% set card_sizes = ["default", "sm"] %}
 
+{% macro floating_panel(id, title, storage_key="") -%}
+  {% if id is not string or not id | trim or id | trim != id or id.split() | length != 1 %}{{ fail("Floating panel id is required") }}{% endif %}
+  {% if title is not string or not title | trim %}{{ fail("Floating panel title is required") }}{% endif %}
+  {% if storage_key is not string or storage_key | length > 256 %}{{ fail("Floating panel storage key must be a bounded string") }}{% endif %}
+  <aside id="{{ id }}" aria-label="{{ title }}" data-floating-panel="{{ id }}"{% if storage_key %} data-floating-panel-key="{{ storage_key }}" hidden{% endif %}
+    class="position-fixed bottom-0 end-0 col-12 col-sm-6 col-lg-4 col-xl-3 p-3 z-3 mh-100 overflow-auto">
+    {{ caller() }}
+  </aside>
+{%- endmacro %}
+
 {% macro card(
   title="",
   subtitle="",

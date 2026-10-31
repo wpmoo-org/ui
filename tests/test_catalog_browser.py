@@ -59,6 +59,56 @@ class CatalogBrowserTests(unittest.TestCase):
         cls.browser = launch_certification_browser(cls.playwright)
         cls.addClassCleanup(cls.browser.close)
 
+    def test_card_floating_checklist_keeps_its_composed_public_contract(self) -> None:
+        for theme, direction, width in itertools.product(
+            ("light", "dark"), ("ltr", "rtl"), (390, 1440),
+        ):
+            with self.subTest(theme=theme, direction=direction, width=width):
+                context = self.browser.new_context(viewport={"width": width, "height": 900})
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    page.goto(f"{self.base_url}/site-dist/components/card/index.html")
+                    panel = page.locator("#card-preparation-panel")
+                    expect(panel).to_have_attribute("data-floating-panel-ready", "true")
+                    panel.evaluate("""(element, state) => {
+                        const owner = element.closest('.moo-ui');
+                        owner.setAttribute('data-bs-theme', state.theme);
+                        owner.setAttribute('dir', state.direction);
+                    }""", {"theme": theme, "direction": direction})
+                    expect(panel).to_be_visible()
+                    progress = panel.get_by_role("progressbar")
+                    expect(progress).to_have_attribute("aria-valuenow", "2")
+                    expect(progress).to_have_attribute("aria-valuemax", "5")
+                    expect(panel.locator(".nav-item")).to_have_count(5)
+                    completed = panel.locator('[data-nav-completed="true"] a')
+                    expect(completed).to_have_count(2)
+                    self.assertTrue(completed.evaluate_all("elements => elements.every(e => getComputedStyle(e).textDecorationLine.includes('line-through'))"))
+                    box = panel.bounding_box()
+                    self.assertGreaterEqual(box["x"], -1)
+                    self.assertLessEqual(box["x"] + box["width"], width + 1)
+                    toggle = panel.get_by_role("button", name="Toggle preparation steps")
+                    content = panel.locator("#card-preparation-steps")
+                    toggle.focus()
+                    toggle.press("Enter")
+                    expect(content).to_be_hidden()
+                    expect(content).not_to_have_class(re.compile(r"\bcollapsing\b"))
+                    toggle.press("Enter")
+                    expect(content).to_be_visible()
+                    expect(content).not_to_have_class(re.compile(r"\bcollapsing\b"))
+                    dismiss = panel.get_by_role("button", name="Dismiss forever")
+                    dismiss.focus()
+                    dismiss.press("Enter")
+                    expect(panel).to_be_hidden()
+                    launcher = page.locator('[data-floating-panel-open="card-preparation-panel"]')
+                    expect(launcher).to_be_focused()
+                    launcher.press("Enter")
+                    expect(panel).to_be_visible()
+                    expect(toggle).to_be_focused()
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
     def test_toc_document_preview_keeps_fragment_navigation_inside_its_frame(self) -> None:
         context = self.browser.new_context(viewport={"width": 1540, "height": 1314})
         self.addCleanup(context.close)
