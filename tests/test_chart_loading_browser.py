@@ -43,6 +43,10 @@ class ChartLoadingBrowserTests(unittest.TestCase):
                             lambda route: route.fulfill(
                                 content_type="text/html",
                                 body="<!doctype html><html><head>"
+                                '<script type="importmap">{"imports":{'
+                                '"chart.js/auto":"/vendor/chart.js/auto/auto.js",'
+                                '"@kurkle/color":"/vendor/@kurkle/color/dist/color.esm.js"'
+                                '}}</script>'
                                 '<link rel="stylesheet" href="/dist/assets/css/moo-ui.css">'
                                 '</head><body><div class="moo-ui" data-bs-theme="'
                                 + case.color_scheme + '"></div></body></html>',
@@ -63,6 +67,12 @@ class ChartLoadingBrowserTests(unittest.TestCase):
                         self.assertEqual(loaded, "function")
                         chart_url = f"{self.base_url}/dist/js/chart.js"
                         self.assertNotIn(chart_url, requests)
+                        vendor_urls = [f"{self.base_url}/vendor/{path}" for path in (
+                            "chart.js/auto/auto.js", "chart.js/dist/chart.js",
+                            "chart.js/dist/chunks/index.js", "@kurkle/color/dist/color.esm.js",
+                        )]
+                        for vendor_url in vendor_urls:
+                            self.assertNotIn(vendor_url, requests)
                         report = page.evaluate("""async () => {
                           const api = window.loaderApi;
                           const [Chart, again] = await Promise.all([
@@ -96,6 +106,8 @@ class ChartLoadingBrowserTests(unittest.TestCase):
                             "sameInstance": True, "disposed": True,
                         })
                         self.assertEqual(requests.count(chart_url), 1)
+                        for vendor_url in vendor_urls:
+                            self.assertEqual(requests.count(vendor_url), 1)
                         evidence.assert_clean()
                     finally:
                         context.close()

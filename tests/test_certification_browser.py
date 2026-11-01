@@ -241,7 +241,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         evidence = BrowserEvidence(page)
         try:
             response = page.goto(
-                f"{self.base_url}/tests/fixtures/certification/nested-owners.html",
+                f"{self.base_url}/tests/fixtures/integration/nested-owners.html",
                 wait_until="networkidle",
             )
             self.assertIsNotNone(response)
