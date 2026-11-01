@@ -457,8 +457,7 @@
 {#- Dashboard Overview: stat cards + Moo UI charts. The overview page
    uses the same .moo-examples-page layout as Tasks/Users, but without
    DataTable — just stat cards and chart containers. Charts are rendered
-   by the public MooChart component, which bundles Chart.js at build time
-   (no runtime Chart.js CDN load). #}
+   by the public MooChart adapter with an explicit external Chart.js import map. #}
 {% macro dashboard_codepen_css() -%}
 .moo-examples-page {
   display: grid;
@@ -493,9 +492,8 @@
    Access-Control-Allow-Origin header, so the cross-origin import would be
    blocked by CORS. unpkg.com serves the published @wpmoo/ui bundle with a
    CORS header, so this small DOM adapter dynamically imports the
-   version-pinned Moo bundle from there. It never loads Chart.js directly:
-   the published dist/js/chart.js already bundles Chart.js and exposes
-   MooChart as its default export. #}
+   Moo module from there. The HTML payload provides the external Chart.js
+   and color import map before this script executes. #}
 {% macro dashboard_codepen_js() -%}
 function startMooCodePenCharts() {
   import("https://unpkg.com/@wpmoo/ui@{{ product.codepenCdnVersion }}/dist/js/chart.js")
@@ -559,6 +557,11 @@ if (document.readyState === "loading") {
      tokens and the demo runtime never need an html/body theme mirror. #}
   {% set has_resolved_moo_owner = "moo-ui" in resolved_html and "data-bs-theme" in resolved_html %}
   {% set owner_html %}
+    {% if 'class="chart' in resolved_html or component_slug == 'chart' %}
+<script type="importmap">
+{"imports":{"chart.js/auto":"https://cdn.jsdelivr.net/npm/chart.js@4.6.1/auto/auto.js","@kurkle/color":"https://cdn.jsdelivr.net/npm/@kurkle/color@0.3.4/dist/color.esm.js"}}
+</script>
+    {% endif %}
     {% if has_resolved_moo_owner %}
 {{ resolved_html | trim }}
     {% else %}

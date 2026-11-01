@@ -1,6 +1,6 @@
 // Chart catalog adapter. All rendering, theming, and lifecycle work is
 // delegated to the public MooChart component (src/js/components/chart.js),
-// which bundles Chart.js at build time through `chart.js/auto`. This module
+// which imports the external `chart.js/auto` vendor. This module
 // never touches Chart.js, a CDN, or `window.Chart` itself — it only discovers
 // `.chart` roots in the catalog and wires their disposal into
 // initCatalog's dispose chain.

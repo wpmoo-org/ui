@@ -1774,7 +1774,7 @@ report("stateful-lifecycle-button", {{
 
         bundle = (PACKAGE_DIST / "js/chart.js").read_text(encoding="utf-8")
         self.assertRegex(bundle, r"export\s*{\s*MooChart as default\s*}")
-        self.assertIn("Chart.js v4.6.1", bundle)
+        self.assertIn('from "chart.js/auto"', bundle)
         self.assertNotIn("cdn.jsdelivr.net", bundle)
         self.assertNotIn("unpkg.com", bundle)
         self.assertNotIn("window.Chart", bundle)

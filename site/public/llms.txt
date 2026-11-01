@@ -2,7 +2,7 @@
 
 > Bootstrap markup. shadcn feel.
 
-Moo UI 1.6.0 is the release target for a Bootstrap 5.3-native component system with a restrained,
+Moo UI 2.0.0 is the release target for a Bootstrap 5.3-native component system with a restrained,
 shadcn-inspired visual language for server-rendered and Bootstrap-native apps.
 It is CSS-first, not JavaScript-free: Bootstrap owns native plugin behavior,
 while Moo UI adds optional, explicit ESM only for documented gaps.
@@ -14,7 +14,7 @@ implementation.
 
 ## Version And Support
 
-- package release target: `@wpmoo/ui@1.6.0`
+- package release target: `@wpmoo/ui@2.0.0`
 - Bootstrap peer range: `>=5.3.0 <5.4`
 - Tested Bootstrap versions in the manifest: `5.3.0`, `5.3.3`, `5.3.8`
 - License: MIT for source code
@@ -39,8 +39,8 @@ not independent or accredited certification.
 - `@wpmoo/ui/sidebar.js`: optional Sidebar ESM lifecycle
 - `@wpmoo/ui/toc.js`: optional TableOfContents lifecycle and current-section tracking (`table-of-contents.js` remains a compatibility entrypoint)
 - `@wpmoo/ui/overlay-scrollbar.js`: opt-in OverlayScrollbar lifecycle for native document or same-owner element scrolling, with native fallback
-- `@wpmoo/ui/chart.js`: optional Chart ESM lifecycle (Chart.js 4.6.1 bundled)
-- `@wpmoo/ui/chart.min.js`: minified Chart bundle (artifact variant of chart.js)
+- `@wpmoo/ui/chart.js`: optional Chart ESM lifecycle (external optional Chart.js >=4.6.1 <5 peer)
+- `@wpmoo/ui/chart.min.js`: minified MooChart adapter (artifact variant of chart.js)
 - `@wpmoo/ui/datepicker.js`: optional Datepicker ESM lifecycle (self-contained, no third-party runtime)
 - `@wpmoo/ui/datepicker.min.js`: minified Datepicker bundle (artifact variant of datepicker.js)
 - `@wpmoo/ui/slider.js`: optional Slider ESM lifecycle (native range input, no third-party runtime)
@@ -63,7 +63,7 @@ entrypoints; undocumented internal partial paths are not separate public APIs.
 
 ## Installation Facts
 
-- Version-pinned CDN full stylesheet after publication: `https://unpkg.com/@wpmoo/ui@1.6.0/dist/assets/css/moo-ui.css`
+- Version-pinned CDN full stylesheet after publication: `https://unpkg.com/@wpmoo/ui@2.0.0/dist/assets/css/moo-ui.css`
 
 Full replacement:
 
@@ -107,8 +107,8 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
   optional Moo UI ESM composed with Bootstrap Table and controls
 - Sidebar state and responsive coordination: optional Moo UI ESM composed with
   Bootstrap behavior
-- Chart rendering with light/dark theme toggle: optional Moo UI ESM, self-contained
-  bundle (Chart.js 4.6.1 bundled at build time)
+- Chart rendering with light/dark theme toggle: optional Moo UI ESM adapter; install Chart.js4.6.1 separately
+  or supply a native import map for Chart.js and color0.3.4
 - Datepicker with shadcn-like trigger/popover/calendar: optional Moo UI ESM,
   self-contained (no third-party runtime)
 - Slider with native range input semantics: optional Moo UI ESM, no third-party

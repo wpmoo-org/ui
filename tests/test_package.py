@@ -191,6 +191,7 @@ class PackageMetadataTests(unittest.TestCase):
     def _install_clean_consumer_with_bootstrap_scss(
         self,
         temporary_root: Path,
+        *, include_chart_peer: bool = True,
     ) -> tuple[Path, Path, Path]:
         pack_result = subprocess.run(
             [sys.executable, "scripts/package_release.py", "--pack-destination", str(temporary_root)],
@@ -229,6 +230,13 @@ class PackageMetadataTests(unittest.TestCase):
                 shutil.copy2(item, destination)
             elif item.is_dir():
                 shutil.copytree(item, destination)
+
+        if include_chart_peer:
+            for dependency in ("chart.js", "@kurkle/color"):
+                shutil.copytree(
+                    ROOT / "node_modules" / dependency,
+                    consumer_root / "node_modules" / dependency,
+                )
 
         return consumer_root, installed_package, tarball
 
@@ -566,15 +574,31 @@ class PackageMetadataTests(unittest.TestCase):
             self.assertNotIn("Chart.js", license_text)
             self.assertNotIn("@kurkle/color", license_text)
             self.assertEqual(license_text.count("MIT License"), 1)
-            notices_path = installed_package / "THIRD_PARTY_NOTICES.md"
-            self.assertTrue(notices_path.is_file())
-            notices = notices_path.read_text(encoding="utf-8")
             for dependency in ("chart.js", "@kurkle/color"):
                 with self.subTest(dependency=dependency):
-                    upstream_license = (
-                        ROOT / "node_modules" / dependency / "LICENSE.md"
-                    ).read_text(encoding="utf-8").strip()
-                    self.assertIn(upstream_license, notices)
+                    upstream = ROOT / "node_modules" / dependency / "LICENSE.md"
+                    installed = installed_package.parent.parent / dependency / "LICENSE.md"
+                    self.assertEqual(installed.read_bytes(), upstream.read_bytes())
+                    self.assertFalse((installed_package / "node_modules" / dependency).exists())
+
+    def test_aggregate_import_does_not_require_optional_chart_peer(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            consumer, _, _ = self._install_clean_consumer_with_bootstrap_scss(
+                Path(temporary_directory), include_chart_peer=False,
+            )
+            result = subprocess.run(
+                ["node", "--input-type=module", "-e", """
+import { loadChart, Combobox } from '@wpmoo/ui/moo-ui.js';
+if (typeof Combobox.getOrCreateInstance !== 'function') throw Error('aggregate');
+try {
+  await loadChart();
+  throw Error('Chart must require the absent peer');
+} catch (error) {
+  if (error.code !== 'ERR_MODULE_NOT_FOUND' || !error.message.includes('chart.js')) throw error;
+}
+"""], cwd=consumer, capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_package_manifest_validator_accepts_approved_tarball_files(self) -> None:
         payload = [

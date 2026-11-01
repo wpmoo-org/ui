@@ -14,6 +14,7 @@ product, site, template, library, training dataset, or marketing asset without
 prior written permission from WPMoo.
 
 Third-party assets remain under their own licenses. See the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.6.0/THIRD_PARTY_NOTICES.md).
-The npm package includes those notices for bundled dependencies. Catalog visual
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v2.0.0/THIRD_PARTY_NOTICES.md).
+The npm package includes distribution notices; Chart vendors keep their own
+licenses outside the Moo archive. Catalog visual
 assets and this visual asset license remain repository-only.

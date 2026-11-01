@@ -380,6 +380,8 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 "nested-owner-outer-portal",
             )
             self.assertEqual(page.locator("body > .modal-backdrop").count(), 1)
+            # Bootstrap focuses the dialog after its opening transition.
+            expect(modal).to_be_focused()
             page.keyboard.press("Escape")
             expect(modal).not_to_have_class(re.compile(r"\bshow\b"))
             page.wait_for_function(

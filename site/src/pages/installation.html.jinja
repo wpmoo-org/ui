@@ -188,6 +188,12 @@
           Create instances explicitly and dispose them when your host removes
           the corresponding UI.
         </p>
+        <p>
+          Since Moo UI 2.0, Chart.js is an external optional peer. For Chart use,
+          run <code>npm install chart.js@4.6.1</code>; color comes with Chart.js.
+          Other components need neither vendor. A bundler resolves
+          <code>chart.js/auto</code> from that separate installation.
+        </p>
         {% set esm_example %}
         import Chart from "@wpmoo/ui/chart.js";
         import Combobox from "@wpmoo/ui/combobox.js";
@@ -259,6 +265,12 @@
           existing loading flow.
         </p>
         {% set esm_cdn_example %}
+        <script type="importmap">
+          {"imports": {
+            "chart.js/auto": "https://cdn.jsdelivr.net/npm/chart.js@4.6.1/auto/auto.js",
+            "@kurkle/color": "https://cdn.jsdelivr.net/npm/@kurkle/color@0.3.4/dist/color.esm.js"
+          }}
+        </script>
         <script type="module">
           import Chart from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./chart.js"] | replace("./", "") }}";
           import Combobox from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./combobox.js"] | replace("./", "") }}";
@@ -305,6 +317,16 @@
         </script>
         {% endset %}
         {{ render_code_snippet("installation-esm-cdn", esm_cdn_example, "html") }}
+        <p>
+          Place the import map before any module that imports Chart, including
+          <code>loadChart()</code>. For self-hosting, copy Chart.js's
+          <code>auto/auto.js</code>, <code>dist/chart.js</code>,
+          <code>dist/chunks/index.js</code>, color's <code>dist/color.esm.js</code>
+          and both upstream <code>LICENSE.md</code> files to your vendor directory;
+          preserve relative paths and point the same two map entries there.
+          A strict CSP must allow this import map with its exact hash or a host
+          nonce, plus the chosen vendor origins for CDN use.
+        </p>
         <p>
           Review the <a href="{{ site_href('components/chart.html', root_path) }}">Chart</a>,
           <a href="{{ site_href('components/combobox.html', root_path) }}">Combobox</a>,

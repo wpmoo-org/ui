@@ -3,21 +3,30 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
-## 1.6.0 Password Requirements
+## 2.0.0 External Chart vendors and Password Requirements
 
-The npm archive excludes `ASSET_LICENSE.md`, which applies to repository and
-catalog visual assets that are not distributed through npm. The file and the
-catalog's visual-asset license section remain in the repository. The packaged
-README links to the version-pinned repository copy. Historical API inventories
-are immutable; compatibility checks reconcile only this approved documentation
-removal while preserving every runtime, stylesheet and Sass export.
+The maintainer requests Chart.js and color outside Moo's npm archive. This major
+changes the former self-contained Chart install contract: `chart.js` and
+`chart.min.js` retain the `chart.js/auto` import and require the optional Chart.js
+peer (`>=4.6.1 <5`). npm Chart consumers install it explicitly; color remains its
+transitive dependency. Native browser/CDN consumers supply an import map for
+both vendors before importing MooChart. No browser global or implicit CDN fetch
+is introduced. The existing synchronous standalone API and lazy aggregate
+`loadChart()` identity/lifecycle remain unchanged. Other modules do not require
+Chart.js; the aggregate needs it only when the loader is called.
 
-Dependency updates from PRs #112 and #113 are included in this release:
-Chart.js 4.6.1 is bundled into the standalone Chart modules; development tools
-use coverage 7.17.0 and Playwright 1.64.1. Full dependency MIT notices remain in
-`THIRD_PARTY_NOTICES.md`, which is included in the npm archive. `LICENSE`
-contains only Moo UI's own MIT license; vendor license texts must remain
-separate. These updates add no runtime package dependency or public entrypoint.
+The catalog copies exact locked native ESM files and unchanged licenses into
+site-dist/vendor, outside npm. CodePen HTML exports carry the version-pinned
+external vendor map. Historical 1.x API freezes remain immutable descriptions
+of the old install profile, explicitly superseded only for this Chart runtime
+packaging boundary and the repository-only ASSET_LICENSE file.
+
+The npm archive excludes `ASSET_LICENSE.md`; visual assets and their license
+stay in the repository/catalog. `LICENSE` contains only WPMoo MIT.
+`THIRD_PARTY_NOTICES.md` stays separate and describes actual distribution,
+including Bootstrap-derived full CSS; Chart/color licenses stay with vendors.
+Dependency PR112 supplies Chart.js4.6.1; PR113 supplies development tools
+coverage7.17.0 and Playwright1.64.1. No new public export is added by vendoring.
 
 The additive `password-requirements.js` entrypoint and named aggregate
 `PasswordRequirements` export share one constructor and instance map across

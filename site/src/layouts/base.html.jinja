@@ -23,6 +23,12 @@
     {% if page_meta.url %}
     <link rel="canonical" href="{{ page_meta.url }}">
     {% endif %}
+    <script type="importmap">
+      {"imports": {
+        "chart.js/auto": "{{ root_path or './' }}vendor/chart.js/auto/auto.js",
+        "@kurkle/color": "{{ root_path or './' }}vendor/@kurkle/color/dist/color.esm.js"
+      }}
+    </script>
     <title>{% block title %}{{ page_meta.title }}{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{{ root_path }}favicon.svg">
     <link rel="icon" href="{{ root_path }}favicon.ico" sizes="any">

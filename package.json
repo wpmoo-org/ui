@@ -1,6 +1,6 @@
 {
   "name": "@wpmoo/ui",
-  "version": "1.6.0",
+  "version": "2.0.0",
   "description": "Bootstrap markup. shadcn feel. A frontend-framework-free component system for server-rendered apps.",
   "license": "MIT",
   "author": "WPMoo (https://wpmoo.org)",
@@ -88,10 +88,14 @@
     "THIRD_PARTY_NOTICES.md"
   ],
   "peerDependencies": {
-    "bootstrap": ">=5.3.0 <5.4"
+    "bootstrap": ">=5.3.0 <5.4",
+    "chart.js": ">=4.6.1 <5"
   },
   "peerDependenciesMeta": {
     "bootstrap": {
+      "optional": true
+    },
+    "chart.js": {
       "optional": true
     }
   },

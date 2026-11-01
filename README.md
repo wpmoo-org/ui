@@ -140,6 +140,17 @@ if (combobox) {
 
 The runtime bundle is optional and side-effect-free. Import the aggregate
 `@wpmoo/ui/moo-ui.js` entrypoint, or import only the component module you use.
+Chart consumers install the optional peer explicitly (other components need no Chart dependency):
+
+```sh
+npm install chart.js@4.6.1
+```
+
+Chart.js supplies its own `@kurkle/color` dependency and vendor licenses. Neither
+implementation is embedded in Moo's npm archive. Bundlers resolve `chart.js/auto`
+from that installation. Native browser/CDN hosts must configure the version-pinned
+import map in the [Installation guide](https://ui.wpmoo.org/installation/) before
+loading MooChart. Self-hosted vendors must retain their upstream license files.
 The aggregate loads Chart.js only when `loadChart()` is called:
 
 ```js
@@ -264,10 +275,12 @@ calm.
 
 ## Status And Support
 
-The `1.6.0` minor release target adds dependency-free password requirements,
+The `2.0.0` major release target externalizes Chart.js and adds dependency-free password requirements,
 optional host-supplied analysis and native confirmation/submit feedback.
 Field, Input, Button and Tooltip gain additive composition options. Existing
 exports and Bootstrap compatibility are preserved; no estimator is bundled.
+Chart consumers must now install the external Chart.js peer or provide a browser
+import map; the previously self-contained Chart setup changes in this major.
 Component certification remains
 `preview`, with its documented manual and browser/device limits. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
@@ -290,9 +303,8 @@ paths live in the [Installation guide](https://ui.wpmoo.org/installation/).
 
 Moo UI source code is MIT licensed. License details live in
 [LICENSE](LICENSE) and the [License page](https://ui.wpmoo.org/license/).
-Full MIT notices for bundled Chart.js and `@kurkle/color` are kept separately
-in the published
-[THIRD_PARTY_NOTICES.md](https://github.com/wpmoo-org/ui/blob/v1.6.0/THIRD_PARTY_NOTICES.md).
+Third-party distribution details and notices are kept separately in
+[THIRD_PARTY_NOTICES.md](https://github.com/wpmoo-org/ui/blob/v2.0.0/THIRD_PARTY_NOTICES.md).
 Catalog visual assets and their license are repository-only and are not
 included in the npm package. Asset terms live in the
-[visual asset license](https://github.com/wpmoo-org/ui/blob/v1.6.0/ASSET_LICENSE.md).
+[visual asset license](https://github.com/wpmoo-org/ui/blob/v2.0.0/ASSET_LICENSE.md).
