@@ -5,6 +5,12 @@ than one component page.
 
 ## 2.0.0 External Chart vendors and Password Requirements
 
+The four compiled CSS artifacts change only in the version shown in the Moo UI
+license banner. The two normalized CSS checksum fixtures advance from 1.6.0 to
+2.0.0 only after replacing the new banner with the old one reproduces both prior
+accepted checksums. Selectors, declarations, tokens, geometry and fonts stay
+unchanged.
+
 The maintainer requests Chart.js and color outside Moo's npm archive. This major
 changes the former self-contained Chart install contract: `chart.js` and
 `chart.min.js` retain the `chart.js/auto` import and require the optional Chart.js
