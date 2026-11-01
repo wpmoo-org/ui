@@ -49,6 +49,15 @@ class _QuietHandler(SimpleHTTPRequestHandler):
 
     def translate_path(self, path: str) -> str:
         public_path = urlsplit(path).path.lstrip("/")
+        if public_path.startswith("vendor/"):
+            relative = public_path.removeprefix("vendor/")
+            for vendor_root in (ROOT / "vendor", ROOT / "site-dist/vendor"):
+                candidate = (vendor_root / relative).resolve()
+                if not candidate.is_relative_to(vendor_root.resolve()):
+                    continue
+                if candidate.is_file():
+                    return str(candidate)
+            return str(ROOT / "site-dist/vendor/__not_found__")
         if public_path.startswith("assets/"):
             local_asset = Path(self.directory) / public_path
             if local_asset.exists():
@@ -246,9 +255,27 @@ def setup_codepen_page(
 ) -> tuple[Page, BrowserEvidence]:
     page = context.new_page()
     evidence = BrowserEvidence(page)
-    response = page.goto(f"{base_url.rstrip('/')}/site-dist/index.html", wait_until="load")
+    # Start from a blank same-origin document: catalog module/import-map state
+    # must not leak into the independent CodePen host under test.
+    origin_url = f"{base_url.rstrip('/')}/__codepen_origin__"
+    page.route(origin_url, lambda route: route.fulfill(
+        content_type="text/html", body="<!doctype html><html><head></head><body></body></html>",
+    ))
+    response = page.goto(origin_url, wait_until="load")
     if response is None or not response.ok:
         raise AssertionError("Could not establish CodePen fixture origin")
+    for prefix, directory in (
+        ("https://cdn.jsdelivr.net/npm/chart.js@4.6.1/", "chart.js"),
+        ("https://cdn.jsdelivr.net/npm/@kurkle/color@0.3.4/", "@kurkle/color"),
+    ):
+        def serve_vendor(route, request, *, prefix=prefix, directory=directory):
+            relative = route.request.url.removeprefix(prefix)
+            route.fulfill(
+                path=ROOT / "node_modules" / directory / relative,
+                content_type="application/javascript",
+                headers={"Access-Control-Allow-Origin": "*"},
+            )
+        page.route(prefix + "**", serve_vendor)
     page.set_content(
         f"""
         <!doctype html>

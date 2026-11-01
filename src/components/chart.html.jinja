@@ -1,9 +1,9 @@
 {# Chart is a Moo-owned public contract: Bootstrap ships no chart component,
    so Moo defines the .chart root, the data-chart type attribute, the
    data-chart-data JSON payload, optional data-chart-options JSON object, and
-   the deterministic child <canvas> resolution. The bundled runtime
-   (src/js/components/chart.js wraps chart.js@4.5.1 through chart.js/auto at
-   build time) renders the datasets, themes them from Bootstrap's CSS
+   the deterministic child <canvas> resolution. The external runtime
+   (src/js/components/chart.js wraps the separately installed chart.js@4.6.1
+   peer through chart.js/auto) renders the datasets, themes them from Bootstrap's CSS
    variables plus optional chart palette tokens, and re-themes when
    data-bs-theme or inline chart-token styles change. The contract is frozen
    in src/certification/api-freeze-1.0.0-rc.6.json. #}

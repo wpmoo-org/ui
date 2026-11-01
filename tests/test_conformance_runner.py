@@ -238,9 +238,9 @@ class OwnerConformanceFixtureTests(unittest.TestCase):
                 )
 
     def test_nested_owner_fixture_declares_explicit_keys_and_external_runtime(self):
-        fixture = (FIXTURES_DIR / "nested-owners.html").read_text(encoding="utf-8")
+        fixture = (ROOT / "tests/fixtures/integration/nested-owners.html").read_text(encoding="utf-8")
         initializer = (
-            FIXTURES_DIR / "assets" / "init-nested-owners.js"
+            ROOT / "tests/fixtures/integration/assets/init-nested-owners.js"
         ).read_text(encoding="utf-8")
 
         self.assertIn('id="nested-owner-outer"', fixture)
@@ -252,7 +252,7 @@ class OwnerConformanceFixtureTests(unittest.TestCase):
         self.assertIn('data-moo-overlay-host', fixture)
         self.assertIn('src="assets/init-nested-owners.js"', fixture)
         self.assertEqual(
-            fixture.count('<script src="assets/state.js"></script>'),
+            fixture.count('<script src="/dist/js/state.js"></script>'),
             2,
         )
         self.assertNotIn("../../site/static", fixture)
@@ -265,7 +265,15 @@ class OwnerConformanceFixtureTests(unittest.TestCase):
             self.assertNotRegex(script, r"\btype\s*=\s*[\"']module[\"']")
         self.assertNotIn("<style", fixture)
         self.assertNotIn(" style=", fixture)
-        self.assertNotRegex(fixture, r"<script(?![^>]*\bsrc=)")
+        # The only inline script is inert, strictly parsed import-map JSON.
+        import_maps = re.findall(r'<script type="importmap">(.*?)</script>', fixture, re.S)
+        self.assertEqual(len(import_maps), 1)
+        self.assertEqual(json.loads(import_maps[0]), {"imports": {
+            "chart.js/auto": "/vendor/chart.js/auto/auto.js",
+            "@kurkle/color": "/vendor/@kurkle/color/dist/color.esm.js",
+        }})
+        without_map = re.sub(r'<script type="importmap">.*?</script>', "", fixture, flags=re.S)
+        self.assertNotRegex(without_map, r"<script(?![^>]*\bsrc=)")
         self.assertNotRegex(fixture, r"<script[^>]*>\s*\(?\s*!?function\b")
         self.assertNotRegex(fixture, r"html\s*\[data-bs-theme")
         self.assertNotRegex(fixture, r"body\s*\[data-bs-theme")
@@ -309,7 +317,7 @@ class OwnerConformanceFixtureTests(unittest.TestCase):
         self.assertNotRegex(fixture, r"body\s*\[data-bs-theme")
 
     def test_nested_owners_are_embedded_and_never_document_owners(self):
-        fixture = (FIXTURES_DIR / "nested-owners.html").read_text(encoding="utf-8")
+        fixture = (ROOT / "tests/fixtures/integration/nested-owners.html").read_text(encoding="utf-8")
         parser = _FixtureParser()
         parser.feed(fixture)
         owners = [

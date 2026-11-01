@@ -10,12 +10,22 @@
   placement="top",
   html=false,
   href="#!",
-  extra_class=""
+  extra_class="",
+  id="",
+  disabled=false,
+  hidden=false
 ) -%}
   {% if not label | trim %}{{ fail("Tooltip trigger label is required") }}{% endif %}
   {% if not text | trim %}{{ fail("Tooltip text is required") }}{% endif %}
   {% if placement not in tooltip_placements %}{{ fail("Unknown tooltip placement: " ~ placement) }}{% endif %}
-  <a
+  {% if disabled and (html or href != "#!") %}{{ fail("Disabled Tooltip wrappers do not support html or href") }}{% endif %}
+  {% if disabled %}
+  <span{% if hidden %} hidden{% endif %}{% if id %} id="{{ id }}"{% endif %} class="tooltip-trigger d-inline-block{% if extra_class %} {{ extra_class }}{% endif %}"
+    role="button" tabindex="0" aria-label="{{ label }}" data-bs-toggle="tooltip"
+    data-bs-placement="{{ placement }}" data-bs-title="{{ text }}">
+    {% if caller is defined %}{{ caller() }}{% else %}{{ label }}{% endif %}
+  </span>
+  {% else %}<a{% if hidden %} hidden{% endif %}{% if id %} id="{{ id }}"{% endif %}
     href="{{ href }}"
     class="tooltip-trigger{% if extra_class %} {{ extra_class }}{% endif %}"
     data-bs-toggle="tooltip"
@@ -23,4 +33,5 @@
     data-bs-title="{{ text }}"
     {% if html %}data-bs-html="true"{% endif %}
   >{{ label }}</a>
+  {% endif %}
 {%- endmacro %}

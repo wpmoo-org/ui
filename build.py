@@ -66,6 +66,7 @@ JS_CATALOG = SITE_SRC / "js/catalog"
 CATALOG_STATE_MODULES = ("catalog-theme-state", "catalog-direction-state")
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
+    "password-requirements.js",
     "floating-panel.js",
     "overlay-scrollbar.js",
     "combobox.js",
@@ -2184,8 +2185,11 @@ def _bundle_module(
     ]
     if module_name != "state.js":
         cmd.append("--format=esm")
+    if module_name == "chart.js":
+        cmd.append("--external:chart.js")
     if module_name in AGGREGATE_JS_MODULES:
         cmd.append("--external:./chart.js")
+        cmd.append("--external:./password-requirements.js")
     if bundle:
         cmd.append("--legal-comments=external")
     if minify:
@@ -2376,6 +2380,22 @@ def copy_site_assets() -> None:
     )
     if SITE_STATIC.exists():
         shutil.copytree(SITE_STATIC, SITE_DIST / "assets", dirs_exist_ok=True)
+
+
+def copy_chart_vendors_to_site() -> None:
+    """Copy locked native ESM vendors and their licenses outside the npm tree."""
+    for relative in (
+        "chart.js/auto/auto.js",
+        "chart.js/dist/chart.js",
+        "chart.js/dist/chunks/index.js",
+        "chart.js/LICENSE.md",
+        "@kurkle/color/dist/color.esm.js",
+        "@kurkle/color/LICENSE.md",
+    ):
+        source = ROOT / "node_modules" / relative
+        target = SITE_DIST / "vendor" / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
 
 
 def copy_certification_fixtures_to_site() -> None:
@@ -2753,6 +2773,7 @@ def build_site() -> None:
     copy_core_outputs_to_site()
     compile_catalog_styles()
     copy_site_assets()
+    copy_chart_vendors_to_site()
     theme_builder_payload = theme_builder_first_paint_payload()
     write_catalog_state_css(theme_builder_payload)
     state_config = catalog_state_config(theme_builder_payload)

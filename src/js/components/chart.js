@@ -1,5 +1,5 @@
 // MooChart — the public Moo UI Chart component. A thin, theme-aware
-// wrapper around Chart.js (bundled at build time through `chart.js/auto`).
+// wrapper around the external Chart.js peer through `chart.js/auto`.
 //
 // Markup contract (see api-freeze-1.0.0-rc.3.json):
 //
@@ -17,8 +17,7 @@
 // canvas, and malformed JSON all fail with explicit errors rather than
 // rendering an empty chart.
 //
-// Chart.js is imported as a module and bundled into the published ESM
-// output; this wrapper never reads `window.Chart` and never loads a
+// Chart.js is imported as an external ESM dependency; this wrapper never reads `window.Chart` and never loads a
 // runtime CDN script.
 
 import Chart from "chart.js/auto";

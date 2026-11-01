@@ -566,11 +566,7 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
         self.assertEqual(introduction.count("<footer"), 0)
 
     def test_public_esm_outputs_have_no_bare_imports_or_cdn_urls(self) -> None:
-        """Public Chart/Datepicker outputs must be self-contained.
-
-        Chart.js bundles its runtime; Datepicker is self-contained Moo UI ESM.
-        In both cases the shipped output must never contain a bare third-party
-        specifier or a CDN runtime URL."""
+        """Only Chart has an explicit external peer; no implicit CDN fetches."""
         self.require_full_build()
         for module_name in (
             "moo-ui.js",
@@ -585,7 +581,8 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                 self.assertTrue(module_path.is_file())
                 content = module_path.read_text(encoding="utf-8")
                 # No bare third-party imports
-                self.assertNotIn('from "chart.js', content)
+                if module_name not in ("chart.js", "chart.min.js"):
+                    self.assertNotIn('from "chart.js', content)
                 self.assertNotIn('from "vanillajs-datepicker', content)
                 self.assertNotIn("from 'chart.js", content)
                 self.assertNotIn("from 'vanillajs-datepicker", content)
@@ -606,6 +603,7 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
             "slider.js",
             "sheet.js",
             "floating-panel.js",
+            "password-requirements.js",
             "state.js",
             "moo-ui.js",
             "moo-ui.min.js",
@@ -628,24 +626,6 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                 self.assertTrue(content.startswith(expected_banner))
                 self.assertEqual(content.count(expected_banner), 1)
 
-    def test_chart_variants_preserve_identical_dependency_notices_at_the_top(self) -> None:
-        self.require_full_build()
-        notices = []
-        for filename in ("chart.js", "chart.min.js"):
-            with self.subTest(module=filename):
-                source = (PACKAGE_DIST / "js" / filename).read_text(encoding="utf-8")
-                own_banner = build.js_license_banner(filename)
-                self.assertTrue(source.startswith(own_banner + "\n"))
-                remainder = source[len(own_banner):].lstrip()
-                match = re.match(r"/\*! Bundled license information:.*?\*/", remainder, re.DOTALL)
-                self.assertIsNotNone(match, "Dependency notices must precede executable code")
-                notice = match.group(0)
-                for upstream in ("@kurkle/color v0.3.4", "Chart.js v4.5.1"):
-                    self.assertIn(upstream, notice)
-                self.assertEqual(source.count(notice), 1)
-                notices.append(notice)
-        self.assertEqual(len(notices), 2)
-        self.assertEqual(notices[0], notices[1])
 
     def test_bundled_module_comments_are_path_stable(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -737,6 +717,7 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                 directory = Path(temp)
                 (directory / "package.json").write_text('{"type":"module"}\n')
                 shutil.copy2(PACKAGE_DIST / "js" / filename, directory / filename)
+                shutil.copy2(PACKAGE_DIST / "js/password-requirements.js", directory / "password-requirements.js")
                 result = subprocess.run(
                     ["node", "--input-type=module", "--eval", """
                     import assert from "node:assert/strict";

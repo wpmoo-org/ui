@@ -20,9 +20,9 @@ from scripts.style_comments import css_comments, is_license_comment, strip_scss_
 
 
 APPROVED_TARBALL_FILES = {
-    "ASSET_LICENSE.md",
     "LICENSE",
     "README.md",
+    "THIRD_PARTY_NOTICES.md",
     "certification.json",
     "dist/assets/css/moo-ui.css",
     "dist/assets/css/moo-ui.min.css",
@@ -38,6 +38,7 @@ APPROVED_TARBALL_FILES = {
     "dist/js/table-of-contents.js",
     "dist/js/sheet.js",
     "dist/js/floating-panel.js",
+    "dist/js/password-requirements.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
     "dist/js/chart.js",

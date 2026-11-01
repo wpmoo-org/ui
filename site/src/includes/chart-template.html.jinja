@@ -211,8 +211,9 @@
 
   <h2 id="chart-javascript" class="h4 mt-5 mb-3">JavaScript</h2>
   <p>
-    Chart.js is bundled into the published <code>chart.js</code> entrypoint through
-    <code>chart.js/auto</code>; the wrapper never reads a browser global Chart
+    Chart.js is a separately installed optional peer imported through
+    <code>chart.js/auto</code>. Install <code>chart.js@4.6.1</code> with npm or
+    configure the vendor import map from the <a href="{{ site_href('installation.html', root_path) }}">Installation guide</a>; the wrapper never reads a browser global Chart
     object and never loads a runtime CDN script. Importing the module never scans the document.
     Initialize only a <code>.chart</code> root your application owns: repeated
     initialization returns the same instance, and <code>dispose()</code> destroys the

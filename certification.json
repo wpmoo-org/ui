@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.1",
   "status": "preview",
-  "coreVersion": "1.5.0",
+  "coreVersion": "2.0.0",
   "bootstrap": {
     "canonicalVersion": "5.3.3",
     "targetRange": ">=5.3.0 <5.4",
@@ -21,6 +21,7 @@
       "./moo.min.css"
     ],
     "esm": [
+      "./password-requirements.js",
       "./moo-ui.js",
       "./moo-ui.min.js",
       "./combobox.js",

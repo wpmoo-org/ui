@@ -109,6 +109,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/slider.js",
     "dist/js/sheet.js",
     "dist/js/floating-panel.js",
+    "dist/js/password-requirements.js",
     "dist/js/toc.js",
     "dist/js/overlay-scrollbar.js",
     "dist/js/table-of-contents.js",
@@ -125,7 +126,7 @@ EXPECTED_PACKAGE_FILES = {
     "certification.json",
     "README.md",
     "LICENSE",
-    "ASSET_LICENSE.md",
+    "THIRD_PARTY_NOTICES.md",
 }
 EXPECTED_PACKAGE_EXPORTS = {
     "./moo-ui.css": "./dist/assets/css/moo-ui.css",
@@ -139,6 +140,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./slider.js": "./dist/js/slider.js",
     "./sheet.js": "./dist/js/sheet.js",
     "./floating-panel.js": "./dist/js/floating-panel.js",
+    "./password-requirements.js": "./dist/js/password-requirements.js",
     "./toc.js": "./dist/js/toc.js",
     "./overlay-scrollbar.js": "./dist/js/overlay-scrollbar.js",
     "./table-of-contents.js": "./dist/js/table-of-contents.js",
@@ -189,6 +191,7 @@ class PackageMetadataTests(unittest.TestCase):
     def _install_clean_consumer_with_bootstrap_scss(
         self,
         temporary_root: Path,
+        *, include_chart_peer: bool = True,
     ) -> tuple[Path, Path, Path]:
         pack_result = subprocess.run(
             [sys.executable, "scripts/package_release.py", "--pack-destination", str(temporary_root)],
@@ -227,6 +230,13 @@ class PackageMetadataTests(unittest.TestCase):
                 shutil.copy2(item, destination)
             elif item.is_dir():
                 shutil.copytree(item, destination)
+
+        if include_chart_peer:
+            for dependency in ("chart.js", "@kurkle/color"):
+                shutil.copytree(
+                    ROOT / "node_modules" / dependency,
+                    consumer_root / "node_modules" / dependency,
+                )
 
         return consumer_root, installed_package, tarball
 
@@ -294,7 +304,6 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotIn("static", files)
         self.assertNotIn("dist/assets/images", files)
         self.assertNotIn("static/images", files)
-        self.assertNotIn("THIRD_PARTY_NOTICES.md", files)
         self.assertEqual(package["peerDependencies"]["bootstrap"], ">=5.3.0 <5.4")
         self.assertTrue(package["peerDependenciesMeta"]["bootstrap"]["optional"])
         self.assertEqual(
@@ -492,6 +501,7 @@ class PackageMetadataTests(unittest.TestCase):
                 "slider.js",
                 "sheet.js",
                 "floating-panel.js",
+                "password-requirements.js",
                 "toc.js",
                 "overlay-scrollbar.js",
                 "table-of-contents.js",
@@ -540,6 +550,10 @@ class PackageMetadataTests(unittest.TestCase):
                 self.assertIn(expected_url, document)
                 self.assertNotIn("`THIRD_PARTY_NOTICES.md`", document)
                 self.assertNotRegex(document, moving_branch_pattern)
+        self.assertIn(
+            f"https://github.com/wpmoo-org/ui/blob/v{published_version}/ASSET_LICENSE.md",
+            readme,
+        )
         llms = (ROOT / "site/public/llms.txt").read_text(encoding="utf-8")
         self.assertIn(
             f"https://unpkg.com/@wpmoo/ui@{published_version}/dist/assets/css/moo-ui.css",
@@ -557,12 +571,34 @@ class PackageMetadataTests(unittest.TestCase):
                 Path(temporary_directory)
             )
             license_text = (installed_package / "LICENSE").read_text(encoding="utf-8")
+            self.assertNotIn("Chart.js", license_text)
+            self.assertNotIn("@kurkle/color", license_text)
+            self.assertEqual(license_text.count("MIT License"), 1)
             for dependency in ("chart.js", "@kurkle/color"):
                 with self.subTest(dependency=dependency):
-                    upstream_license = (
-                        ROOT / "node_modules" / dependency / "LICENSE.md"
-                    ).read_text(encoding="utf-8").strip()
-                    self.assertIn(upstream_license, license_text)
+                    upstream = ROOT / "node_modules" / dependency / "LICENSE.md"
+                    installed = installed_package.parent.parent / dependency / "LICENSE.md"
+                    self.assertEqual(installed.read_bytes(), upstream.read_bytes())
+                    self.assertFalse((installed_package / "node_modules" / dependency).exists())
+
+    def test_aggregate_import_does_not_require_optional_chart_peer(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            consumer, _, _ = self._install_clean_consumer_with_bootstrap_scss(
+                Path(temporary_directory), include_chart_peer=False,
+            )
+            result = subprocess.run(
+                ["node", "--input-type=module", "-e", """
+import { loadChart, Combobox } from '@wpmoo/ui/moo-ui.js';
+if (typeof Combobox.getOrCreateInstance !== 'function') throw Error('aggregate');
+try {
+  await loadChart();
+  throw Error('Chart must require the absent peer');
+} catch (error) {
+  if (error.code !== 'ERR_MODULE_NOT_FOUND' || !error.message.includes('chart.js')) throw error;
+}
+"""], cwd=consumer, capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_package_manifest_validator_accepts_approved_tarball_files(self) -> None:
         payload = [
@@ -629,29 +665,30 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("dist/assets/css/moo-ui.css", result.stderr)
 
-    def test_package_manifest_validator_rejects_site_dist_output(self) -> None:
-        payload = [
-            {
-                "files": [
-                    {"path": path}
-                    for path in sorted(
-                        EXPECTED_NPM_PACK_FILES
-                        | {"package.json", "site-dist/index.html"}
-                    )
+    def test_package_manifest_validator_rejects_catalog_only_files(self) -> None:
+        for excluded in ("site-dist/index.html", "ASSET_LICENSE.md"):
+            with self.subTest(excluded=excluded):
+                payload = [
+                    {
+                        "files": [
+                            {"path": path}
+                            for path in sorted(
+                                EXPECTED_NPM_PACK_FILES | {"package.json", excluded}
+                            )
+                        ]
+                    }
                 ]
-            }
-        ]
-        result = subprocess.run(
-            [sys.executable, "scripts/verify_package_contents.py"],
-            cwd=ROOT,
-            input=json.dumps(payload),
-            check=False,
-            capture_output=True,
-            text=True,
-        )
+                result = subprocess.run(
+                    [sys.executable, "scripts/verify_package_contents.py"],
+                    cwd=ROOT,
+                    input=json.dumps(payload),
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
 
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("site-dist/index.html", result.stderr)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(f"unexpected: {excluded}", result.stderr)
 
     def test_real_tarball_resolves_from_a_clean_consumer(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -689,6 +726,7 @@ import OverlayScrollbar from "@wpmoo/ui/overlay-scrollbar.js";
 import LegacyToc from "@wpmoo/ui/table-of-contents.js";
 import { initSheets } from "@wpmoo/ui/sheet.js";
 import FloatingPanel from "@wpmoo/ui/floating-panel.js";
+import PasswordRequirements from "@wpmoo/ui/password-requirements.js";
 import MooUI, {
   loadChart as AggregateLoadChart,
   Combobox as AggregateCombobox,
@@ -702,11 +740,13 @@ import MooUI, {
   OverlayScrollbar as AggregateOverlayScrollbar,
   initSheets as AggregateInitSheets,
   FloatingPanel as AggregateFloatingPanel,
+  PasswordRequirements as AggregatePasswordRequirements,
 } from "@wpmoo/ui/moo-ui.js";
 import MooUIMinified, {
   loadChart as MinifiedAggregateLoadChart,
   Datepicker as MinifiedAggregateDatepicker,
   FloatingPanel as MinifiedAggregateFloatingPanel,
+  PasswordRequirements as MinifiedAggregatePasswordRequirements,
 } from "@wpmoo/ui/moo-ui.min.js";
 import Chart from "@wpmoo/ui/chart.js";
 import ChartMinified from "@wpmoo/ui/chart.min.js";
@@ -718,6 +758,13 @@ const [AggregateChart, MinifiedAggregateChart] = await Promise.all([
 ]);
 
 if (
+  typeof PasswordRequirements.getOrCreateInstance !== "function" ||
+  AggregatePasswordRequirements !== PasswordRequirements ||
+  MinifiedAggregatePasswordRequirements !== PasswordRequirements ||
+  typeof AggregatePasswordRequirements.getOrCreateInstance !== "function" ||
+  typeof MinifiedAggregatePasswordRequirements.getOrCreateInstance !== "function" ||
+  MooUI.PasswordRequirements !== AggregatePasswordRequirements ||
+  MooUIMinified.PasswordRequirements !== MinifiedAggregatePasswordRequirements ||
   Combobox.name !== "Combobox" ||
   Sidebar.name !== "Sidebar" ||
   ContextMenu.name !== "ContextMenu" ||
@@ -973,6 +1020,7 @@ for (const specifier of [
             "datatable.js",
             "sheet.js",
             "floating-panel.js",
+            "password-requirements.js",
             "slider.js",
             "toc.js",
             "overlay-scrollbar.js",

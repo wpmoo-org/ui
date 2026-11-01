@@ -31,10 +31,11 @@
   </div>
 {%- endmacro %}
 
-{% macro field_description(id, text) -%}
+{% macro field_description(id, text, extra_class="", live="off", hidden=false, list_item=false) -%}
   {% if not id | trim %}{{ fail("Field description id is required") }}{% endif %}
   {% if not text | trim %}{{ fail("Field description text is required") }}{% endif %}
-  <div class="field-description form-text" id="{{ id }}">{{ text }}</div>
+  {% set tag = "li" if list_item else "div" %}
+  <{{ tag }} class="field-description form-text{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}"{% if hidden %} hidden{% endif %}{% if live == "polite" %} aria-live="polite" aria-atomic="true"{% endif %}>{{ text }}</{{ tag }}>
 {%- endmacro %}
 
 {% macro field_error(id, text) -%}
@@ -43,16 +44,17 @@
   <div class="field-error invalid-feedback" id="{{ id }}">{{ text }}</div>
 {%- endmacro %}
 
-{% macro field_group(extra_class="") -%}
-  <div class="field-group{% if extra_class %} {{ extra_class }}{% endif %}">
+{% macro field_group(extra_class="", aria_hidden=false, as_list=false) -%}
+  {% set tag = "ul" if as_list else "div" %}
+  <{{ tag }} class="field-group{% if extra_class %} {{ extra_class }}{% endif %}"{% if aria_hidden %} aria-hidden="true"{% endif %}>
     {{ caller() | trim | safe }}
-  </div>
+  </{{ tag }}>
 {%- endmacro %}
 
-{% macro fieldset(legend, description="", extra_class="") -%}
+{% macro fieldset(legend, description="", extra_class="", id="", requirements=none, legend_class="") -%}
   {% if not legend | trim %}{{ fail("Fieldset legend is required") }}{% endif %}
-  <fieldset class="field-fieldset{% if extra_class %} {{ extra_class }}{% endif %}">
-    <legend class="field-legend">{{ legend }}</legend>
+  <fieldset class="field-fieldset{% if extra_class %} {{ extra_class }}{% endif %}"{% if id %} id="{{ id }}"{% endif %}{% if requirements %} data-password-requirements="{{ requirements | tojson | forceescape }}"{% endif %}>
+    <legend class="field-legend{% if legend_class %} {{ legend_class }}{% endif %}">{{ legend }}</legend>
     {% if description %}<div class="field-description form-text">{{ description }}</div>{% endif %}
     {{ caller() | trim | safe }}
   </fieldset>

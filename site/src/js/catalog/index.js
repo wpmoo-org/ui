@@ -26,6 +26,7 @@ const FEATURE_SELECTORS = {
   tableOfContents: "[data-toc]",
   overlayScrollbar: '[data-overlay-scrollbar-demo], [data-moo-shell="catalog"]',
   tasksExample: "[data-moo-example-tasks]",
+  passwordFeedback: "#password-preview-requirements",
   usersExample: "[data-moo-example-users]",
 };
 
@@ -88,6 +89,14 @@ export function initCatalog(root = document) {
     initToc(root),
     initAcceptancePortal(root),
   ];
+
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.passwordFeedback,
+    () => import("./password-feedback.js"),
+    ({ initPasswordFeedback }) => initPasswordFeedback(root),
+  );
 
   pushLazyFeature(
     disposers,
