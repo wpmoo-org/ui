@@ -43,7 +43,7 @@ export default class PasswordRequirements {
     const confirmation = configuration.confirmation && document.getElementById(configuration.confirmation);
     const localControl = node => node?.matches('input[type="password"]') && node.closest('.moo-ui') === owner && node.form === element.closest('form');
     const policy = configuration.policy;
-    if (!owner || !localControl(input) || (configuration.confirmation && !localControl(confirmation)) ||
+    if (!owner || !localControl(input) || (configuration.confirmation && (!localControl(confirmation) || confirmation === input)) ||
         policy?.version !== 3 || !Number.isInteger(policy.minlength) || policy.minlength < 1 ||
         !Number.isInteger(policy.maxlength) || policy.maxlength < policy.minlength || policy.maxlength > 128 ||
         !Array.isArray(policy.rules) || !policy.rules.length ||
@@ -97,6 +97,9 @@ export default class PasswordRequirements {
       throw new TypeError('PasswordRequirements submit binding requires Bootstrap Tooltip.');
     }
     const previousTooltip = hint && Tooltip?.getInstance(hint);
+    // Bootstrap 5.3 has no public enabled-state getter. Snapshot its state,
+    // then restore exclusively through the public enable/disable methods.
+    const previousTooltipWasEnabled = previousTooltip?._isEnabled;
     let tooltip;
     let gateReady = !submit;
     let lastTitle;
@@ -110,7 +113,11 @@ export default class PasswordRequirements {
         restoreAttribute('aria-label', initialLabel);
         tooltip?.hide();
         if (!previousTooltip) tooltip?.dispose();
-        else { tooltip.enable(); tooltip.setContent({'.tooltip-inner': initialTitle}); }
+        else {
+          tooltip.setContent({'.tooltip-inner': initialTitle});
+          if (previousTooltipWasEnabled) tooltip.enable();
+          else tooltip.disable();
+        }
         submitParent.insertBefore(submit, submitNext?.parentNode === submitParent ? submitNext : null);
         hintParent.insertBefore(hint, hintNext?.parentNode === hintParent ? hintNext : null);
         hint.replaceChildren(...hintChildren);

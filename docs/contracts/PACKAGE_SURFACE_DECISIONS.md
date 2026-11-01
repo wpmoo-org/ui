@@ -13,6 +13,7 @@ Explicit `getOrCreateInstance(fieldset, options)` is synchronous; `ready` is a
 resolved promise for host lifecycle compatibility. `getInstance` never creates.
 `dispose()` removes listeners and restores the original row/summary text,
 classes, visibility, submit disabled state and Tooltip wrapper placement/ARIA.
+An existing host Tooltip retains its original enabled/disabled state on disposal.
 Synchronous initialization failures roll back the component's changes.
 
 The identified Fieldset carries JSON `data-password-requirements`:
@@ -38,7 +39,8 @@ The identified Fieldset carries JSON `data-password-requirements`:
 }
 ```
 
-Confirmation and submit IDs are optional. Password controls must share the
+Confirmation and submit IDs are optional; a configured confirmation must resolve
+to a different password control, never the original input. Password controls must share the
 Fieldset's form and nearest `.moo-ui` owner. `minlength` is a positive integer;
 `maxlength` is an integer between it and128. Rules use unique keys from the
 shown set; length and maximum are mandatory. Each rule names a local description

@@ -4369,8 +4369,11 @@ class CatalogContractTests(CatalogTestCase):
         release_links.feed(active_release)
         hrefs = {link.get("href") for link in release_links.links}
         self.assertEqual({
-            "../components/field/#password-feedback",
+            "../components/field/#password-feedback-preview",
         }, hrefs)
+        field_tags = StartTagParser()
+        field_tags.feed(self.read_output("components/field.html"))
+        self.assertTrue(any(tag.get("id") == "password-feedback-preview" for tag in field_tags.tags))
 
         page_links = LinkParser()
         page_links.feed(changelog)

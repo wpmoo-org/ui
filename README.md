@@ -209,7 +209,7 @@ await feedback.ready;
 // feedback.dispose(); // restore original markup, attributes and control state
 ```
 
-The [Field example](https://ui.wpmoo.org/components/field/#password-feedback)
+The [Field example](https://ui.wpmoo.org/components/field/#password-feedback-preview)
 shows the rendered contract. Policy version3 supports length, maximum, case,
 number and symbol requirements, plus optional confirmation and submit binding.
 All controls share a form and nearest `.moo-ui` owner. Submit feedback requires

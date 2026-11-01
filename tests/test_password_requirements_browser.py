@@ -42,12 +42,18 @@ class PasswordRequirementsTests(unittest.TestCase):
             self.assertNotIn('autofocus', control)
 
     def test_public_import_is_side_effect_free(self) -> None:
+        program = '''
+            globalThis.document = new Proxy({}, {
+                get() { throw new Error("import touched document"); },
+            });
+            const {default: Requirements, passwordRequirementStates} =
+                await import("./src/js/components/password-requirements.js");
+            if (typeof Requirements.getOrCreateInstance !== "function" ||
+                typeof Requirements.getInstance !== "function" ||
+                typeof passwordRequirementStates !== "function") process.exit(1);
+        '''
         result = subprocess.run(
-            ["node", "--input-type=module", "--eval",
-             'import Requirements, {passwordRequirementStates} from "./src/js/components/password-requirements.js"; '
-             'if (typeof Requirements.getOrCreateInstance !== "function" || '
-             'typeof Requirements.getInstance !== "function" || '
-             'typeof passwordRequirementStates !== "function") process.exit(1);'],
+            ["node", "--input-type=module", "--eval", program],
             cwd=ROOT, capture_output=True, text=True, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -120,6 +126,12 @@ class PasswordRequirementsTests(unittest.TestCase):
                 page.goto("http://requirements.invalid/probe")
                 page.evaluate('''async url => {
                     const {default: Requirements} = await import(url);
+                    window.fetch = () => { throw new Error('Local feedback must not send requests'); };
+                    for (const name of ['localStorage', 'sessionStorage']) {
+                        Object.defineProperty(window, name, {
+                            get() { throw new Error('Local feedback must not persist secrets'); },
+                        });
+                    }
                     window.Requirements = Requirements;
                     window.changes = [];
                     const root = document.querySelector('#password-preview-requirements');
@@ -129,12 +141,6 @@ class PasswordRequirementsTests(unittest.TestCase):
                         onChange: states => window.changes.push(states),
                     });
                     await window.instance.ready;
-                    window.fetch = () => { throw new Error('Local feedback must not send requests'); };
-                    for (const name of ['localStorage', 'sessionStorage']) {
-                        Object.defineProperty(window, name, {
-                            get() { throw new Error('Local feedback must not persist secrets'); },
-                        });
-                    }
                 }''', module_url)
                 prefix = '#password-preview-requirements-'
                 self.assertTrue(page.evaluate('''() => {
@@ -243,6 +249,39 @@ class PasswordRequirementsTests(unittest.TestCase):
                     bootstrap.Tooltip.getOrCreateInstance=create;
                     return blocked && allowed && emptyBlocked && missingRejected && untouched && failed && submit.parentNode===parent &&
                         original.hidden && Requirements.getInstance(root)===null;
+                }'''))
+                self.assertTrue(page.evaluate('''() => {
+                    const root=document.querySelector('#password-preview-requirements');
+                    const original=root.dataset.passwordRequirements;
+                    const config=JSON.parse(original);
+                    config.confirmation=config.input;
+                    root.dataset.passwordRequirements=JSON.stringify(config);
+                    let rejected=false;
+                    try { Requirements.getOrCreateInstance(root); } catch (error) {
+                        rejected=error instanceof TypeError;
+                    }
+                    root.dataset.passwordRequirements=original;
+                    return rejected && Requirements.getInstance(root)===null;
+                }'''))
+                self.assertTrue(page.evaluate('''() => {
+                    const root=document.querySelector('#password-preview-requirements');
+                    const hint=document.querySelector('#password-preview-requirements-submit-hint');
+                    const input=document.querySelector('#password-preview-input');
+                    input.value='';
+                    const outcomes=[];
+                    for (const enabled of [true,false]) {
+                        const host=new bootstrap.Tooltip(hint,{animation:false});
+                        if (!enabled) host.disable();
+                        const feedback=Requirements.getOrCreateInstance(root);
+                        feedback.dispose();
+                        hint.hidden=false;
+                        host.show();
+                        const shown=Boolean(document.querySelector('.tooltip.show'));
+                        outcomes.push(bootstrap.Tooltip.getInstance(hint)===host && shown===enabled);
+                        host.dispose();
+                        hint.hidden=true;
+                    }
+                    return outcomes.every(Boolean);
                 }'''))
             finally:
                 browser.close()
