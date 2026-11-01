@@ -121,6 +121,8 @@ class PasswordRequirementsTests(unittest.TestCase):
                     window.Requirements = Requirements;
                     window.changes = [];
                     const root = document.querySelector('#password-preview-requirements');
+                    root.dataset.requirementsReady = 'host-ready';
+                    root.querySelector('[id$="-length"]').dataset.requirementMet = 'host-met';
                     window.instance = Requirements.getOrCreateInstance(root, {
                         onChange: states => window.changes.push(states),
                     });
@@ -192,8 +194,13 @@ class PasswordRequirementsTests(unittest.TestCase):
                 expect(warning).to_be_hidden()
                 expect(page.locator('#password-preview-requirements-submit-hint')).to_be_hidden()
                 expect(submit).to_be_disabled()
-                self.assertTrue(page.evaluate('''() => Requirements.getInstance(
-                    document.querySelector('#password-preview-requirements')) === null'''))
+                self.assertTrue(page.evaluate('''() => {
+                    const root=document.querySelector('#password-preview-requirements');
+                    return Requirements.getInstance(root) === null &&
+                        root.dataset.requirementsReady === 'host-ready' &&
+                        root.querySelector('[id$="-length"]').dataset.requirementMet === 'host-met' &&
+                        !root.querySelector('[id$="-maximum"]').hasAttribute('data-requirement-met');
+                }'''))
                 self.assertTrue(page.evaluate('''() => {
                     const root=document.querySelector('#password-preview-requirements');
                     const input=document.querySelector('#password-preview-input');

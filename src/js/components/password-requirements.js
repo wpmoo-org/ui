@@ -56,12 +56,14 @@ export default class PasswordRequirements {
       throw new TypeError('PasswordRequirements requires same-owner controls and a versioned public policy.');
     }
     this._element = element;
+    this._initialReady = element.getAttribute('data-requirements-ready');
     this._originals = new Map();
     this._listeners = [];
     const local = suffix => {
       const node = document.getElementById(element.id + '-' + suffix);
       if (!node || !element.contains(node)) throw new TypeError('Missing local requirement description.');
-      this._originals.set(node, {text: node.textContent, className: node.className, hidden: node.hidden});
+      this._originals.set(node, {text: node.textContent, className: node.className, hidden: node.hidden,
+        met: node.getAttribute('data-requirement-met')});
       return node;
     };
     const rows = new Map(policy.rules.map(rule => [rule.key, local(rule.key)]));
@@ -223,9 +225,11 @@ export default class PasswordRequirements {
       node.textContent = original.text;
       node.className = original.className;
       node.hidden = original.hidden;
-      delete node.dataset.requirementMet;
+      if (original.met === null) node.removeAttribute('data-requirement-met');
+      else node.setAttribute('data-requirement-met', original.met);
     }
-    delete this._element.dataset.requirementsReady;
+    if (this._initialReady === null) this._element.removeAttribute('data-requirements-ready');
+    else this._element.setAttribute('data-requirements-ready', this._initialReady);
     instances.delete(this._element);
     this._originals.clear();
   }
