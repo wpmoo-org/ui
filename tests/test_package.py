@@ -126,7 +126,7 @@ EXPECTED_PACKAGE_FILES = {
     "certification.json",
     "README.md",
     "LICENSE",
-    "ASSET_LICENSE.md",
+    "THIRD_PARTY_NOTICES.md",
 }
 EXPECTED_PACKAGE_EXPORTS = {
     "./moo-ui.css": "./dist/assets/css/moo-ui.css",
@@ -296,7 +296,6 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotIn("static", files)
         self.assertNotIn("dist/assets/images", files)
         self.assertNotIn("static/images", files)
-        self.assertNotIn("THIRD_PARTY_NOTICES.md", files)
         self.assertEqual(package["peerDependencies"]["bootstrap"], ">=5.3.0 <5.4")
         self.assertTrue(package["peerDependenciesMeta"]["bootstrap"]["optional"])
         self.assertEqual(
@@ -543,6 +542,10 @@ class PackageMetadataTests(unittest.TestCase):
                 self.assertIn(expected_url, document)
                 self.assertNotIn("`THIRD_PARTY_NOTICES.md`", document)
                 self.assertNotRegex(document, moving_branch_pattern)
+        self.assertIn(
+            f"https://github.com/wpmoo-org/ui/blob/v{published_version}/ASSET_LICENSE.md",
+            readme,
+        )
         llms = (ROOT / "site/public/llms.txt").read_text(encoding="utf-8")
         self.assertIn(
             f"https://unpkg.com/@wpmoo/ui@{published_version}/dist/assets/css/moo-ui.css",
@@ -560,12 +563,18 @@ class PackageMetadataTests(unittest.TestCase):
                 Path(temporary_directory)
             )
             license_text = (installed_package / "LICENSE").read_text(encoding="utf-8")
+            self.assertNotIn("Chart.js", license_text)
+            self.assertNotIn("@kurkle/color", license_text)
+            self.assertEqual(license_text.count("MIT License"), 1)
+            notices_path = installed_package / "THIRD_PARTY_NOTICES.md"
+            self.assertTrue(notices_path.is_file())
+            notices = notices_path.read_text(encoding="utf-8")
             for dependency in ("chart.js", "@kurkle/color"):
                 with self.subTest(dependency=dependency):
                     upstream_license = (
                         ROOT / "node_modules" / dependency / "LICENSE.md"
                     ).read_text(encoding="utf-8").strip()
-                    self.assertIn(upstream_license, license_text)
+                    self.assertIn(upstream_license, notices)
 
     def test_package_manifest_validator_accepts_approved_tarball_files(self) -> None:
         payload = [
@@ -632,29 +641,30 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("dist/assets/css/moo-ui.css", result.stderr)
 
-    def test_package_manifest_validator_rejects_site_dist_output(self) -> None:
-        payload = [
-            {
-                "files": [
-                    {"path": path}
-                    for path in sorted(
-                        EXPECTED_NPM_PACK_FILES
-                        | {"package.json", "site-dist/index.html"}
-                    )
+    def test_package_manifest_validator_rejects_catalog_only_files(self) -> None:
+        for excluded in ("site-dist/index.html", "ASSET_LICENSE.md"):
+            with self.subTest(excluded=excluded):
+                payload = [
+                    {
+                        "files": [
+                            {"path": path}
+                            for path in sorted(
+                                EXPECTED_NPM_PACK_FILES | {"package.json", excluded}
+                            )
+                        ]
+                    }
                 ]
-            }
-        ]
-        result = subprocess.run(
-            [sys.executable, "scripts/verify_package_contents.py"],
-            cwd=ROOT,
-            input=json.dumps(payload),
-            check=False,
-            capture_output=True,
-            text=True,
-        )
+                result = subprocess.run(
+                    [sys.executable, "scripts/verify_package_contents.py"],
+                    cwd=ROOT,
+                    input=json.dumps(payload),
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
 
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("site-dist/index.html", result.stderr)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(f"unexpected: {excluded}", result.stderr)
 
     def test_real_tarball_resolves_from_a_clean_consumer(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

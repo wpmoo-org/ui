@@ -5,6 +5,20 @@ than one component page.
 
 ## 1.6.0 Password Requirements
 
+The npm archive excludes `ASSET_LICENSE.md`, which applies to repository and
+catalog visual assets that are not distributed through npm. The file and the
+catalog's visual-asset license section remain in the repository. The packaged
+README links to the version-pinned repository copy. Historical API inventories
+are immutable; compatibility checks reconcile only this approved documentation
+removal while preserving every runtime, stylesheet and Sass export.
+
+Dependency updates from PRs #112 and #113 are included in this release:
+Chart.js 4.6.1 is bundled into the standalone Chart modules; development tools
+use coverage 7.17.0 and Playwright 1.64.1. Full dependency MIT notices remain in
+`THIRD_PARTY_NOTICES.md`, which is included in the npm archive. `LICENSE`
+contains only Moo UI's own MIT license; vendor license texts must remain
+separate. These updates add no runtime package dependency or public entrypoint.
+
 The additive `password-requirements.js` entrypoint and named aggregate
 `PasswordRequirements` export share one constructor and instance map across
 standalone, expanded and minified aggregates. Keep the adjacent standalone file

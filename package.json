@@ -85,7 +85,7 @@
     "certification.json",
     "README.md",
     "LICENSE",
-    "ASSET_LICENSE.md"
+    "THIRD_PARTY_NOTICES.md"
   ],
   "peerDependencies": {
     "bootstrap": ">=5.3.0 <5.4"
@@ -111,7 +111,7 @@
   },
   "devDependencies": {
     "axe-core": "4.14.0",
-    "chart.js": "4.5.1",
+    "chart.js": "4.6.1",
     "esbuild": "0.28.2"
   }
 }

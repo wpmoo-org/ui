@@ -19,6 +19,8 @@ from tests.helpers import npm_env
 ROOT = Path(__file__).resolve().parents[1]
 PROJECT_DOCS_ROOT = ROOT.parent / "docs"
 CERTIFICATION_ROOT = ROOT / "src/certification"
+# Approved 1.6.0 documentation removal; historical inventories stay immutable.
+REPOSITORY_ONLY_PACKAGE_FILES = {"ASSET_LICENSE.md"}
 PUBLIC_COMPONENT_HOOK_SOURCES = (
     ROOT / "src/components",
     ROOT / "src/js/components",
@@ -751,7 +753,7 @@ class CertificationContractTests(unittest.TestCase):
         # Frozen 0.9.0 package files must be a subset of current files.
         # Removals fail; additive RC.3 entries are allowed.
         live_files = set(package["files"])
-        frozen_files = set(freeze["packageFiles"])
+        frozen_files = set(freeze["packageFiles"]) - REPOSITORY_ONLY_PACKAGE_FILES
         reconciled_removed_files = {
             "scss/_facade-settings.scss",
             "scss/settings/_facade_public.scss",
@@ -933,7 +935,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertIn("./scss/components", frozen_exports)
         self.assertIn("./scss/settings", frozen_exports)
 
-        frozen_files = set(freeze["packageFiles"])
+        frozen_files = set(freeze["packageFiles"]) - REPOSITORY_ONLY_PACKAGE_FILES
         self.assertTrue(
             frozen_files.issubset(set(package["files"])),
             "RC5 frozen package files were removed from package.json",
@@ -1057,7 +1059,7 @@ class CertificationContractTests(unittest.TestCase):
             set(freeze["packageExports"]).issubset(set(package["exports"]))
         )
         self.assertTrue(
-            set(freeze["packageFiles"]).issubset(set(package["files"]))
+            (set(freeze["packageFiles"]) - REPOSITORY_ONLY_PACKAGE_FILES).issubset(package["files"])
         )
 
         import re
@@ -1100,7 +1102,7 @@ class CertificationContractTests(unittest.TestCase):
             set(freeze["packageExports"]).issubset(set(package["exports"]))
         )
         self.assertTrue(
-            set(freeze["packageFiles"]).issubset(set(package["files"]))
+            (set(freeze["packageFiles"]) - REPOSITORY_ONLY_PACKAGE_FILES).issubset(package["files"])
         )
 
         import re
@@ -1144,7 +1146,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertNotEqual(package["version"], freeze["freezeVersion"])
         self.assertEqual(certification["coreVersion"], package["version"])
         self.assertTrue(set(freeze["packageExports"]).issubset(package["exports"]))
-        self.assertTrue(set(freeze["packageFiles"]).issubset(package["files"]))
+        self.assertTrue((set(freeze["packageFiles"]) - REPOSITORY_ONLY_PACKAGE_FILES).issubset(package["files"]))
         self.assertIn("browser", public_entrypoints["properties"])
         self.assertNotIn("browser", public_entrypoints["required"])
         self.assertEqual(
@@ -1170,7 +1172,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.10")
         self.assertNotEqual(freeze["freezeVersion"], package["version"])
         self.assertTrue(set(freeze["packageExports"]).issubset(package["exports"]))
-        self.assertTrue(set(freeze["packageFiles"]).issubset(package["files"]))
+        self.assertTrue((set(freeze["packageFiles"]) - REPOSITORY_ONLY_PACKAGE_FILES).issubset(package["files"]))
 
     def test_rc11_api_freeze_remains_a_historical_removal_guard(self) -> None:
         freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.11.json")
@@ -1178,7 +1180,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.11")
         self.assertNotEqual(freeze["freezeVersion"], package["version"])
         self.assertTrue(set(freeze["packageExports"]).issubset(package["exports"]))
-        self.assertTrue(set(freeze["packageFiles"]).issubset(package["files"]))
+        self.assertTrue((set(freeze["packageFiles"]) - REPOSITORY_ONLY_PACKAGE_FILES).issubset(package["files"]))
 
     def test_1_1_api_freeze_preserves_the_released_toc_surface(self) -> None:
         freeze = self._read_json("src/certification/api-freeze-1.1.0.json")
@@ -1191,7 +1193,7 @@ class CertificationContractTests(unittest.TestCase):
             current_version = tuple(int(part) for part in package["version"].split("-")[0].split("."))
             self.assertGreater(current_version, (1, 1, 0))
             self.assertTrue(set(freeze["packageExports"]).issubset(package["exports"]))
-            self.assertTrue(set(freeze["packageFiles"]).issubset(package["files"]))
+            self.assertTrue((set(freeze["packageFiles"]) - REPOSITORY_ONLY_PACKAGE_FILES).issubset(package["files"]))
         aggregate = next(record for record in freeze["esmModules"] if record["module"] == "moo-ui.js")
         self.assertIn("TableOfContents", aggregate["namedExports"])
         toc = next(record for record in freeze["esmModules"] if record["module"] == "table-of-contents.js")
@@ -1228,7 +1230,7 @@ class CertificationContractTests(unittest.TestCase):
             current_version = tuple(int(part) for part in package["version"].split("-")[0].split("."))
             self.assertGreater(current_version, (1, 0, 0))
             self.assertTrue(set(freeze["packageExports"]).issubset(package["exports"]))
-            self.assertTrue(set(freeze["packageFiles"]).issubset(package["files"]))
+            self.assertTrue((set(freeze["packageFiles"]) - REPOSITORY_ONLY_PACKAGE_FILES).issubset(package["files"]))
         self.assertEqual(certification["status"], "preview")
         rc11 = self._read_json("src/certification/api-freeze-1.0.0-rc.11.json")
         inventory_keys = set(rc11) - {"freezeVersion", "frozenAt", "description"}

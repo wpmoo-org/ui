@@ -290,8 +290,9 @@ paths live in the [Installation guide](https://ui.wpmoo.org/installation/).
 
 Moo UI source code is MIT licensed. License details live in
 [LICENSE](LICENSE) and the [License page](https://ui.wpmoo.org/license/).
-The published `LICENSE` also retains the full MIT notices for bundled
-Chart.js and `@kurkle/color`.
-Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
-live in the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.6.0/THIRD_PARTY_NOTICES.md).
+Full MIT notices for bundled Chart.js and `@kurkle/color` are kept separately
+in the published
+[THIRD_PARTY_NOTICES.md](https://github.com/wpmoo-org/ui/blob/v1.6.0/THIRD_PARTY_NOTICES.md).
+Catalog visual assets and their license are repository-only and are not
+included in the npm package. Asset terms live in the
+[visual asset license](https://github.com/wpmoo-org/ui/blob/v1.6.0/ASSET_LICENSE.md).

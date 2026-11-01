@@ -641,7 +641,7 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                 match = re.match(r"/\*! Bundled license information:.*?\*/", remainder, re.DOTALL)
                 self.assertIsNotNone(match, "Dependency notices must precede executable code")
                 notice = match.group(0)
-                for upstream in ("@kurkle/color v0.3.4", "Chart.js v4.5.1"):
+                for upstream in ("@kurkle/color v0.3.4", "Chart.js v4.6.1"):
                     self.assertIn(upstream, notice)
                 self.assertEqual(source.count(notice), 1)
                 notices.append(notice)

@@ -39,7 +39,7 @@ not independent or accredited certification.
 - `@wpmoo/ui/sidebar.js`: optional Sidebar ESM lifecycle
 - `@wpmoo/ui/toc.js`: optional TableOfContents lifecycle and current-section tracking (`table-of-contents.js` remains a compatibility entrypoint)
 - `@wpmoo/ui/overlay-scrollbar.js`: opt-in OverlayScrollbar lifecycle for native document or same-owner element scrolling, with native fallback
-- `@wpmoo/ui/chart.js`: optional Chart ESM lifecycle (Chart.js 4.5.1 bundled)
+- `@wpmoo/ui/chart.js`: optional Chart ESM lifecycle (Chart.js 4.6.1 bundled)
 - `@wpmoo/ui/chart.min.js`: minified Chart bundle (artifact variant of chart.js)
 - `@wpmoo/ui/datepicker.js`: optional Datepicker ESM lifecycle (self-contained, no third-party runtime)
 - `@wpmoo/ui/datepicker.min.js`: minified Datepicker bundle (artifact variant of datepicker.js)
@@ -108,7 +108,7 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 - Sidebar state and responsive coordination: optional Moo UI ESM composed with
   Bootstrap behavior
 - Chart rendering with light/dark theme toggle: optional Moo UI ESM, self-contained
-  bundle (Chart.js 4.5.1 bundled at build time)
+  bundle (Chart.js 4.6.1 bundled at build time)
 - Datepicker with shadcn-like trigger/popover/calendar: optional Moo UI ESM,
   self-contained (no third-party runtime)
 - Slider with native range input semantics: optional Moo UI ESM, no third-party
