@@ -141,6 +141,10 @@ class PackagingTests(unittest.TestCase):
         with tarfile.open(fileobj=io.BytesIO(self.archive)) as tar:
             names = {member.name for member in tar.getmembers()}
         self.assertEqual(names, expected)
+        # Supplemental integration fixtures require Core's full runtime and
+        # external Chart vendors; the portable kit must not advertise them.
+        self.assertNotIn(f"{PREFIX}/conformance/fixtures/nested-owners.html", names)
+        self.assertNotIn(f"{PREFIX}/conformance/fixtures/assets/init-nested-owners.js", names)
         for forbidden in ("/reports/", "__pycache__"):
             self.assertFalse(
                 any(forbidden in name for name in names), forbidden

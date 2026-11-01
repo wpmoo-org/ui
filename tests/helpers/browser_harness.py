@@ -50,10 +50,14 @@ class _QuietHandler(SimpleHTTPRequestHandler):
     def translate_path(self, path: str) -> str:
         public_path = urlsplit(path).path.lstrip("/")
         if public_path.startswith("vendor/"):
-            local_vendor = ROOT / public_path
-            if local_vendor.is_file():
-                return str(local_vendor)
-            return str(ROOT / "site-dist" / public_path)
+            relative = public_path.removeprefix("vendor/")
+            for vendor_root in (ROOT / "vendor", ROOT / "site-dist/vendor"):
+                candidate = (vendor_root / relative).resolve()
+                if not candidate.is_relative_to(vendor_root.resolve()):
+                    continue
+                if candidate.is_file():
+                    return str(candidate)
+            return str(ROOT / "site-dist/vendor/__not_found__")
         if public_path.startswith("assets/"):
             local_asset = Path(self.directory) / public_path
             if local_asset.exists():

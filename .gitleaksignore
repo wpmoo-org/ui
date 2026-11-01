@@ -36,3 +36,10 @@ dea7b98c19acbce89aa94eb0d4d5593bcf6c6f0c:tests/fixtures/boundary-baseline.json:g
 dea7b98c19acbce89aa94eb0d4d5593bcf6c6f0c:tests/fixtures/boundary-baseline.json:generic-api-key:750
 dea7b98c19acbce89aa94eb0d4d5593bcf6c6f0c:tests/fixtures/boundary-baseline.json:generic-api-key:839
 dea7b98c19acbce89aa94eb0d4d5593bcf6c6f0c:tests/fixtures/boundary-baseline.json:generic-api-key:877
+
+# baea681: approved 2.0.0 banner/import-map artifact digests, byte-verified.
+baea6810b57a2ad6fddd24cc53283af9baa46bc7:tests/fixtures/boundary-baseline.json:generic-api-key:18
+baea6810b57a2ad6fddd24cc53283af9baa46bc7:tests/fixtures/boundary-baseline.json:generic-api-key:737
+baea6810b57a2ad6fddd24cc53283af9baa46bc7:tests/fixtures/boundary-baseline.json:generic-api-key:757
+baea6810b57a2ad6fddd24cc53283af9baa46bc7:tests/fixtures/boundary-baseline.json:generic-api-key:846
+baea6810b57a2ad6fddd24cc53283af9baa46bc7:tests/fixtures/boundary-baseline.json:generic-api-key:884

@@ -4,8 +4,12 @@ import json
 import re
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
+
+from tests.helpers.browser_harness import _QuietHandler
 
 from tests.helpers import npm_env
 
@@ -69,3 +73,27 @@ class ChartVendorTests(unittest.TestCase):
         files = {entry["path"] for entry in json.loads(result.stdout)[0]["files"]}
         self.assertNotIn("ASSET_LICENSE.md", files)
         self.assertFalse(any(path.startswith(("vendor/", "node_modules/", "site-dist/")) for path in files))
+
+
+class VendorRequestPathTests(unittest.TestCase):
+    def test_vendor_requests_cannot_escape_either_vendor_root(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            secret = root / "outside-vendor.txt"
+            secret.write_text("synthetic outside-root marker")
+            for vendor in (root / "vendor", root / "site-dist/vendor"):
+                vendor.mkdir(parents=True)
+                (vendor / "valid.js").write_text("export default 1;")
+                (vendor / "escape.js").symlink_to(secret)
+            handler = object.__new__(_QuietHandler)
+            handler.directory = str(root)
+            with mock.patch("tests.helpers.browser_harness.ROOT", root):
+                self.assertEqual(
+                    Path(handler.translate_path("/vendor/valid.js")),
+                    root / "vendor/valid.js",
+                )
+                for request in ("/vendor/../outside-vendor.txt", "/vendor/escape.js"):
+                    with self.subTest(request=request):
+                        resolved = Path(handler.translate_path(request)).resolve()
+                        self.assertNotEqual(resolved, secret)
+                        self.assertFalse(resolved.is_file())

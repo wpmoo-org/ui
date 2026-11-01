@@ -1,7 +1,7 @@
-import Sidebar from "../../../dist/js/sidebar.js";
-import MooDatepicker from "../../../dist/js/datepicker.js";
-import DataTable from "../../../dist/js/datatable.js";
-import MooChart from "../../../dist/js/chart.js";
+import Sidebar from "../../../../dist/js/sidebar.js";
+import MooDatepicker from "../../../../dist/js/datepicker.js";
+import DataTable from "../../../../dist/js/datatable.js";
+import MooChart from "../../../../dist/js/chart.js";
 
 const OWNER_SELECTOR =
   '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]';
