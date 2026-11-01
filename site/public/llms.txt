@@ -93,7 +93,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"; // only when plugins are use
 Optional Moo UI ESM is imported only for documented gaps and must be initialized
 explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 `sidebar.js`, `chart.js`, `datepicker.js`, `slider.js`, `sheet.js`,
-`overlay-scrollbar.js`, `floating-panel.js`, or the aggregate
+`overlay-scrollbar.js`, `floating-panel.js`, `password-requirements.js`, or the aggregate
 `moo-ui.js` does not scan the document.
 
 ## Runtime Ownership
@@ -196,7 +196,8 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 
 - Preserve Bootstrap behavior before adding custom behavior.
 - Use Moo UI ESM only for Combobox, Context Menu, DataTable, Sidebar, Chart,
-  Datepicker, Slider, Sheet initialization, Table of Contents, Overlay Scrollbar, FloatingPanel, or the documented
+  Datepicker, Slider, Sheet initialization, Table of Contents, Overlay Scrollbar,
+  FloatingPanel, PasswordRequirements, or the documented
   aggregate `moo-ui.js` entrypoint.
 - Do not invent public Sass APIs, undocumented JavaScript entrypoints, or
   certification claims.
