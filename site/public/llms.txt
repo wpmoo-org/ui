@@ -46,6 +46,7 @@ not independent or accredited certification.
 - `@wpmoo/ui/slider.js`: optional Slider ESM lifecycle (native range input, no third-party runtime)
 - `@wpmoo/ui/sheet.js`: explicit `initSheets(root)` for server-marked Sheets; uses Bootstrap Offcanvas, no import-time scan
 - `@wpmoo/ui/floating-panel.js`: explicit FloatingPanel lifecycle for non-modal floating cards, local dismissal persistence and reopening; no import-time scan
+- `@wpmoo/ui/password-requirements.js`: dependency-free PasswordRequirements lifecycle, confirmation and submit feedback; optional host analysis, no built-in strength rating or import-time scan
 - `@wpmoo/ui/state.js`: classic placement-dependent browser state bootstrap (not ESM)
 - `@wpmoo/ui/release-manifest.json`: release metadata with SHA-256 hashes for adapter-facing CSS and state bootstrap bytes
 - `@wpmoo/ui/scss/config`: public Sass variable allow-list (LibSass `@import`)

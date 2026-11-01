@@ -4369,10 +4369,7 @@ class CatalogContractTests(CatalogTestCase):
         release_links.feed(active_release)
         hrefs = {link.get("href") for link in release_links.links}
         self.assertEqual({
-            "../components/card/#floating-panel",
-            "../components/progress/",
-            "../components/collapsible/",
-            "../components/switch/",
+            "../components/field/#password-feedback",
         }, hrefs)
 
         page_links = LinkParser()

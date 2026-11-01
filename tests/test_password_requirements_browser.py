@@ -1,3 +1,5 @@
+"""Password feedback contracts, including the standalone browser lifecycle."""
+
 from __future__ import annotations
 
 import subprocess

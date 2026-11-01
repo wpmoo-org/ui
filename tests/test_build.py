@@ -738,6 +738,7 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                 directory = Path(temp)
                 (directory / "package.json").write_text('{"type":"module"}\n')
                 shutil.copy2(PACKAGE_DIST / "js" / filename, directory / filename)
+                shutil.copy2(PACKAGE_DIST / "js/password-requirements.js", directory / "password-requirements.js")
                 result = subprocess.run(
                     ["node", "--input-type=module", "--eval", """
                     import assert from "node:assert/strict";
