@@ -147,7 +147,7 @@ npm install chart.js@4.6.1
 ```
 
 Chart.js supplies its own `@kurkle/color` dependency and vendor licenses. Neither
-implementation is embedded in Moo's npm archive. Bundlers resolve `chart.js/auto`
+implementation is embedded in Moo UI's npm archive. Bundlers resolve `chart.js/auto`
 from that installation. Native browser/CDN hosts must configure the version-pinned
 import map in the [Installation guide](https://ui.wpmoo.org/installation/) before
 loading MooChart. Self-hosted vendors must retain their upstream license files.
