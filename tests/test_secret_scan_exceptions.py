@@ -22,5 +22,11 @@ class SecretScanExceptionTests(unittest.TestCase):
             )
             for line in (18, 730, 750, 839, 877)
         }
+        # Separately approved 2.0.0 generated-byte hashes; shifted catalog
+        # lines are enumerated, never accepted by file/rule-wide matching.
+        expected |= {
+            f'baea6810b57a2ad6fddd24cc53283af9baa46bc7:tests/fixtures/boundary-baseline.json:generic-api-key:{line}'
+            for line in (18, 737, 757, 846, 884)
+        }
         self.assertEqual(len(entries), len(expected))
         self.assertEqual(set(entries), expected)
