@@ -109,6 +109,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/slider.js",
     "dist/js/sheet.js",
     "dist/js/floating-panel.js",
+    "dist/js/password-requirements.js",
     "dist/js/toc.js",
     "dist/js/overlay-scrollbar.js",
     "dist/js/table-of-contents.js",
@@ -139,6 +140,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./slider.js": "./dist/js/slider.js",
     "./sheet.js": "./dist/js/sheet.js",
     "./floating-panel.js": "./dist/js/floating-panel.js",
+    "./password-requirements.js": "./dist/js/password-requirements.js",
     "./toc.js": "./dist/js/toc.js",
     "./overlay-scrollbar.js": "./dist/js/overlay-scrollbar.js",
     "./table-of-contents.js": "./dist/js/table-of-contents.js",
@@ -492,6 +494,7 @@ class PackageMetadataTests(unittest.TestCase):
                 "slider.js",
                 "sheet.js",
                 "floating-panel.js",
+                "password-requirements.js",
                 "toc.js",
                 "overlay-scrollbar.js",
                 "table-of-contents.js",
@@ -689,6 +692,7 @@ import OverlayScrollbar from "@wpmoo/ui/overlay-scrollbar.js";
 import LegacyToc from "@wpmoo/ui/table-of-contents.js";
 import { initSheets } from "@wpmoo/ui/sheet.js";
 import FloatingPanel from "@wpmoo/ui/floating-panel.js";
+import PasswordRequirements from "@wpmoo/ui/password-requirements.js";
 import MooUI, {
   loadChart as AggregateLoadChart,
   Combobox as AggregateCombobox,
@@ -702,11 +706,13 @@ import MooUI, {
   OverlayScrollbar as AggregateOverlayScrollbar,
   initSheets as AggregateInitSheets,
   FloatingPanel as AggregateFloatingPanel,
+  PasswordRequirements as AggregatePasswordRequirements,
 } from "@wpmoo/ui/moo-ui.js";
 import MooUIMinified, {
   loadChart as MinifiedAggregateLoadChart,
   Datepicker as MinifiedAggregateDatepicker,
   FloatingPanel as MinifiedAggregateFloatingPanel,
+  PasswordRequirements as MinifiedAggregatePasswordRequirements,
 } from "@wpmoo/ui/moo-ui.min.js";
 import Chart from "@wpmoo/ui/chart.js";
 import ChartMinified from "@wpmoo/ui/chart.min.js";
@@ -718,6 +724,13 @@ const [AggregateChart, MinifiedAggregateChart] = await Promise.all([
 ]);
 
 if (
+  typeof PasswordRequirements.getOrCreateInstance !== "function" ||
+  AggregatePasswordRequirements !== PasswordRequirements ||
+  MinifiedAggregatePasswordRequirements !== PasswordRequirements ||
+  typeof AggregatePasswordRequirements.getOrCreateInstance !== "function" ||
+  typeof MinifiedAggregatePasswordRequirements.getOrCreateInstance !== "function" ||
+  MooUI.PasswordRequirements !== AggregatePasswordRequirements ||
+  MooUIMinified.PasswordRequirements !== MinifiedAggregatePasswordRequirements ||
   Combobox.name !== "Combobox" ||
   Sidebar.name !== "Sidebar" ||
   ContextMenu.name !== "ContextMenu" ||
@@ -973,6 +986,7 @@ for (const specifier of [
             "datatable.js",
             "sheet.js",
             "floating-panel.js",
+            "password-requirements.js",
             "slider.js",
             "toc.js",
             "overlay-scrollbar.js",

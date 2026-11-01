@@ -606,6 +606,7 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
             "slider.js",
             "sheet.js",
             "floating-panel.js",
+            "password-requirements.js",
             "state.js",
             "moo-ui.js",
             "moo-ui.min.js",

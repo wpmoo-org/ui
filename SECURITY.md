@@ -6,7 +6,7 @@ DataTable, Date Picker, FloatingPanel, Slider, and Sidebar.
 
 ## Supported Versions
 
-Security review covers the `1.4.3` stable line and the `1.5.0` release target. Older
+Security review covers the `1.5.0` stable line and the `1.6.0` release target. Older
 tags remain available for source inspection, but fixes are prepared against the
 current development branch.
 

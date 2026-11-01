@@ -197,6 +197,31 @@ const scrollbar = OverlayScrollbar.getOrCreateInstance(document.querySelector(".
 // scrollbar.dispose(); // restore the native scrollbar
 ```
 
+For dependency-free password requirements feedback, initialize an identified
+`fieldset[data-password-requirements]` explicitly:
+
+```js
+import PasswordRequirements from "@wpmoo/ui/password-requirements.js";
+const feedback = PasswordRequirements.getOrCreateInstance(
+  document.getElementById("password-rules"),
+);
+await feedback.ready;
+// feedback.dispose(); // restore original markup, attributes and control state
+```
+
+The [Field example](https://ui.wpmoo.org/components/field/#password-feedback)
+shows the rendered contract. Policy version3 supports length, maximum, case,
+number and symbol requirements, plus optional confirmation and submit binding.
+All controls share a form and nearest `.moo-ui` owner. Submit feedback requires
+Bootstrap Tooltip on that document's window. There is no bundled estimator,
+strength score, breached-password lookup, network request or storage access.
+Meeting these checks does **not** establish password strength or replace server
+validation. A trusted host may supply synchronous `analyze(value)`, returning
+`{met: boolean, score: 0..4}`; this callback receives the normalized password and
+owns its security/privacy behavior. Without it no score is produced. `onChange`
+receives only Boolean check states, an active flag and the optional host score.
+See the [public policy contract](https://github.com/wpmoo-org/ui/blob/main/docs/contracts/PACKAGE_SURFACE_DECISIONS.md#160-password-requirements).
+
 The module preserves native document/touch/wheel scrolling. Its thin thumb
 appears while scrolling, near the trailing mouse edge or on keyboard focus;
 show/hide never reserves a layout gutter. Initial activation removes any native
@@ -239,11 +264,10 @@ calm.
 
 ## Status And Support
 
-The `1.5.0` minor release target adds an optional FloatingPanel ESM module and
-a composed onboarding checklist. Progress gains a circular variant; Collapsible
-supports composed headers, Navigation supports icon utilities, and Switch keeps
-native form names and values. Existing exports and Bootstrap compatibility are
-preserved; `@wpmoo/ui/floating-panel.js` is an additive public entrypoint.
+The `1.6.0` minor release target adds dependency-free password requirements,
+optional host-supplied analysis and native confirmation/submit feedback.
+Field, Input, Button and Tooltip gain additive composition options. Existing
+exports and Bootstrap compatibility are preserved; no estimator is bundled.
 Component certification remains
 `preview`, with its documented manual and browser/device limits. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
@@ -270,4 +294,4 @@ The published `LICENSE` also retains the full MIT notices for bundled
 Chart.js and `@kurkle/color`.
 Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
 live in the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.5.0/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.6.0/THIRD_PARTY_NOTICES.md).

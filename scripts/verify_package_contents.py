@@ -38,6 +38,7 @@ APPROVED_TARBALL_FILES = {
     "dist/js/table-of-contents.js",
     "dist/js/sheet.js",
     "dist/js/floating-panel.js",
+    "dist/js/password-requirements.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
     "dist/js/chart.js",

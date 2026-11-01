@@ -3,6 +3,77 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.6.0 Password Requirements
+
+The additive `password-requirements.js` entrypoint and named aggregate
+`PasswordRequirements` export share one constructor and instance map across
+standalone, expanded and minified aggregates. Keep the adjacent standalone file
+when self-hosting an aggregate. Imports never initialize or scan the document.
+Explicit `getOrCreateInstance(fieldset, options)` is synchronous; `ready` is a
+resolved promise for host lifecycle compatibility. `getInstance` never creates.
+`dispose()` removes listeners and restores the original row/summary text,
+classes, visibility, submit disabled state and Tooltip wrapper placement/ARIA.
+Synchronous initialization failures roll back the component's changes.
+
+The identified Fieldset carries JSON `data-password-requirements`:
+
+```json
+{
+  "input": "password",
+  "confirmation": "password-confirm",
+  "submit": "password-submit",
+  "policy": {
+    "version": 3,
+    "minlength": 12,
+    "maxlength": 128,
+    "whitespace": " \t\r\n",
+    "rules": [
+      {"key": "length", "label": "At least 12 characters"},
+      {"key": "case", "label": "Upper and lower case"},
+      {"key": "number", "label": "At least one number"},
+      {"key": "symbol", "label": "At least one symbol"},
+      {"key": "maximum", "label": "At most 128 characters", "warning": true}
+    ]
+  }
+}
+```
+
+Confirmation and submit IDs are optional. Password controls must share the
+Fieldset's form and nearest `.moo-ui` owner. `minlength` is a positive integer;
+`maxlength` is an integer between it and128. Rules use unique keys from the
+shown set; length and maximum are mandatory. Each rule names a local description
+`<fieldset-id>-<key>`; also provide `<fieldset-id>-summary`, a polite live region,
+and `<fieldset-id>-confirmation` if confirmation is configured. A submit binding
+requires a same-form submit control and a local Tooltip trigger with ID
+`<fieldset-id>-submit-hint`, plus Bootstrap Tooltip available on the window.
+Host markup should start submit disabled to avoid a pre-initialization gap.
+The controller temporarily wraps that original submit control; it neither
+replaces the form endpoint nor submits a password. An invalid gate cancels
+submit events. Server validation is always authoritative.
+
+Requirements count Unicode code points, normalize with NFKC for classification,
+and trim only host-declared outer whitespace for minimum length. Maximum applies
+to both raw and normalized lengths. Confirmation compares the original values.
+Core sends or stores no credentials, includes no password dictionaries and does
+not label requirements-only results as Weak/Strong. Optional trusted
+`options.analyze(normalizedValue)` receives a nonempty, trimmed value within the
+maximum and must synchronously return `{met: boolean, score: integer 0..4}`.
+Its Boolean result is an additional gate condition; its score alone is not.
+The host owns the analyzer, localization, privacy, dictionary maintenance and
+server-policy compatibility. Invalid/throwing analysis fails the gate closed.
+`options.onChange(states, active, score)` receives only `{key, met}` states and
+a host score or `null`; it does not receive the password. `passwordRequirementStates`
+is also exported as a pure requirement evaluator for validated version3 policies.
+
+Field Description adds live/hidden/list-item/class options; Field Group adds
+native list and aria-hidden composition; Fieldset adds identity, legend classes
+and escaped requirements metadata. Input adds autocomplete; Button adds escaped
+identity. Tooltip adds identity/hidden to both branches and an optional disabled
+control wrapper; HTML/custom href combinations on that wrapper are rejected.
+Default markup, CSS and Bootstrap peers are unchanged. No new third-party
+dependency is added. Earlier unreleased engine-specific version2 metadata is
+not this public contract. This change does not migrate any Odoo/Portal policy.
+
 ## 1.5.0 Additive Component Features
 
 Release 1.5.0 adds `@wpmoo/ui/floating-panel.js` and the named `FloatingPanel`

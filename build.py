@@ -66,6 +66,7 @@ JS_CATALOG = SITE_SRC / "js/catalog"
 CATALOG_STATE_MODULES = ("catalog-theme-state", "catalog-direction-state")
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
+    "password-requirements.js",
     "floating-panel.js",
     "overlay-scrollbar.js",
     "combobox.js",
@@ -2186,6 +2187,7 @@ def _bundle_module(
         cmd.append("--format=esm")
     if module_name in AGGREGATE_JS_MODULES:
         cmd.append("--external:./chart.js")
+        cmd.append("--external:./password-requirements.js")
     if bundle:
         cmd.append("--legal-comments=external")
     if minify:

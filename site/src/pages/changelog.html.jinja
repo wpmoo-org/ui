@@ -27,7 +27,7 @@
           </div>
           {{ typography("Moo UI " ~ product.version, variant="section-title", id=release_id, extra_class="mb-0") }}
           <p class="text-body-secondary mb-0">
-            Floating onboarding checklists and additive component composition.
+            Dependency-free password requirements and optional host analysis.
           </p>
         </header>
 
@@ -35,28 +35,27 @@
           {{ typography("Added", variant="subsection-title", id=release_id ~ "-added", extra_class="mb-3") }}
           <ul class="mb-0 ps-4">
             <li>
-              <a href="{{ site_href("components/card.html", root_path) }}#floating-panel">FloatingPanel</a>
-              provides explicit non-modal panel initialization, dismissal persistence,
-              reopening and disposal through a new optional public ESM entrypoint.
+              <a href="{{ site_href("components/field.html", root_path) }}#password-feedback">Password requirements</a>
+              adds explicit initialization, confirmation feedback, submit gating and
+              disposal through an optional dependency-free public ESM entrypoint.
             </li>
             <li>
-              <a href="{{ site_href("components/progress.html", root_path) }}">Progress</a>
-              adds a circular variant with fractional values and accessible progress.
+              Hosts may supply their own password analyzer. Without one, feedback
+              shows requirements only, not a strength rating.
             </li>
             <li>
-              <a href="{{ site_href("components/collapsible.html", root_path) }}">Collapsible</a>
-              supports composed headers and content utilities; Navigation supports
-              icon-frame utilities for task lists.
+              Field supports semantic feedback lists and live descriptions;
+              Input supports autocomplete and Button supports control identity.
             </li>
             <li>
-              <a href="{{ site_href("components/switch.html", root_path) }}">Switch</a>
-              accepts native form names and values without adding submission JavaScript.
+              Tooltip supports identified, hidden disabled-control wrappers with
+              native hover and keyboard feedback.
             </li>
           </ul>
         </section>
 
         <p class="small text-body-secondary mb-0">
-          Additive to the public 1.4.3 package API. Component certification
+          Additive to the public 1.5.0 package API. Component certification
           remains in preview.
         </p>
       {% endcall %}

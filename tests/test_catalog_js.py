@@ -35,12 +35,14 @@ MODULES = {
     "settings-panel.js": "initSettingsPanel",
     "theme-builder-export.js": None,
     "theme-builder-schema.js": None,
+    "password-feedback.js": "initPasswordFeedback",
 }
 LAZY_CATALOG_MODULES = {
     "overlay-scrollbar.js",
     "examples-chart.js",
     "examples-tasks.js",
     "examples-users.js",
+    "password-feedback.js",
 }
 LAZY_COMPONENT_MODULES = (
     "combobox.js",

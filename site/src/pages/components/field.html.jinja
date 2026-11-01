@@ -11,6 +11,7 @@
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/password-feedback-preview.html.jinja" import password_feedback_preview %}
 
 {% block title %}Field — Moo UI{% endblock %}
 
@@ -38,6 +39,14 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_component_intro(
   intro,
   field_usage,
+  preview_class="moo-example__preview--narrow"
+  ) }}
+
+  {{ render_component_example("field", "Field",
+  "password-feedback",
+  "Password feedback preview",
+  "Type a sample password, then repeat it to check the match. Nothing is sent or saved. Submit stays disabled until every requirement and the confirmation match; hover or focus its Tooltip to see what is missing. This example checks 12–128 characters, upper/lower case, a number and a symbol. It does not estimate strength or look up breached passwords. Applications must enforce their policy on the server. The demonstration never submits a password.",
+  password_feedback_preview(),
   preview_class="moo-example__preview--narrow"
   ) }}
 
