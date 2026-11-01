@@ -4,6 +4,8 @@
 # of the historical fa6f8e1 outputs with the locked build toolchain (PR #114).
 # Ignore only these exact commit/file/rule/line fingerprints. Do not exclude
 # the baseline file, password modules, hash-shaped values, or the rule globally.
+# PR #114 must use a merge commit: squash/rebase changes the approved SHAs and
+# requires new, separately verified fingerprints. Never bypass the scan to merge.
 
 # fa6f8e1: initial dependency-free module and catalog artifact hashes.
 fa6f8e17afb021dfddea95feff8cd300589b2f9d:tests/fixtures/boundary-baseline.json:generic-api-key:18

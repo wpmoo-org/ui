@@ -100,6 +100,7 @@ export default class PasswordRequirements {
     // Bootstrap 5.3 has no public enabled-state getter. Snapshot its state,
     // then restore exclusively through the public enable/disable methods.
     const previousTooltipWasEnabled = previousTooltip?._isEnabled;
+    const previousTooltipContent = previousTooltip?._newContent;
     let tooltip;
     let gateReady = !submit;
     let lastTitle;
@@ -114,7 +115,9 @@ export default class PasswordRequirements {
         tooltip?.hide();
         if (!previousTooltip) tooltip?.dispose();
         else {
-          tooltip.setContent({'.tooltip-inner': initialTitle});
+          // A null override restores Bootstrap's original configured title,
+          // including a host callback; an explicit host override stays intact.
+          tooltip.setContent(previousTooltipContent);
           if (previousTooltipWasEnabled) tooltip.enable();
           else tooltip.disable();
         }

@@ -270,16 +270,24 @@ class PasswordRequirementsTests(unittest.TestCase):
                     input.value='';
                     const outcomes=[];
                     for (const enabled of [true,false]) {
-                        const host=new bootstrap.Tooltip(hint,{animation:false});
-                        if (!enabled) host.disable();
-                        const feedback=Requirements.getOrCreateInstance(root);
-                        feedback.dispose();
-                        hint.hidden=false;
-                        host.show();
-                        const shown=Boolean(document.querySelector('.tooltip.show'));
-                        outcomes.push(bootstrap.Tooltip.getInstance(hint)===host && shown===enabled);
-                        host.dispose();
-                        hint.hidden=true;
+                        for (const override of [false,true]) {
+                            const host=new bootstrap.Tooltip(hint,{
+                                animation:false,title:()=> 'Host configured title',
+                            });
+                            if (override) host.setContent({'.tooltip-inner':'Host custom content'});
+                            if (!enabled) host.disable();
+                            const feedback=Requirements.getOrCreateInstance(root);
+                            feedback.dispose();
+                            hint.hidden=false;
+                            host.show();
+                            const shown=Boolean(document.querySelector('.tooltip.show'));
+                            outcomes.push(bootstrap.Tooltip.getInstance(hint)===host && shown===enabled);
+                            if (!enabled) { host.enable(); host.show(); }
+                            outcomes.push(document.querySelector('.tooltip-inner')?.textContent ===
+                                (override ? 'Host custom content' : 'Host configured title'));
+                            host.dispose();
+                            hint.hidden=true;
+                        }
                     }
                     return outcomes.every(Boolean);
                 }'''))
