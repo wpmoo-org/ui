@@ -231,7 +231,7 @@ validation. A trusted host may supply synchronous `analyze(value)`, returning
 `{met: boolean, score: 0..4}`; this callback receives the normalized password and
 owns its security/privacy behavior. Without it no score is produced. `onChange`
 receives only Boolean check states, an active flag and the optional host score.
-See the [public policy contract](https://github.com/wpmoo-org/ui/blob/main/docs/contracts/PACKAGE_SURFACE_DECISIONS.md#160-password-requirements).
+See the [public policy contract](https://github.com/wpmoo-org/ui/blob/main/docs/contracts/PACKAGE_SURFACE_DECISIONS.md#200-external-chart-vendors-and-password-requirements).
 
 The module preserves native document/touch/wheel scrolling. Its thin thumb
 appears while scrolling, near the trailing mouse edge or on keyboard focus;

@@ -5,9 +5,8 @@ import re
 import subprocess
 import sys
 import tempfile
-import unittest
 from pathlib import Path
-from unittest import mock
+from unittest import TestCase, mock
 
 from tests.helpers.browser_harness import _QuietHandler
 
@@ -24,7 +23,7 @@ VENDOR_FILES = {
 }
 
 
-class ChartVendorTests(unittest.TestCase):
+class ChartVendorTests(TestCase):
     @classmethod
     def setUpClass(cls):
         result = subprocess.run(
@@ -59,8 +58,10 @@ class ChartVendorTests(unittest.TestCase):
             match = re.search(r'<script type="importmap">(.*?)</script>', html, re.S)
             self.assertIsNotNone(match)
             imports = json.loads(match.group(1))["imports"]
+            page_dir = (ROOT / "site-dist" / page).parent
             for target in imports.values():
                 self.assertRegex(target, r"^\.{1,2}/")
+                self.assertTrue((page_dir / target).resolve().is_file(), target)
             self.assertTrue(imports["chart.js/auto"].endswith("vendor/chart.js/auto/auto.js"))
             self.assertTrue(imports["@kurkle/color"].endswith("vendor/@kurkle/color/dist/color.esm.js"))
 
@@ -75,7 +76,7 @@ class ChartVendorTests(unittest.TestCase):
         self.assertFalse(any(path.startswith(("vendor/", "node_modules/", "site-dist/")) for path in files))
 
 
-class VendorRequestPathTests(unittest.TestCase):
+class VendorRequestPathTests(TestCase):
     def test_vendor_requests_cannot_escape_either_vendor_root(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
