@@ -1208,7 +1208,6 @@ class CatalogContractTests(CatalogTestCase):
             )
             for index, payload in enumerate(payloads):
                 html = str(payload.get("html", ""))
-                html_lower = html.lower()
                 with self.subTest(
                     page=path.relative_to(ROOT / "site-dist").as_posix(),
                     payload=index,
@@ -1220,7 +1219,21 @@ class CatalogContractTests(CatalogTestCase):
                     )
                     self.assertNotIn("window.MooCodePen", html)
                     self.assertNotIn("MooCodePenDemo.init", html)
-                    self.assertNotIn("<script", html_lower)
+                    # Chart's explicit native ESM vendors require inert JSON,
+                    # while executable HTML bootstrap code remains forbidden.
+                    maps = re.findall(r'<script type="importmap">(.*?)</script>', html, re.S)
+                    if path.relative_to(SITE_DIST).as_posix() == "components/chart/index.html":
+                        self.assertEqual(len(maps), 1)
+                        self.assertEqual(json.loads(maps[0]), {"imports": {
+                            "chart.js/auto": "https://cdn.jsdelivr.net/npm/chart.js@4.6.1/auto/auto.js",
+                            "@kurkle/color": "https://cdn.jsdelivr.net/npm/@kurkle/color@0.3.4/dist/color.esm.js",
+                        }})
+                    else:
+                        self.assertEqual(maps, [])
+                    executable_html = re.sub(
+                        r'<script type="importmap">.*?</script>', "", html, flags=re.S,
+                    )
+                    self.assertNotIn("<script", executable_html.lower())
                     for marker in (
                         "data-moo-codepen-form",
                         "data-moo-code-panel",
