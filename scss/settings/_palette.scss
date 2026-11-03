@@ -1,7 +1,13 @@
 $white: #fff !default;
 $black: #0a0a0a !default;
 
-$headings-font-weight: 600 !default;
+// Heading weight is a runtime token on each resolved owner, like
+// --moo-heading-font-family. This knob sets its default; the Bootstrap
+// variable consumes the token so reboot, Display, Card, Alert and Empty
+// headings follow an owner override. The fallback covers documents
+// outside a resolved owner.
+$moo-heading-font-weight: 600 !default;
+$headings-font-weight: var(--moo-heading-font-weight, #{$moo-heading-font-weight}) !default;
 $lead-font-size: 1.125rem !default;
 $lead-font-weight: 400 !default;
 // Bootstrap's stock display scale (5rem down to 2.5rem) at font-weight 300

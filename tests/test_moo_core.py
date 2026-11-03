@@ -116,6 +116,27 @@ class MooCoreTests(CatalogTestCase):
                 ):
                     self.assertTrue(declaration in css, f"{entrypoint} must emit {declaration}")
 
+    def test_heading_weight_is_an_owner_token_with_a_sass_default(self) -> None:
+        import sass
+
+        for weight, overrides in (("600", ""), ("500", "$moo-heading-font-weight: 500; ")):
+            for entrypoint in ("moo-core", "moo-ui"):
+                with self.subTest(entrypoint=entrypoint, weight=weight):
+                    css = sass.compile(
+                        string=overrides + f'@import "{entrypoint}";',
+                        include_paths=[str(SCSS), str(ROOT / "vendor")],
+                    )
+                    owner = re.search(r"\.moo-ui\[data-bs-theme\]\s*\{([^}]+)\}", css)
+                    self.assertIsNotNone(owner)
+                    self.assertIn(f"--moo-heading-font-weight: {weight};", owner.group(1))
+                    consumed = f"font-weight: var(--moo-heading-font-weight, {weight});"
+                    for selector in (r"\.card-title", r"\.alert-heading", r"\.empty-state-title"):
+                        rules = re.findall(selector + r"\s*\{([^}]+)\}", css)
+                        self.assertTrue(
+                            any(consumed in rule for rule in rules),
+                            f"{entrypoint} {selector} must consume the heading weight token",
+                        )
+
     def test_body_secondary_utility_follows_the_resolved_base_color(self) -> None:
         full_css = build.compile_style(SCSS / "moo-ui.scss")
         utility = re.search(r"\.bg-body-secondary\s*\{([^}]+)\}", full_css)

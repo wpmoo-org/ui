@@ -16,6 +16,14 @@ host adapter; consumers never pass raw CSS or selectors.
 This contract is limited to Body typography. Heading level overrides and font
 variant delivery are separate work.
 
+Heading weight follows the same owner rule. Each resolved owner resets
+`--moo-heading-font-weight` (default 600, Sass `$moo-heading-font-weight`).
+Bootstrap's `$headings-font-weight` consumes the token with that default as
+fallback, so h1–h6, `.h1`–`.h6`, Display headings, `.card-title`,
+`.alert-heading` and `.empty-state-title` follow an owner override, together
+with the existing `--moo-heading-font-family`. Explicit utilities such as
+`fw-semibold` still win. Font files are delivered by the host, not by Core.
+
 Sass consumers can configure Small through `$moo-small-font-size` and paragraph
 top spacing through `$moo-paragraph-margin-top`, both `!default` settings. The
 bottom spacing consumes Bootstrap's `$paragraph-margin-bottom`. Default output
