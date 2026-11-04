@@ -4469,6 +4469,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("https://ui.wpmoo.org/layouts/page/", public_urls)
         self.assertNotIn("layouts/previews/app-sidebar.html", public_paths)
         self.assertNotIn("layouts/previews/app-none.html", public_paths)
+        self.assertNotIn("layouts/previews/app-document.html", public_paths)
         self.assertNotIn("layouts/previews/page.html", public_paths)
         self.assertNotIn("https://ui.wpmoo.org/layouts/previews/", public_urls)
 
@@ -4499,6 +4500,7 @@ class CatalogContractTests(CatalogTestCase):
         preview_outputs = {
             "app-sidebar": self.read_output("layouts/previews/app-sidebar.html"),
             "app-none": self.read_output("layouts/previews/app-none.html"),
+            "app-document": self.read_output("layouts/previews/app-document.html"),
             "page": self.read_output("layouts/previews/page.html"),
         }
         app_preview = preview_outputs["app-sidebar"]
@@ -4523,6 +4525,10 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn('data-slot="sidebar"', none_preview)
         self.assertGreaterEqual(none_preview.count('class="skeleton placeholder-glow"'), 8)
         self.assertIn('data-slot="page"', page_preview)
+        document_preview = preview_outputs["app-document"]
+        self.assertIn('data-shell-mode="document"', document_preview)
+        self.assertNotIn('data-slot="sidebar"', document_preview)
+        self.assertIn('layouts/previews/app-document/', self.read_output("layout.html"))
         for name, preview in preview_outputs.items():
             with self.subTest(preview=name):
                 self.assertEqual(preview.count("<main"), 1)
