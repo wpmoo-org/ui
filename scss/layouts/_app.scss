@@ -22,6 +22,15 @@
   border-radius: var(--bs-border-radius-xl);
 }
 
+// Document mode lets the document scroll, as websites expect: the footer
+// follows the content and still meets the viewport bottom on short pages.
+// It has no Sidebar; site navigation uses the header or a drawer.
+.wrapper[data-layout="app"][data-shell-mode="document"] {
+  height: auto;
+  min-height: 100svh;
+  overflow: visible;
+}
+
 .wrapper[data-layout="app"] > [data-slot="page"] {
   display: flex;
   min-width: 0;
@@ -81,6 +90,10 @@
   flex: 1 1 auto;
   flex-direction: column;
   overflow-y: auto;
+}
+
+.wrapper[data-layout="app"][data-shell-mode="document"] > [data-slot="page"] > main {
+  overflow: visible;
 }
 
 .wrapper[data-layout="app"] > [data-slot="page"] > main > :is(
