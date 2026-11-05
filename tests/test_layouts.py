@@ -668,7 +668,7 @@ class LayoutCatalogTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("layout/index.html")
         self.assertIn('class="moo-doc-layout"', page)
-        self.assertIn('<h1 class="fw-semibold" id="layout">Layout</h1>', page)
+        self.assertIn('<h1 id="layout">Layout</h1>', page)
         self.assertIn("A focused space for Moo UI layout examples.", page)
         self.assertIn('aria-label="On this page"', page)
         self.assertEqual(page.count('data-example="layout-app-example"'), 1)
