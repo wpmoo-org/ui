@@ -1,4 +1,4 @@
-"""Keep the reviewed PR114 artifact-hash exceptions strictly fingerprint-scoped."""
+"""Keep byte-verified artifact hash exceptions strictly fingerprint-scoped."""
 
 import unittest
 
@@ -27,6 +27,16 @@ class SecretScanExceptionTests(unittest.TestCase):
         expected |= {
             f'baea6810b57a2ad6fddd24cc53283af9baa46bc7:tests/fixtures/boundary-baseline.json:generic-api-key:{line}'
             for line in (18, 737, 757, 846, 884)
+        }
+        # Byte-verified 2.1.0 release artifact hashes.
+        expected |= {
+            f'{commit}:tests/fixtures/boundary-baseline.json:generic-api-key:{line}'
+            for commit, lines in {
+                '6a7014a79ad011fae7f42c39bdc5ec02a96a8a8b': (18, 757, 846, 884),
+                '7966017d6f3f27bbc209540ddbbee51927014dcf': (738,),
+                'af5c8dcfed2fbeb108c16ac6134c1318bf779685': (18, 738, 758, 847, 885),
+            }.items()
+            for line in lines
         }
         self.assertEqual(len(entries), len(expected))
         self.assertEqual(set(entries), expected)
