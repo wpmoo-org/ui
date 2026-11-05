@@ -217,7 +217,7 @@ class PasswordRequirementsTests(unittest.TestCase):
                     const length=document.querySelector('#password-preview-requirements-length');
                     const messages={met:'ok %s', missing:'offen %s', remaining:'Noch offen: %s',
                         complete:'Alle angezeigten Prüfungen erfüllt.'};
-                    const invalid=[{met:1}, {unknown:'x'}, null, 'text'].filter(value => {
+                    const invalid=[{met:1}, {unknown:'x'}, {constructor:'x'}, {toString:'x'}, null, 'text'].filter(value => {
                         try { Requirements.getOrCreateInstance(root, {messages:value}).dispose(); return true; }
                         catch (error) { return !(error instanceof TypeError); }
                     }).length;

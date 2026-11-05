@@ -63,7 +63,7 @@ export default class PasswordRequirements {
         typeof policy.whitespace !== 'string' ||
         (options.analyze !== undefined && typeof options.analyze !== 'function') ||
         (options.messages !== undefined && (!options.messages || typeof options.messages !== 'object' ||
-          Object.entries(options.messages).some(([key, value]) => !(key in MESSAGES) || typeof value !== 'string')))) {
+          Object.entries(options.messages).some(([key, value]) => !Object.hasOwn(MESSAGES, key) || typeof value !== 'string')))) {
       throw new TypeError('PasswordRequirements requires same-owner controls and a versioned public policy.');
     }
     this._element = element;
