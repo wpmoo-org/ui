@@ -209,6 +209,29 @@ class PasswordRequirementsTests(unittest.TestCase):
                         root.querySelector('[id$="-length"]').dataset.requirementMet === 'host-met' &&
                         !root.querySelector('[id$="-maximum"]').hasAttribute('data-requirement-met');
                 }'''))
+                self.assertEqual(page.evaluate('''() => {
+                    const root=document.querySelector('#password-preview-requirements');
+                    const input=document.querySelector('#password-preview-input');
+                    const confirm=document.querySelector('#password-preview-confirm');
+                    const summary=document.querySelector('#password-preview-requirements-summary');
+                    const length=document.querySelector('#password-preview-requirements-length');
+                    const messages={met:'ok %s', missing:'offen %s', remaining:'Noch offen: %s',
+                        complete:'Alle angezeigten Prüfungen erfüllt.'};
+                    const invalid=[{met:1}, {unknown:'x'}, null, 'text'].filter(value => {
+                        try { Requirements.getOrCreateInstance(root, {messages:value}).dispose(); return true; }
+                        catch (error) { return !(error instanceof TypeError); }
+                    }).length;
+                    input.value='short'; confirm.value='';
+                    const translated=Requirements.getOrCreateInstance(root,{messages});
+                    const pending=[summary.textContent, length.textContent];
+                    input.value=confirm.value='Fir!82meadow $& kept';
+                    input.dispatchEvent(new Event('input',{bubbles:true}));
+                    const done=summary.textContent;
+                    translated.dispose();
+                    input.value=confirm.value='';
+                    return {invalid, pending: pending[0].startsWith('Noch offen: ') && pending[1].startsWith('offen '),
+                            done};
+                }'''), {'invalid': 0, 'pending': True, 'done': 'Alle angezeigten Prüfungen erfüllt.'})
                 self.assertTrue(page.evaluate('''() => {
                     const root=document.querySelector('#password-preview-requirements');
                     const input=document.querySelector('#password-preview-input');

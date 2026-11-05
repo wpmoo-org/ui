@@ -1,4 +1,13 @@
 const instances = new WeakMap();
+// Hosts may pass translated text; each value may contain one `%s` placeholder.
+const MESSAGES = {
+  met: '✓ %s',
+  missing: '— %s',
+  remaining: 'Remaining: %s',
+  complete: 'Shown checks met. Final validation happens on submit.',
+  analysis: 'Host password analysis must pass.',
+};
+const format = (message, value) => message.replace('%s', () => String(value));
 
 function strip(value, characters) {
   const points = Array.from(value);
@@ -52,10 +61,13 @@ export default class PasswordRequirements {
         new Set(policy.rules.map(rule => rule.key)).size !== policy.rules.length ||
         !['length', 'maximum'].every(key => policy.rules.some(rule => rule.key === key)) ||
         typeof policy.whitespace !== 'string' ||
-        (options.analyze !== undefined && typeof options.analyze !== 'function')) {
+        (options.analyze !== undefined && typeof options.analyze !== 'function') ||
+        (options.messages !== undefined && (!options.messages || typeof options.messages !== 'object' ||
+          Object.entries(options.messages).some(([key, value]) => !(key in MESSAGES) || typeof value !== 'string')))) {
       throw new TypeError('PasswordRequirements requires same-owner controls and a versioned public policy.');
     }
     this._element = element;
+    const messages = {...MESSAGES, ...options.messages};
     this._initialReady = element.getAttribute('data-requirements-ready');
     this._originals = new Map();
     this._listeners = [];
@@ -145,7 +157,7 @@ export default class PasswordRequirements {
       lastTitle = title;
     };
     const show = (node, label, met, warning = false, active = Boolean(input.value)) => {
-      node.textContent = warning ? label : (met ? '✓ ' : '— ') + label;
+      node.textContent = warning ? label : format(met ? messages.met : messages.missing, label);
       node.hidden = warning && (!active || met);
       node.classList.toggle('text-body', !warning && met);
       node.classList.toggle('text-danger', warning);
@@ -168,7 +180,7 @@ export default class PasswordRequirements {
           throw new TypeError('Password analysis must synchronously return {met: boolean, score: 0..4}.');
         }
       }
-      if (options.analyze) states.push({key: 'analysis', label: 'Host password analysis must pass.',
+      if (options.analyze) states.push({key: 'analysis', label: messages.analysis,
         met: Boolean(analysis?.met), warning: true});
       if (confirmation) states.push({key: 'confirmation', label: this._originals.get(match).text,
         warning: true, met: Boolean(confirmation.value) && confirmation.value === input.value});
@@ -176,7 +188,8 @@ export default class PasswordRequirements {
         Boolean(input.value) && state.met, state.warning, state.key === 'confirmation' ? Boolean(confirmation.value) : Boolean(input.value));
       const missing = states.filter(state => !state.met).length;
       const warnings = states.filter(state => state.warning && !state.met).map(state => state.label).join(' ');
-      const summaryText = !input.value ? this._originals.get(summary).text : missing ? `Remaining: ${missing} ${warnings}`.trim() : 'Shown checks met. Final validation happens on submit.';
+      const summaryText = !input.value ? this._originals.get(summary).text
+        : missing ? `${format(messages.remaining, missing)} ${warnings}`.trim() : messages.complete;
       if (summary.textContent !== summaryText) summary.textContent = summaryText;
       // The host owns the strength source. Only non-secret Boolean check states
       // leave the component; no password value is passed to a callback/event.

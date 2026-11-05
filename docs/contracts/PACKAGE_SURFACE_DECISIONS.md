@@ -95,6 +95,11 @@ server-policy compatibility. Invalid/throwing analysis fails the gate closed.
 `options.onChange(states, active, score)` receives only `{key, met}` states and
 a host score or `null`; it does not receive the password. `passwordRequirementStates`
 is also exported as a pure requirement evaluator for validated version3 policies.
+Optional `options.messages` lets the host supply translated live text for the
+keys `met` (`✓ %s`), `missing` (`— %s`), `remaining` (`Remaining: %s`),
+`complete` and `analysis`. Each value is a string with at most one `%s`
+placeholder, inserted literally; unknown keys or non-string values are rejected.
+Omitted keys keep the English defaults, so existing hosts are unchanged.
 
 Field Description adds live/hidden/list-item/class options; Field Group adds
 native list and aria-hidden composition; Fieldset adds identity, legend classes
