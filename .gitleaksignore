@@ -59,3 +59,10 @@ af5c8dcfed2fbeb108c16ac6134c1318bf779685:tests/fixtures/boundary-baseline.json:g
 af5c8dcfed2fbeb108c16ac6134c1318bf779685:tests/fixtures/boundary-baseline.json:generic-api-key:758
 af5c8dcfed2fbeb108c16ac6134c1318bf779685:tests/fixtures/boundary-baseline.json:generic-api-key:847
 af5c8dcfed2fbeb108c16ac6134c1318bf779685:tests/fixtures/boundary-baseline.json:generic-api-key:885
+
+# d8c3e7a: password message validation and its generated copies.
+d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:18
+d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:738
+d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:758
+d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:847
+d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:885
