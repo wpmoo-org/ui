@@ -1,5 +1,5 @@
 /*!
- * Moo UI v2.0.0 (https://wpmoo.org/)
+ * Moo UI v2.1.0 (https://wpmoo.org/)
  * Copyright 2026 WPMoo Authors
  * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)
  *
@@ -253,6 +253,7 @@ html.scrollbar-overlay-native::-webkit-scrollbar {
   --moo-chart-4: #3f3f46;
   --moo-chart-5: #27272a;
   --moo-heading-font-family: var(--bs-body-font-family);
+  --moo-heading-font-weight: 600;
   --moo-small-font-size: 0.75rem;
   --moo-paragraph-margin-top: 0;
   --moo-paragraph-margin-bottom: 1rem;
@@ -4430,7 +4431,7 @@ label.btn {
   .card-title {
     margin-bottom: 0;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: var(--moo-heading-font-weight, 600);
     line-height: 1.25;
     letter-spacing: -0.01em;
   }
@@ -4480,7 +4481,7 @@ label.btn {
   .empty-state-title {
     margin: 0;
     font-size: 1.09375rem;
-    font-weight: 600;
+    font-weight: var(--moo-heading-font-weight, 600);
     line-height: 1.2;
   }
   .empty-state-description {
@@ -5439,7 +5440,7 @@ label.btn {
   .alert-heading {
     margin-bottom: 0.25rem;
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: var(--moo-heading-font-weight, 600);
   }
   .alert-action {
     flex: 0 0 auto;
@@ -8457,6 +8458,11 @@ label.btn {
     border: var(--bs-border-width) solid var(--moo-border);
     border-radius: var(--bs-border-radius-xl);
   }
+  .wrapper[data-layout="app"][data-shell-mode="document"] {
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+  }
   .wrapper[data-layout="app"] > [data-slot="page"] {
     display: flex;
     min-width: 0;
@@ -8553,6 +8559,9 @@ label.btn {
     flex: 1 1 auto;
     flex-direction: column;
     overflow-y: auto;
+  }
+  .wrapper[data-layout="app"][data-shell-mode="document"] > [data-slot="page"] > main {
+    overflow: visible;
   }
   .wrapper[data-layout="app"] > [data-slot="page"] > main > :is( .container, .container-sm, .container-md, .container-lg, .container-xl, .container-xxl, .container-fluid ) {
     display: flex;

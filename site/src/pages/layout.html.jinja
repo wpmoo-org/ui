@@ -106,6 +106,44 @@
         </p>
       </section>
 
+      <section aria-labelledby="document">
+        {{ typography("Document", variant="section-title", id="document") }}
+        <p>
+          Use <code>data-shell-mode="document"</code> for websites. The
+          document scrolls instead of <code>main</code>, so the footer follows
+          the content and still meets the viewport bottom on short pages.
+          Document mode has no Sidebar; put site navigation in the header or a
+          drawer. Do not add <code>main</code> scroll utilities such as
+          <code>scroll-fade-y</code>, because <code>main</code> is not a
+          scroll container.
+        </p>
+        {% set document_source %}
+          <div class="wrapper" data-layout="app" data-shell-mode="document">
+            <div data-slot="page">
+              <header>
+                <div class="container-xl">Site header</div>
+              </header>
+              <main id="main-content" tabindex="-1">
+                <div class="container-xl">Page content</div>
+              </main>
+              <footer>
+                <div class="container-xl">Site footer</div>
+              </footer>
+            </div>
+          </div>
+        {% endset %}
+        {{ render_block_example(
+          "layout-document-example",
+          "Document preview",
+          "",
+          "",
+          preview_class="moo-example__preview--shell",
+          frame_src=site_href("layouts/previews/app-document.html", root_path),
+          show_header=false,
+          source_content=document_source
+        ) }}
+      </section>
+
       <section aria-labelledby="page">
         {{ typography("Page", variant="section-title", id="page") }}
         <p>
@@ -478,6 +516,7 @@
 
     {{ render_doc_toc([
       {"id": "app", "label": "App"},
+      {"id": "document", "label": "Document"},
       {"id": "page", "label": "Page"},
       {"id": "breakpoints", "label": "Breakpoints"},
       {"id": "containers", "label": "Containers"},

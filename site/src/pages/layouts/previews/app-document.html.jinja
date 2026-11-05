@@ -1,0 +1,117 @@
+{% extends "layouts/base.html.jinja" %}
+{% from "layouts/app.html.jinja" import app %}
+{% from "layouts/page.html.jinja" import page %}
+{% from "components/accordion.html.jinja" import accordion %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/card.html.jinja" import card %}
+
+{% block title %}App Document Preview — Moo UI{% endblock %}
+
+{% block body %}
+  <div class="moo-layout-preview min-vh-100">
+    {% call(slot) app(navigation="none", shell_mode="document") %}
+      {% if slot == "page" %}
+        {% call(region) page(width="xl", id="layout-preview-page") %}
+          {% if region == "header" %}
+            <div class="d-flex align-items-center justify-content-between gap-3 mt-3 py-2 ps-4 pe-2 bg-body border rounded-pill shadow-sm">
+              <a class="fw-semibold text-body text-decoration-none" href="#">Moo Studio</a>
+              <div class="d-flex align-items-center gap-3">
+                <nav class="d-none d-sm-flex gap-3 small" aria-label="Website">
+                  <a class="text-body-secondary text-decoration-none" href="#features">Features</a>
+                  <a class="text-body-secondary text-decoration-none" href="#faq">FAQ</a>
+                  <a class="text-body-secondary text-decoration-none" href="#contact">Contact</a>
+                </nav>
+                {{ button("Get started", size="sm", element="a", href="#contact", extra_class="rounded-pill") }}
+              </div>
+            </div>
+          {% elif region == "main" %}
+            {# A faint dot grid that fades out toward the edges keeps the hero quiet. #}
+            <section class="position-relative my-4 py-5 px-3 text-center" aria-labelledby="hero-title">
+              <div class="position-absolute top-0 start-0 w-100 h-100" aria-hidden="true"
+                style="background-image: radial-gradient(var(--bs-border-color) 1px, transparent 1px); background-size: 1.25rem 1.25rem; mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);"></div>
+              <div class="position-relative py-lg-5">
+              {{ badge("New · Document shell mode", variant="outline", pill=true, extra_class="mb-3 fw-normal") }}
+              <h1 id="hero-title" class="display-4 fw-semibold mx-auto" style="max-width: 40rem; letter-spacing: -0.02em;">
+                Websites that scroll like websites
+              </h1>
+              <p class="lead text-body-secondary mx-auto mb-4" style="max-width: 36rem;">
+                The document owns the scroll. Header, sections and footer follow
+                each other in normal flow; nothing is pinned to the viewport.
+              </p>
+              <div class="d-flex flex-wrap justify-content-center gap-2">
+                {{ button("Get started", element="a", href="#contact") }}
+                {{ button("See features", variant="secondary", element="a", href="#features") }}
+              </div>
+              </div>
+            </section>
+
+            <section id="features" class="py-5" aria-labelledby="features-title">
+              <h2 id="features-title" class="h3 fw-semibold text-center mb-2">Features</h2>
+              <p class="text-body-secondary text-center mb-5">Built from Moo UI components and Bootstrap utilities.</p>
+              <div class="row g-4">
+                {% for icon_name, title, text in [
+                  ("zap", "Fast pages", "Static markup with progressive Bootstrap behavior."),
+                  ("palette", "Themeable", "Owner tokens set fonts, colors and heading weight."),
+                  ("shield-check", "Accessible", "Native landmarks, focus order and skip links."),
+                  ("layout-grid", "Responsive", "Bootstrap containers and grid at every width."),
+                  ("users", "Editor friendly", "Content blocks stay separate from the theme."),
+                  ("rocket", "Ready to ship", "The same Core powers HTML, PHP, Odoo and Astro."),
+                ] %}
+                  <div class="col-12 col-md-6 col-lg-4">
+                    {% call card(extra_class="h-100") %}
+                      <div class="d-flex flex-column gap-2">
+                        <span class="d-inline-flex text-body-secondary" style="inline-size: 1.5rem; block-size: 1.5rem;">{{ render_icon(icon_name, "") }}</span>
+                        <h3 class="h6 fw-semibold mb-0">{{ title }}</h3>
+                        <p class="mb-0 text-body-secondary">{{ text }}</p>
+                      </div>
+                    {% endcall %}
+                  </div>
+                {% endfor %}
+              </div>
+            </section>
+
+            <section class="py-5" aria-label="Results">
+              <div class="row g-4 text-center">
+                {% for value, label in [("120+", "Sites launched"), ("99.9%", "Uptime"), ("4.9", "Average rating")] %}
+                  <div class="col-12 col-md-4">
+                    <div class="display-6 fw-semibold">{{ value }}</div>
+                    <div class="text-body-secondary">{{ label }}</div>
+                  </div>
+                {% endfor %}
+              </div>
+            </section>
+
+            <section id="faq" class="py-5" aria-labelledby="faq-title">
+              <div class="row justify-content-center">
+                <div class="col-12 col-lg-8">
+                  <h2 id="faq-title" class="h3 fw-semibold text-center mb-4">Questions</h2>
+                  {{ accordion("layout-preview-faq", [
+                    {"id": "scroll", "title": "Which element scrolls?", "content": "The document. <code>main</code> is not a scroll container in this mode.", "open": true},
+                    {"id": "footer", "title": "Where does the footer go?", "content": "After the content. On short pages it still meets the viewport bottom."},
+                    {"id": "sidebar", "title": "Can I add a Sidebar?", "content": "No. Use header navigation or a drawer for websites."},
+                  ]) }}
+                </div>
+              </div>
+            </section>
+
+            <section id="contact" class="py-5" aria-labelledby="cta-title">
+              {% call card(extra_class="text-center") %}
+                <div class="py-4">
+                  <h2 id="cta-title" class="h3 fw-semibold mb-2">Ready to build your site?</h2>
+                  <p class="text-body-secondary mb-4">Start from the document shell and add your own sections.</p>
+                  {{ button("Contact us", element="a", href="#") }}
+                </div>
+              {% endcall %}
+            </section>
+          {% elif region == "footer" %}
+            <div class="d-flex flex-wrap justify-content-between gap-3 py-4 border-top small text-body-secondary">
+              <span>Moo Studio · The footer follows the content.</span>
+              <span>Imprint · Privacy</span>
+            </div>
+          {% endif %}
+        {% endcall %}
+      {% endif %}
+    {% endcall %}
+  </div>
+{% endblock %}

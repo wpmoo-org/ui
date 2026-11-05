@@ -454,6 +454,18 @@ class AppLayoutTests(LayoutRenderMixin, unittest.TestCase):
         self.assertNotIn("data-sidebar-trigger", output)
         self.assertNotIn("<script>", output)
 
+    def test_app_document_mode_emits_a_page_without_sidebar(self) -> None:
+        output = self.render_app_shell(
+            navigation="none",
+            include_sidebar=False,
+            shell_mode="document",
+        )
+
+        self.assertIn('data-shell-mode="document"', output)
+        self.assertEqual(output.count('data-slot="page"'), 1)
+        self.assertNotIn('data-slot="sidebar"', output)
+        self.assertNotIn("data-sidebar-trigger", output)
+
     def test_app_forwards_sidebar_props_and_right_side_trigger_target(self) -> None:
         output = self.render_app_shell(
             sidebar_id="right-sidebar",
@@ -496,7 +508,8 @@ class AppLayoutTests(LayoutRenderMixin, unittest.TestCase):
     def test_app_validates_finite_props_and_shared_identifier_grammar(self) -> None:
         invalid_calls = (
             ({"navigation": "auto"}, "Unknown app navigation: auto"),
-            ({"shell_mode": "document"}, "Unknown app shell mode: document"),
+            ({"shell_mode": "page"}, "Unknown app shell mode: page"),
+            ({"shell_mode": "document"}, "App document shell mode requires navigation none"),
             ({"side": "top"}, "Unknown app sidebar side: top"),
             ({"variant": "card"}, "Unknown app sidebar variant: card"),
             ({"collapsible": "rail"}, "Unknown app sidebar collapsible mode: rail"),

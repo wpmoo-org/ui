@@ -1,7 +1,7 @@
 {% from "components/sidebar.html.jinja" import sidebar %}
 
 {% set app_navigation_values = ["sidebar", "none"] %}
-{% set app_shell_modes = ["viewport", "contained"] %}
+{% set app_shell_modes = ["viewport", "contained", "document"] %}
 {% set app_sidebar_sides = ["left", "right"] %}
 {% set app_sidebar_variants = ["sidebar", "floating", "inset"] %}
 {% set app_sidebar_collapsible = ["icon", "offcanvas", "none"] %}
@@ -28,6 +28,9 @@
   {% endif %}
   {% if shell_mode not in app_shell_modes %}
     {{ fail("Unknown app shell mode: " ~ shell_mode) }}
+  {% endif %}
+  {% if shell_mode == "document" and navigation != "none" %}
+    {{ fail("App document shell mode requires navigation none") }}
   {% endif %}
   {% if side not in app_sidebar_sides %}
     {{ fail("Unknown app sidebar side: " ~ side) }}

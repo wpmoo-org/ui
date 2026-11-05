@@ -43,3 +43,26 @@ baea6810b57a2ad6fddd24cc53283af9baa46bc7:tests/fixtures/boundary-baseline.json:g
 baea6810b57a2ad6fddd24cc53283af9baa46bc7:tests/fixtures/boundary-baseline.json:generic-api-key:757
 baea6810b57a2ad6fddd24cc53283af9baa46bc7:tests/fixtures/boundary-baseline.json:generic-api-key:846
 baea6810b57a2ad6fddd24cc53283af9baa46bc7:tests/fixtures/boundary-baseline.json:generic-api-key:884
+
+# 6a7014a: translated password runtime and its generated copies.
+6a7014a79ad011fae7f42c39bdc5ec02a96a8a8b:tests/fixtures/boundary-baseline.json:generic-api-key:18
+6a7014a79ad011fae7f42c39bdc5ec02a96a8a8b:tests/fixtures/boundary-baseline.json:generic-api-key:757
+6a7014a79ad011fae7f42c39bdc5ec02a96a8a8b:tests/fixtures/boundary-baseline.json:generic-api-key:846
+6a7014a79ad011fae7f42c39bdc5ec02a96a8a8b:tests/fixtures/boundary-baseline.json:generic-api-key:884
+
+# 7966017: catalog module cache key for translated feedback.
+7966017d6f3f27bbc209540ddbbee51927014dcf:tests/fixtures/boundary-baseline.json:generic-api-key:738
+
+# af5c8dc: 2.1.0 version banner and catalog cache-key artifacts.
+af5c8dcfed2fbeb108c16ac6134c1318bf779685:tests/fixtures/boundary-baseline.json:generic-api-key:18
+af5c8dcfed2fbeb108c16ac6134c1318bf779685:tests/fixtures/boundary-baseline.json:generic-api-key:738
+af5c8dcfed2fbeb108c16ac6134c1318bf779685:tests/fixtures/boundary-baseline.json:generic-api-key:758
+af5c8dcfed2fbeb108c16ac6134c1318bf779685:tests/fixtures/boundary-baseline.json:generic-api-key:847
+af5c8dcfed2fbeb108c16ac6134c1318bf779685:tests/fixtures/boundary-baseline.json:generic-api-key:885
+
+# d8c3e7a: password message validation and its generated copies.
+d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:18
+d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:738
+d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:758
+d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:847
+d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:885

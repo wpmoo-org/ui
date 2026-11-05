@@ -3,6 +3,25 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 2.1.0 Owner Options and Document Shell
+
+Hosts can initialize `PasswordRequirements` with an optional `options.messages`
+map for translated feedback. It supports `met` (`✓ %s`), `missing` (`— %s`),
+`remaining` (`Remaining: %s`), `complete` and `analysis`. In the first three
+templates, the component substitutes the first `%s` with the rule label or
+remaining count. It inserts feedback as text and uses the English default for
+each omitted key. Hosts supply translated rule labels and confirmation text
+through the existing markup and policy.
+
+Resolved theme owners expose `--moo-heading-font-weight`, with a default of 600
+from the `$moo-heading-font-weight` Sass setting. See the
+[body typography contract](BODY_TYPOGRAPHY.md) for affected headings.
+
+The `document` App shell mode uses `navigation="none"` and gives the document
+ownership of scrolling. The footer follows content and reaches the viewport
+bottom on short pages. See the [document shell contract](DOCUMENT_SHELL.md)
+and the Layout catalog's Document preview.
+
 ## 2.0.0 External Chart vendors and Password Requirements
 
 The four compiled CSS artifacts change only in the version shown in the Moo UI
