@@ -275,12 +275,11 @@ calm.
 
 ## Status And Support
 
-The `2.0.0` major release target externalizes Chart.js and adds dependency-free password requirements,
-optional host-supplied analysis and native confirmation/submit feedback.
-Field, Input, Button and Tooltip gain additive composition options. Existing
-exports and Bootstrap compatibility are preserved; no estimator is bundled.
-Chart consumers must now install the external Chart.js peer or provide a browser
-import map; the previously self-contained Chart setup changes in this major.
+The `2.1.0` minor release adds host-translated password feedback, the
+`--moo-heading-font-weight` owner token, and a document scrolling mode for
+website shells. The Layout catalog demonstrates the document mode with a live
+preview and copyable example. Chart consumers use the optional Chart.js peer
+or a native browser import map.
 Component certification remains
 `preview`, with its documented manual and browser/device limits. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
@@ -304,7 +303,7 @@ paths live in the [Installation guide](https://ui.wpmoo.org/installation/).
 Moo UI source code is MIT licensed. License details live in
 [LICENSE](LICENSE) and the [License page](https://ui.wpmoo.org/license/).
 Third-party distribution details and notices are kept separately in
-[THIRD_PARTY_NOTICES.md](https://github.com/wpmoo-org/ui/blob/v2.0.0/THIRD_PARTY_NOTICES.md).
+[THIRD_PARTY_NOTICES.md](https://github.com/wpmoo-org/ui/blob/v2.1.0/THIRD_PARTY_NOTICES.md).
 Catalog visual assets and their license are repository-only and are not
 included in the npm package. Asset terms live in the
-[visual asset license](https://github.com/wpmoo-org/ui/blob/v2.0.0/ASSET_LICENSE.md).
+[visual asset license](https://github.com/wpmoo-org/ui/blob/v2.1.0/ASSET_LICENSE.md).

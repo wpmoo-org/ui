@@ -4,12 +4,10 @@ Moo UI Core is an open-source Bootstrap component system. This document defines
 the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
-Moo UI `2.0.0` is a major release target externalizing Chart.js and introducing dependency-free
-password requirements and optional host-supplied analysis. Field feedback,
-Input autocomplete, Button identity and Tooltip wrappers extend the rendered
-component contracts without bundling a password strength estimator. Existing
-package exports, the Bootstrap peer range and native form semantics remain
-intact. Chart.js >=4.6.1 <5 is an optional peer: install it explicitly for Chart
+Moo UI `2.1.0` adds host-translated password feedback, owner-scoped heading
+weight, and a document shell mode for websites. Hosts can supply localized live
+feedback through `PasswordRequirements` initialization and choose the heading
+weight on each resolved theme owner. Chart.js >=4.6.1 <5 is an optional peer: install it explicitly for Chart
 with npm, or supply an import map for native ESM/CDN. Color is Chart.js's own
 transitive dependency. Moo ships neither vendor implementation. The previous
 self-contained Chart setup is no longer supported. Package stability
@@ -208,9 +206,9 @@ conformance pass for that host. The runner needs Python 3 and Playwright
 only; no Moo UI build tooling is involved.
 
 The archive is reproducible byte-for-byte from the repository source at any
-time. Current development source targeting Moo UI 2.0.0 carries kit contract
+time. Current development source targeting Moo UI 2.1.0 carries kit contract
 version 1.0; its development archive hashes to SHA-256
-`b167ac383cb42f44d3dd6e4d5846bd716d4bdd2d484e97a13c380ca08678a5e0`.
+`0e1a8febbf3340a412a92f6c05fa5bb241519692cda9ce1c68005100e75ee00f`.
 The [released Moo UI 1.1.0 source](https://github.com/wpmoo-org/ui/releases/tag/v1.1.0)
 archive hashes to SHA-256
 `e4ab6c256ce4e2e1a3a82a42fdfbbf90f5c5871c14d4853fce928546a8cafbac`.
