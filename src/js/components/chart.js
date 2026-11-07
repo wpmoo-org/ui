@@ -611,6 +611,18 @@ function tooltipLabel(context) {
   const raw = context.raw;
 
   if (parsed !== null && typeof parsed === "object") {
+    // Category and radial charts parse to objects too. Their category is an
+    // index, not a data value, so only the value axis (or radius) is shown.
+    const meta = context.chart?.getDatasetMeta?.(context.datasetIndex);
+    const valueAxis = meta?.iScale?.type === "category" ? meta.vScale?.axis : null;
+    const single = valueAxis
+      ? parsed[valueAxis]
+      : typeof parsed.r === "number" && parsed.x === undefined ? parsed.r : undefined;
+    if (single !== undefined) {
+      const value = formatNumber(single);
+      if (!value) return label;
+      return label ? `${label}: ${value}` : value;
+    }
     const values = [];
     if (typeof parsed.x === "number" && Number.isFinite(parsed.x)) {
       values.push(`X: ${formatNumber(parsed.x)}`);
