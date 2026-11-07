@@ -1,6 +1,7 @@
 import { findThemeOwner, ownerPortalRoot } from "../theme-owner.js";
 
 const instances = new WeakMap();
+const FLYOUT_FOCUSABLE_SELECTOR = "a[href], button:not(:disabled), [tabindex]:not([tabindex='-1'])";
 
 export default class Sidebar {
   static getInstance(element) {
@@ -525,7 +526,29 @@ export default class Sidebar {
       this._closeFlyouts();
     } else {
       this._openFlyout(item);
+      // Opened from the keyboard: move into the flyout's items.
+      if (event.detail === 0) {
+        this._flyout?.querySelector(FLYOUT_FOCUSABLE_SELECTOR)?.focus();
+      }
     }
+  }
+
+  // The flyout lives in a portal, away from its trigger, so Escape and Tab
+  // out of it return to the trigger instead of wandering.
+  _handleFlyoutKeydown(event) {
+    const owner = this._flyoutOwner;
+    if (!this._flyout || !owner || !(event.key === "Escape" || event.key === "Tab")) {
+      return false;
+    }
+    const inFlyout = this._flyout.contains(event.target);
+    if (!inFlyout && !(event.key === "Escape" && owner.contains(event.target))) {
+      return false;
+    }
+    event.preventDefault();
+    const trigger = owner.querySelector(":scope > .sidebar-menu-sub-trigger");
+    this._closeFlyouts();
+    trigger?.focus();
+    return true;
   }
 
   _handleOutsideFlyoutClick(event) {
@@ -540,6 +563,9 @@ export default class Sidebar {
   }
 
   _handleShortcut(event) {
+    if (this._handleFlyoutKeydown(event)) {
+      return;
+    }
     const target = event.target;
     const isEditable =
       target instanceof this._window.Element &&

@@ -1160,6 +1160,64 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_collapsed_sidebar_flyout_is_reachable_by_keyboard(self) -> None:
+        case = CERTIFICATION_CASES[0]
+        context = new_case_context(self.browser, case)
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/tests/fixtures/certification/sidebar.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, case)
+            expect(page.locator("body")).to_have_attribute("data-sidebar-ready", "true")
+            page.evaluate(
+                """() => {
+                    const menu = document.querySelector(
+                      '#certification-sidebar [data-slot="sidebar-group-content"] > .sidebar-menu'
+                    );
+                    menu.insertAdjacentHTML("beforeend", `
+                      <li class="sidebar-menu-item" data-slot="sidebar-menu-item">
+                        <button type="button" id="certification-flyout-trigger"
+                          class="sidebar-menu-button sidebar-menu-sub-trigger" aria-expanded="false"
+                          data-slot="sidebar-menu-button">
+                          <span class="sidebar-menu-button__text">
+                            <span class="sidebar-menu-button__title">Projects</span>
+                          </span>
+                        </button>
+                        <ul class="sidebar-menu-sub collapse" data-slot="sidebar-menu-sub">
+                          <li><a class="sidebar-menu-sub-button" href="#alpha">Alpha</a></li>
+                          <li><a class="sidebar-menu-sub-button" href="#beta">Beta</a></li>
+                        </ul>
+                      </li>`);
+                }"""
+            )
+            page.locator("#certification-sidebar-trigger").click()
+            expect(page.locator('[data-slot="sidebar-wrapper"]')).to_have_attribute(
+                "data-sidebar-state", "collapsed"
+            )
+            trigger = page.locator("#certification-flyout-trigger")
+            first_item = page.locator('.sidebar-menu-flyout a[href="#alpha"]')
+
+            trigger.focus()
+            page.keyboard.press("Enter")
+            expect(first_item).to_be_focused()
+            page.keyboard.press("Escape")
+            expect(page.locator(".sidebar-menu-flyout")).to_have_count(0)
+            expect(trigger).to_be_focused()
+
+            page.keyboard.press("Enter")
+            expect(first_item).to_be_focused()
+            page.keyboard.press("Tab")
+            expect(page.locator(".sidebar-menu-flyout")).to_have_count(0)
+            expect(trigger).to_be_focused()
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_sidebar_fixture_proves_desktop_mobile_state_and_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
