@@ -2,6 +2,10 @@ import { findThemeOwner, ownerPortalRoot } from "../theme-owner.js";
 
 const instances = new WeakMap();
 
+// Numbers inside sort values compare as numbers (9 before 10) and letters by
+// the reader's alphabet ("Ärzte" next to "Arzt"), not by code point.
+const SORT_COLLATOR = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+
 function normalize(value) {
   return (value ?? "").toString().trim().toLowerCase();
 }
@@ -544,10 +548,8 @@ export default class DataTable {
       filtered.sort((a, b) => {
         const aValue = this._sortValue(a, this._sortKey);
         const bValue = this._sortValue(b, this._sortKey);
-        if (aValue === bValue) {
-          return a.index - b.index;
-        }
-        return aValue > bValue ? direction : -direction;
+        const order = SORT_COLLATOR.compare(aValue, bValue);
+        return order ? order * direction : a.index - b.index;
       });
     } else {
       filtered.sort((a, b) => a.index - b.index);
