@@ -199,6 +199,19 @@ function dispatch(element, window, name, detail = {}, cancelable = false) {
   );
 }
 
+// A hidden input's value attribute follows every selection, so the form's
+// own default is recorded once, before the first selection, and survives
+// re-initialization.
+function formDefaultValue(input) {
+  if (!input) {
+    return "";
+  }
+  if (!("datepickerFormDefault" in input.dataset)) {
+    input.dataset.datepickerFormDefault = input.getAttribute("value") || "";
+  }
+  return input.dataset.datepickerFormDefault;
+}
+
 function setHiddenValue(input, value) {
   if (!input) return;
   input.value = value || "";
@@ -661,6 +674,7 @@ export class MooCalendar {
       ArrowUp: -7,
     };
     let nextDate = null;
+    let stepTowardActive = false;
     if (event.key in keyMap) {
       nextDate = addDays(this._activeDate, keyMap[event.key]);
     } else if (event.key === "Home") {
@@ -671,10 +685,12 @@ export class MooCalendar {
       const weekStart = firstDayOfWeek(this._config.locale);
       const weekdayOffset = (this._activeDate.getDay() - weekStart + 7) % 7;
       nextDate = addDays(this._activeDate, 6 - weekdayOffset);
-    } else if (event.key === "PageUp") {
-      nextDate = addMonths(this._activeDate, -1);
-    } else if (event.key === "PageDown") {
-      nextDate = addMonths(this._activeDate, 1);
+    } else if (event.key === "PageUp" || event.key === "PageDown") {
+      const target = addMonths(this._activeDate, event.key === "PageUp" ? -1 : 1);
+      nextDate = limitToRange(target, this._config.minDate, this._config.maxDate);
+      // A month past the range edge stops at the edge, then looks back
+      // toward the active day for one that can be chosen.
+      stepTowardActive = compareDates(nextDate, target) !== 0;
     } else if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
       event.preventDefault();
       this._selectDate(this._activeDate, true);
@@ -683,7 +699,8 @@ export class MooCalendar {
       return;
     }
     event.preventDefault();
-    this._setActiveDate(nextDate, true, compareDates(nextDate, this._activeDate) < 0 ? -1 : 1);
+    const backward = compareDates(nextDate, this._activeDate) < 0;
+    this._setActiveDate(nextDate, true, backward !== stepTowardActive ? -1 : 1);
   }
 
   _setActiveDate(date, focus = false, step = 0) {
@@ -986,7 +1003,7 @@ export default class MooDatepicker {
       value: config.value || this._input.value || element.dataset.datepickerValue,
     });
     this._placeholder = this._config.placeholder;
-    this._defaultValue = this._input.defaultValue || this._input.getAttribute("value") || "";
+    this._defaultValue = formDefaultValue(this._input);
     this.calendar = MooCalendar.getOrCreateInstance(this._calendarRoot, {
       ...this._config,
       mode: "single",
@@ -1173,8 +1190,8 @@ export class MooDateRangePicker {
       endValue: config.endValue || this._endInput.value || element.dataset.datepickerEndValue,
     });
     this._placeholder = this._config.placeholder;
-    this._defaultStartValue = this._startInput.defaultValue || this._startInput.getAttribute("value") || "";
-    this._defaultEndValue = this._endInput.defaultValue || this._endInput.getAttribute("value") || "";
+    this._defaultStartValue = formDefaultValue(this._startInput);
+    this._defaultEndValue = formDefaultValue(this._endInput);
     this.calendar = MooCalendar.getOrCreateInstance(this._calendarRoot, this._config);
 
     rangePickerInstances.set(element, this);

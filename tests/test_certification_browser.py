@@ -1119,6 +1119,47 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_datepicker_pages_to_range_edges_and_resets_to_form_default(self) -> None:
+        case = CERTIFICATION_CASES[0]
+        context = new_case_context(self.browser, case)
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/tests/fixtures/certification/datepicker.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, case)
+
+            page.locator("#certification-datepicker-trigger").click()
+            calendar = page.locator("#certification-datepicker-calendar")
+            calendar.locator('[data-calendar-day][tabindex="0"]').focus()
+            page.keyboard.press("PageUp")
+            expect(page.locator(":focus")).to_have_attribute("data-calendar-day", "2026-08-15")
+            page.keyboard.press("PageDown")
+            expect(page.locator(":focus")).to_have_attribute("data-calendar-day", "2026-08-31")
+            page.keyboard.press("Escape")
+
+            reset_input = page.locator('#certification-reset-datepicker input[name="reset_date"]')
+            page.locator("#certification-reset-datepicker-trigger").click()
+            page.locator('#certification-reset-datepicker-calendar [data-calendar-day="2026-08-20"]').click()
+            expect(reset_input).to_have_value("2026-08-20")
+            page.evaluate(
+                """() => {
+                    const element = document.querySelector("#certification-reset-datepicker");
+                    window.certificationResetDatepicker.dispose();
+                    window.certificationResetDatepicker = window.CertificationDatepicker
+                      .getOrCreateInstance(element);
+                    document.querySelector("#certification-datepicker-reset-form").reset();
+                }"""
+            )
+            expect(reset_input).to_have_value("")
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_sidebar_fixture_proves_desktop_mobile_state_and_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
