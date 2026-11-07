@@ -1605,6 +1605,42 @@ class DataTableBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_escape_that_closes_a_menu_keeps_the_selection(self) -> None:
+        context, page, evidence = self.open_certification_fixture()
+        try:
+            root = page.locator("#certification-datatable")
+            root.locator("#cert-row-1 [data-datatable-select-row]").check()
+            bulk_actions = root.locator("[data-datatable-bulk-actions]")
+            expect(bulk_actions).to_be_visible()
+
+            trigger = root.locator('[data-bs-toggle="dropdown"][aria-label="Update status"]')
+            trigger.click()
+            expect(trigger).to_have_attribute("aria-expanded", "true")
+            page.keyboard.press("Escape")
+            expect(trigger).to_have_attribute("aria-expanded", "false")
+            expect(bulk_actions).to_be_visible()
+
+            # A dialog that closes on Escape, such as a bulk-delete confirmation.
+            page.evaluate(
+                """() => {
+                    const dialog = document.createElement("div");
+                    dialog.setAttribute("role", "dialog");
+                    dialog.id = "escape-owner-dialog";
+                    dialog.innerHTML = '<button type="button">Cancel</button>';
+                    document.body.append(dialog);
+                    dialog.querySelector("button").focus();
+                }"""
+            )
+            page.keyboard.press("Escape")
+            expect(bulk_actions).to_be_visible()
+            page.evaluate("() => document.querySelector('#escape-owner-dialog').remove()")
+
+            page.keyboard.press("Escape")
+            expect(bulk_actions).to_be_hidden()
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_certification_fixture_bulk_update_changes_status_across_selection(
         self,
     ) -> None:
