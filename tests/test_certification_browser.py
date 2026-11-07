@@ -1078,6 +1078,47 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_combobox_ignores_ime_enter_and_reopens_with_every_option(self) -> None:
+        case = CERTIFICATION_CASES[0]
+        context = new_case_context(self.browser, case)
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/tests/fixtures/certification/combobox.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, case)
+
+            root = page.locator("#certification-combobox")
+            combobox_input = page.locator("#certification-combobox-input")
+            options = root.locator(".combobox-option")
+            visible_options = root.locator(".combobox-option:not([hidden])")
+            hidden_value = root.locator('input[type="hidden"]')
+            expect(page.locator("body")).to_have_attribute("data-combobox-ready", "true")
+            total = options.count()
+            self.assertGreater(total, 1)
+
+            combobox_input.focus()
+            combobox_input.fill("grace")
+            expect(visible_options).to_have_count(1)
+            combobox_input.dispatch_event(
+                "keydown", {"key": "Enter", "isComposing": True, "bubbles": True, "cancelable": True}
+            )
+            expect(combobox_input).to_have_value("grace")
+            expect(hidden_value).to_have_value("")
+            combobox_input.press("Enter")
+            expect(combobox_input).to_have_value("Grace Hopper")
+            expect(visible_options).to_have_count(total)
+            combobox_input.click()
+            expect(combobox_input).to_have_attribute("aria-expanded", "true")
+            expect(visible_options).to_have_count(total)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_sidebar_fixture_proves_desktop_mobile_state_and_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
