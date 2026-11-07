@@ -76,6 +76,8 @@ export default class ContextMenu {
       target.removeEventListener(type, handler, options);
     });
     this._listeners = [];
+    // dispose() alone leaves an open menu shown at its last position.
+    this._dropdown.hide();
     this._dropdown.dispose();
     this._syncExpanded(false);
     this._invoker = null;
@@ -212,7 +214,7 @@ export default class ContextMenu {
       event.stopPropagation();
       const group = radioButton.dataset.contextMenuRadioGroup;
       this._menu
-        .querySelectorAll(`[data-context-menu-radio-group="${group}"]`)
+        .querySelectorAll(`[data-context-menu-radio-group="${CSS.escape(String(group))}"]`)
         .forEach((button) => {
           const checked = button === radioButton;
           button.classList.toggle("active", checked);

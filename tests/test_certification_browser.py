@@ -5770,6 +5770,9 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
 
                 # Repeated init returns the same instance; dispose removes
                 # listeners/generated state and permits re-initialization.
+                # Disposing an open menu also closes it.
+                surface.click(button="right")
+                expect(menu).to_have_class("dropdown-menu context-menu-menu show")
                 self.assertTrue(
                     root.evaluate(
                         """
@@ -5780,6 +5783,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                         """
                     )
                 )
+                expect(menu).not_to_have_class("dropdown-menu context-menu-menu show")
                 self.assertEqual(surface.get_attribute("aria-expanded"), "false")
                 surface.click(button="right")
                 expect(menu).not_to_have_class("dropdown-menu context-menu-menu show")
