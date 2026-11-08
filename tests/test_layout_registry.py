@@ -154,6 +154,7 @@ COMPONENT_SOURCE_FILES = {
 }
 BLOCK_MACROS_BY_FILE = {
     "accordion_panels.html.jinja": {"accordion_panels"},
+    "video_dialog.html.jinja": {"video_dialog", "video_play", "video_play_icon"},
 }
 
 

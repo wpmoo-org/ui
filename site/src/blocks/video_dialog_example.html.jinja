@@ -1,0 +1,15 @@
+{% from "blocks/video_dialog.html.jinja" import video_dialog, video_play %}
+
+{# A dark cover fills the whole preview, standing in for the hero photo or
+   video the control sits on. The catalog has no video loader, so the dialog
+   opens an empty frame; the host page loads data-video-src on open. #}
+{% macro render_video_dialog_example(id="video-example", labelled=false) -%}
+  <div class="d-flex align-items-center justify-content-center bg-dark bg-gradient py-5 px-3">
+    {% if labelled %}
+      {{ video_play(id, label="Watch the introduction") }}
+    {% else %}
+      {{ video_play(id, aria_label="Watch the introduction") }}
+    {% endif %}
+  </div>
+  {{ video_dialog(id, "Introduction", "https://www.youtube-nocookie.com/embed/M7lc1UVf-VE") }}
+{%- endmacro %}

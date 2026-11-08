@@ -122,6 +122,8 @@ APPROVED_TARBALL_FILES = {
     "scss/themes/_theme.scss",
     "scss/utilities/_background_color.scss",
     "scss/utilities/_border.scss",
+    "scss/utilities/_motion.scss",
+    "scss/utilities/_motion_primitives.scss",
     "scss/utilities/_overlay_scrollbar.scss",
     "scss/utilities/_overlay_scrollbar_native.scss",
     "scss/utilities/_scroll_fade.scss",

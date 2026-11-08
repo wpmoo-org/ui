@@ -1,0 +1,7 @@
+// Breathing scale for one attention cue at a time, such as a video play
+// control over a hero. It runs only for visitors who allow motion.
+@media (prefers-reduced-motion: no-preference) {
+  .animate-breathe {
+    animation: moo-breathe 2s ease-in-out infinite;
+  }
+}

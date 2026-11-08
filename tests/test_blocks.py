@@ -107,6 +107,11 @@ class BlocksTests(CatalogTestCase):
                     "label": "Accordion Panels",
                     "status": "ready",
                 },
+                {
+                    "slug": "video-dialog",
+                    "label": "Video Dialog",
+                    "status": "ready",
+                },
             ],
         )
 

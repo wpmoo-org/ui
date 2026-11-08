@@ -2790,11 +2790,15 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('aria-label="Previous page: Accordion Panels"', block)
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
 
-        last_block = self.read_output("blocks/sidebar-inset.html")
+        inset_block = self.read_output("blocks/sidebar-inset.html")
+        self.assertIn('aria-label="Next page: Video Dialog"', inset_block)
+
+        last_block = self.read_output("blocks/video-dialog.html")
+        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', last_block)
         self.assertIn('aria-label="Next page: Charts"', last_block)
 
         charts = self.read_output("charts.html")
-        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', charts)
+        self.assertIn('aria-label="Previous page: Video Dialog"', charts)
         self.assertIn('aria-label="Next page: Utilities"', charts)
 
         utilities = self.read_output("utils/index.html")

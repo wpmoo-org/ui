@@ -1,0 +1,11 @@
+// Keyframes live outside @scope so both stylesheets can reference them.
+@keyframes moo-breathe {
+  0%,
+  100% {
+    transform: scale(.9);
+  }
+
+  50% {
+    transform: scale(1);
+  }
+}

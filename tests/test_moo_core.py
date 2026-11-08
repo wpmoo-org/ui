@@ -431,6 +431,7 @@ class MooCoreTests(CatalogTestCase):
                 "../utilities/border",
                 "../utilities/scroll_fade",
                 "../utilities/scroll_smooth",
+                "../utilities/motion",
                 "../layouts/app",
                 "../layouts/page_grid",
                 "../themes/forms",
