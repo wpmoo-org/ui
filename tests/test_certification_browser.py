@@ -1189,6 +1189,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                           </span>
                         </button>
                         <ul class="sidebar-menu-sub collapse" data-slot="sidebar-menu-sub">
+                          <li><button type="button" class="sidebar-menu-sub-button" tabindex="0" disabled>Archived</button></li>
                           <li><a class="sidebar-menu-sub-button" href="#alpha">Alpha</a></li>
                           <li><a class="sidebar-menu-sub-button" href="#beta">Beta</a></li>
                         </ul>
@@ -1200,20 +1201,45 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 "data-sidebar-state", "collapsed"
             )
             trigger = page.locator("#certification-flyout-trigger")
+            flyout = page.locator(".sidebar-menu-flyout")
             first_item = page.locator('.sidebar-menu-flyout a[href="#alpha"]')
+            last_item = page.locator('.sidebar-menu-flyout a[href="#beta"]')
 
+            # Keyboard opening skips a disabled item that still has a tabindex.
             trigger.focus()
             page.keyboard.press("Enter")
             expect(first_item).to_be_focused()
             page.keyboard.press("Escape")
-            expect(page.locator(".sidebar-menu-flyout")).to_have_count(0)
+            expect(flyout).to_have_count(0)
+            expect(trigger).to_be_focused()
+
+            # Tab moves between items; only Tab out of the last one closes.
+            page.keyboard.press("Enter")
+            expect(first_item).to_be_focused()
+            page.keyboard.press("Tab")
+            expect(last_item).to_be_focused()
+            expect(flyout).to_have_count(1)
+            page.keyboard.press("Tab")
+            expect(flyout).to_have_count(0)
             expect(trigger).to_be_focused()
 
             page.keyboard.press("Enter")
             expect(first_item).to_be_focused()
-            page.keyboard.press("Tab")
-            expect(page.locator(".sidebar-menu-flyout")).to_have_count(0)
+            page.keyboard.press("Shift+Tab")
+            expect(flyout).to_have_count(0)
             expect(trigger).to_be_focused()
+
+            # Escape a flyout control already handled stays with that control.
+            page.keyboard.press("Enter")
+            expect(first_item).to_be_focused()
+            page.evaluate(
+                """() => window.addEventListener("keydown", (event) => {
+                    if (event.key === "Escape") event.preventDefault();
+                }, { capture: true, once: true })"""
+            )
+            page.keyboard.press("Escape")
+            expect(flyout).to_have_count(1)
+            expect(first_item).to_be_focused()
             evidence.assert_clean()
         finally:
             context.close()

@@ -1,7 +1,14 @@
 import { findThemeOwner, ownerPortalRoot } from "../theme-owner.js";
 
 const instances = new WeakMap();
-const FLYOUT_FOCUSABLE_SELECTOR = "a[href], button:not(:disabled), [tabindex]:not([tabindex='-1'])";
+const FLYOUT_FOCUSABLE_SELECTOR = "a[href], button, [tabindex]";
+
+// Flyout items that keyboard focus can reach, in Tab order.
+function flyoutFocusables(flyout) {
+  return [...flyout.querySelectorAll(FLYOUT_FOCUSABLE_SELECTOR)].filter(
+    (element) => !element.disabled && element.tabIndex >= 0
+  );
+}
 
 export default class Sidebar {
   static getInstance(element) {
@@ -528,21 +535,36 @@ export default class Sidebar {
       this._openFlyout(item);
       // Opened from the keyboard: move into the flyout's items.
       if (event.detail === 0) {
-        this._flyout?.querySelector(FLYOUT_FOCUSABLE_SELECTOR)?.focus();
+        if (this._flyout) {
+          flyoutFocusables(this._flyout)[0]?.focus();
+        }
       }
     }
   }
 
   // The flyout lives in a portal, away from its trigger, so Escape and Tab
-  // out of it return to the trigger instead of wandering.
+  // out of it return to the trigger instead of wandering. Tab between its
+  // items stays native; a key a flyout control already handled is left alone.
   _handleFlyoutKeydown(event) {
     const owner = this._flyoutOwner;
-    if (!this._flyout || !owner || !(event.key === "Escape" || event.key === "Tab")) {
+    if (
+      event.defaultPrevented ||
+      !this._flyout ||
+      !owner ||
+      !(event.key === "Escape" || event.key === "Tab")
+    ) {
       return false;
     }
     const inFlyout = this._flyout.contains(event.target);
     if (!inFlyout && !(event.key === "Escape" && owner.contains(event.target))) {
       return false;
+    }
+    if (event.key === "Tab") {
+      const items = flyoutFocusables(this._flyout);
+      const edge = event.shiftKey ? items[0] : items[items.length - 1];
+      if (edge && event.target !== edge) {
+        return false;
+      }
     }
     event.preventDefault();
     const trigger = owner.querySelector(":scope > .sidebar-menu-sub-trigger");
