@@ -1,0 +1,89 @@
+{
+  "accordion": {
+    "updated": "2026-11-08",
+    "metaTitle": "Accordion: Bootstrap 5 component with shadcn-style design",
+    "metaDescription": "A Bootstrap 5 Accordion with shadcn-style design, light and dark themes, and right-to-left support. It uses Bootstrap's own Collapse plugin and markup, with no Moo-specific JavaScript.",
+    "summary": "Moo UI keeps Bootstrap's own Accordion markup and Collapse plugin and changes only the presentation: shadcn-style borders, spacing, and typography that follow the light and dark themes. The same markup mirrors for Arabic and Hebrew without extra CSS, and any Bootstrap Accordion you already have picks up the new look unchanged.",
+    "whenToUse": [
+      "Frequently asked questions and help content that people scan before reading in full.",
+      "Settings or details that most people do not need at once, grouped under short, descriptive headings.",
+      "Long forms or records where secondary sections should stay out of the way until requested."
+    ],
+    "whenNotToUse": [
+      {"text": "To switch between views of the same content, where people compare panels side by side.", "slug": "tabs"},
+      {"text": "For a single show-and-hide region without a set of headings.", "slug": "collapsible"}
+    ],
+    "keyboard": [
+      {"keys": ["Tab"], "action": "Moves focus to the next accordion header button."},
+      {"keys": ["Shift", "Tab"], "action": "Moves focus to the previous accordion header button."},
+      {"keys": ["Enter"], "action": "Opens or closes the panel of the focused header."},
+      {"keys": ["Space"], "action": "Opens or closes the panel of the focused header."}
+    ],
+    "related": ["collapsible", "tabs", "card"]
+  },
+  "button": {
+    "updated": "2026-11-08",
+    "metaTitle": "Button: Bootstrap 5 buttons with shadcn-style variants",
+    "metaDescription": "Bootstrap 5 buttons with shadcn-style variants: primary, outline, secondary, ghost, destructive, and link, plus sizes, icons, spinners, toggle states, and dark mode.",
+    "summary": "Moo UI uses Bootstrap's .btn classes and adds shadcn-style variants such as ghost and destructive, icon-only buttons, a loading spinner, and toggle states. Sizes come from Bootstrap's own button tokens, so .btn-sm and .btn-lg, and button groups that inherit them, keep a consistent scale, and the focus ring is the same on every variant.",
+    "whenToUse": [
+      "To trigger an action on the current page, such as saving, publishing, or opening a dialog.",
+      "To give one primary action per view the strongest emphasis, with outline, secondary, or ghost buttons for the rest.",
+      "For a destructive action that needs a clear warning colour before people confirm it."
+    ],
+    "whenNotToUse": [
+      {"text": "To move to another page; use a link, or the link variant when it must look like a button."},
+      {"text": "For a set of mutually exclusive options; group related buttons instead.", "slug": "toggle-group"}
+    ],
+    "keyboard": [
+      {"keys": ["Tab"], "action": "Moves focus to the button. Buttons with the disabled attribute are skipped."},
+      {"keys": ["Enter"], "action": "Activates the focused button or link button."},
+      {"keys": ["Space"], "action": "Activates the focused button."}
+    ],
+    "related": ["button-group", "toggle-group", "close-button", "spinner"]
+  },
+  "sidebar": {
+    "updated": "2026-11-08",
+    "metaTitle": "Sidebar: Bootstrap 5 application sidebar with collapsible menus",
+    "metaDescription": "A Bootstrap 5 application sidebar that collapses to icons, remembers its state, opens submenus as keyboard-accessible flyouts, and becomes an Offcanvas drawer on small screens.",
+    "summary": "Moo UI's Sidebar is an application shell built from Bootstrap primitives. On wide screens it collapses to an icon rail with tooltips and remembers the choice per sidebar; submenus of the collapsed rail open as flyouts that keyboard users can enter and leave. On small screens the same markup becomes a Bootstrap Offcanvas drawer. The optional ES module adds this behaviour and never scans the page on import.",
+    "whenToUse": [
+      "As the main navigation of an application or dashboard with several sections.",
+      "When people switch between areas often and benefit from a persistent menu.",
+      "When the navigation has a second level that should stay reachable while the rail is collapsed."
+    ],
+    "whenNotToUse": [
+      {"text": "For a content site with a few top-level pages; a horizontal navigation bar is simpler.", "slug": "navigation"},
+      {"text": "For a temporary panel of settings or details; use a sheet instead.", "slug": "sheet"}
+    ],
+    "keyboard": [
+      {"keys": ["Ctrl", "B"], "action": "Expands or collapses the sidebar on wide screens (Cmd + B on macOS). Ignored while typing in a field."},
+      {"keys": ["Enter"], "action": "On a collapsed submenu trigger, opens its flyout and moves focus to the first available item."},
+      {"keys": ["Tab"], "action": "Moves between flyout items; Tab past the last item closes the flyout and returns focus to its trigger."},
+      {"keys": ["Shift", "Tab"], "action": "Moves back through flyout items; from the first item it closes the flyout and returns focus to its trigger."},
+      {"keys": ["Escape"], "action": "Closes the open flyout and returns focus to its trigger."}
+    ],
+    "related": ["navigation", "sheet", "breadcrumb", "tooltip"]
+  },
+  "datatable": {
+    "updated": "2026-11-08",
+    "metaTitle": "Data Table: Bootstrap 5 table with search, filters, and sorting",
+    "metaDescription": "A Bootstrap 5 data table for server-rendered rows with search, faceted filters, sorting, row selection, bulk actions, column visibility, pagination, and a responsive card view.",
+    "summary": "Moo UI's Data Table enhances an ordinary server-rendered Bootstrap table instead of rendering rows from JSON, so content stays readable and indexable without JavaScript. The optional ES module adds search, faceted filters, sorting, selection with bulk actions, column visibility, pagination, and a card view for small screens. Sorting compares plain numbers by value and text in the reader's alphabet, so -10 comes before -2 and \"Ärzte\" sits next to \"Arzt\".",
+    "whenToUse": [
+      "Work queues and admin lists where people search, filter, and act on many rows.",
+      "Records that need bulk actions on a selection of rows.",
+      "Tables that must stay usable on phones, where a card view replaces wide rows."
+    ],
+    "whenNotToUse": [
+      {"text": "For a short, static table of facts; a plain table is lighter.", "slug": "table"},
+      {"text": "To compare trends or totals at a glance; a chart shows them faster.", "slug": "chart"}
+    ],
+    "keyboard": [
+      {"keys": ["Enter"], "action": "In the search field, closes the open filter menu and keeps the current results."},
+      {"keys": ["ArrowDown"], "action": "In a filter's search field, moves focus to the first matching option."},
+      {"keys": ["Escape"], "action": "Clears the row selection, unless a menu, dialog, or list owns the key."}
+    ],
+    "related": ["table", "pagination", "checkbox", "dropdown-menu"]
+  }
+}

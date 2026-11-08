@@ -1,0 +1,56 @@
+{% from "components/kbd.html.jinja" import kbd %}
+{% from "components/table.html.jinja" import table %}
+
+{#- Usage guidance for a component page, read from the site registry
+    (site/src/registry/component-guides.json). Renders nothing when the
+    current component has no guide entry. -#}
+{% macro render_component_guide() %}
+  {% set guide = component_guides.get(current_slug) if component_guides is defined and current_page_kind is defined and current_page_kind == "component" else none %}
+  {% if guide %}
+    <section class="mt-5" aria-labelledby="{{ current_slug }}-guide-title" data-moo-component-guide>
+      <h2 class="h3 pb-3 mb-3 border-bottom" id="{{ current_slug }}-guide-title">About {{ guide.label }} in Moo UI</h2>
+      <p>{{ guide.summary }}</p>
+
+      <h3 class="h5 mt-4">When to use it</h3>
+      <ul>
+        {% for item in guide.whenToUse %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+
+      {% if guide.whenNotToUse %}
+      <h3 class="h5 mt-4">When to use something else</h3>
+      <ul>
+        {% for item in guide.whenNotToUse %}
+        <li>
+          {{ item.text }}
+          {% if item.get("slug") in component_labels %}
+          See <a href="{{ root_path }}components/{{ item.slug }}/">{{ component_labels[item.slug] }}</a>.
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      {% if guide.keyboard %}
+      <h3 class="h5 mt-4" id="{{ current_slug }}-keyboard-title">Keyboard interaction</h3>
+      {#- The table macro renders cells as markup, so escape registry text. -#}
+      {% set ns = namespace(rows=[]) %}
+      {% for entry in guide.keyboard %}
+        {% set keys %}{% for key in entry["keys"] %}{{ kbd(key) }}{% if not loop.last %} + {% endif %}{% endfor %}{% endset %}
+        {% set ns.rows = ns.rows + [[keys, entry.action | e]] %}
+      {% endfor %}
+      {{ table(["Key", "Action"], ns.rows) }}
+      {% endif %}
+
+      {% if guide.related %}
+      <h3 class="h5 mt-4">Related components</h3>
+      <ul>
+        {% for slug in guide.related if slug in component_labels %}
+        <li><a href="{{ root_path }}components/{{ slug }}/">{{ component_labels[slug] }}</a></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </section>
+  {% endif %}
+{% endmacro %}
