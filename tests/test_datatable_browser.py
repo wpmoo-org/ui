@@ -1428,6 +1428,52 @@ class DataTableBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_sort_orders_plain_numbers_by_value(self) -> None:
+        context, page, evidence = self.open_certification_fixture()
+        try:
+            root = page.locator("#certification-datatable")
+            root.locator(".datatable-page-size-trigger").click()
+            root.locator('[data-datatable-page-size-option="10"]').click()
+            ticket_trigger = root.locator(
+                'th[data-datatable-column="ticket"] [data-datatable-sort-key]'
+            )
+            rows = root.locator("tbody > tr[data-datatable-row]:not([hidden])")
+            expect(rows).to_have_count(3)
+
+            def set_sort_values(values: dict[str, str]) -> None:
+                page.evaluate(
+                    """values => {
+                        for (const [rowId, value] of Object.entries(values)) {
+                          document.querySelector(`#${rowId} [data-datatable-column="ticket"]`)
+                            .dataset.datatableSortValue = value;
+                        }
+                    }""",
+                    values,
+                )
+
+            def sort(direction: str) -> None:
+                ticket_trigger.click()
+                page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show").locator(
+                    f'[data-datatable-sort-action="{direction}"]'
+                ).click()
+
+            # Negative numbers: -10 comes before -2.
+            set_sort_values({"cert-row-1": "-2", "cert-row-2": "1.2", "cert-row-3": "-10"})
+            sort("asc")
+            expect(rows.nth(0)).to_have_attribute("id", "cert-row-3")
+            expect(rows.nth(1)).to_have_attribute("id", "cert-row-1")
+            expect(rows.nth(2)).to_have_attribute("id", "cert-row-2")
+
+            # Decimals: 1.2 is greater than 1.10, and 10 greater than both.
+            set_sort_values({"cert-row-1": "1.10", "cert-row-2": "1.2", "cert-row-3": "10"})
+            sort("desc")
+            expect(rows.nth(0)).to_have_attribute("id", "cert-row-3")
+            expect(rows.nth(1)).to_have_attribute("id", "cert-row-2")
+            expect(rows.nth(2)).to_have_attribute("id", "cert-row-1")
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_certification_fixture_sort_menu_escapes_table_frame(self) -> None:
         context, page, evidence = self.open_certification_fixture()
         try:

@@ -6,6 +6,22 @@ const instances = new WeakMap();
 // the reader's alphabet ("Ärzte" next to "Arzt"), not by code point.
 const SORT_COLLATOR = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
 
+function sortNumber(value) {
+  const number = value === "" ? NaN : Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+// Two plain numbers compare by value, so signs and decimals count
+// (-10 before -2, 1.10 before 1.2); anything else uses the collator.
+function compareSortValues(a, b) {
+  const aNumber = sortNumber(a);
+  const bNumber = sortNumber(b);
+  if (aNumber !== null && bNumber !== null) {
+    return Math.sign(aNumber - bNumber);
+  }
+  return SORT_COLLATOR.compare(a, b);
+}
+
 function normalize(value) {
   return (value ?? "").toString().trim().toLowerCase();
 }
@@ -559,7 +575,7 @@ export default class DataTable {
       filtered.sort((a, b) => {
         const aValue = this._sortValue(a, this._sortKey);
         const bValue = this._sortValue(b, this._sortKey);
-        const order = SORT_COLLATOR.compare(aValue, bValue);
+        const order = compareSortValues(aValue, bValue);
         return order ? order * direction : a.index - b.index;
       });
     } else {
