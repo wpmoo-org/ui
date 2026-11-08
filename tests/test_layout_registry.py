@@ -80,6 +80,7 @@ COMPONENT_MACROS_BY_FILE = {
         "dropdown_divider",
     },
     "empty.html.jinja": {"empty"},
+    "item.html.jinja": {"item", "item_group"},
     "field.html.jinja": {
         "form",
         "field",
@@ -246,15 +247,15 @@ class LayoutRegistryTests(unittest.TestCase):
             ROOT / "src/certification/evidence-inventory.json"
         )
 
-        self.assertEqual(len(components), 47)
-        self.assertEqual(len({entry["slug"] for entry in components}), 47)
-        self.assertEqual(len(evidence_inventory["components"]), 47)
+        self.assertEqual(len(components), 48)
+        self.assertEqual(len({entry["slug"] for entry in components}), 48)
+        self.assertEqual(len(evidence_inventory["components"]), 48)
         self.assertEqual(evidence_inventory["plannedComponents"], [])
         self.assertEqual(
             [entry["slug"] for entry in components],
             [entry["slug"] for entry in evidence_inventory["components"]],
         )
-        self.assertEqual(len(COMPONENT_SOURCE_FILES), 46)
+        self.assertEqual(len(COMPONENT_SOURCE_FILES), 47)
         self.assertIn("field.html.jinja", COMPONENT_SOURCE_FILES)
         self.assertIn("src/includes/field.html.jinja", COMPONENT_MACROS_BY_FILE)
         self.assertIn("form", COMPONENT_MACROS_BY_FILE["field.html.jinja"])

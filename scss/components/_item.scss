@@ -1,0 +1,105 @@
+// Bootstrap 5.3.3 has no Item component: its 5.0 migration guide drops the
+// .media object in favour of flex utilities, and .list-group models joined,
+// bordered lists rather than standalone media/title/description rows. This
+// public namespace owns that row; Bootstrap utilities remain overrides.
+// The media frame spans exactly the title line, the content gap and the first
+// description line, so its top and bottom edges align with that text at any
+// root font size.
+$item-title-line-height: $line-height-sm;
+$item-description-line-height: $line-height-base;
+$item-content-gap: $spacer * 0.25;
+$item-media-size: ($font-size-sm * $item-title-line-height) + $item-content-gap + ($font-size-sm * $item-description-line-height);
+
+/* Item */
+.item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacer;
+  min-width: 0;
+  padding: ($spacer * 0.75) $spacer;
+  color: var(--bs-body-color);
+  text-decoration: none;
+  border: var(--bs-border-width) solid transparent;
+  border-radius: var(--bs-border-radius-lg);
+}
+
+.item-outline {
+  border-color: var(--bs-border-color);
+}
+
+.item-muted {
+  background-color: var(--bs-tertiary-bg);
+}
+
+.item-sm {
+  gap: $spacer * 0.75;
+  padding: ($spacer * 0.5) ($spacer * 0.75);
+}
+
+// A link item highlights the whole row; the shared focus-visible ring in
+// foundations/_focus.scss already covers anchors.
+a.item:hover {
+  color: var(--bs-body-color);
+  background-color: var(--bs-tertiary-bg);
+}
+
+.item-media {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+}
+
+.item-media-icon {
+  width: $item-media-size;
+  height: $item-media-size;
+  color: var(--bs-body-color);
+  background-color: var(--bs-tertiary-bg);
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+}
+
+.item-media-icon > [data-icon] {
+  width: $spacer;
+  height: $spacer;
+}
+
+.item-content {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: $item-content-gap;
+  min-width: 0;
+}
+
+.item-title {
+  margin: 0;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  line-height: $item-title-line-height;
+}
+
+.item-description {
+  margin: 0;
+  font-size: $font-size-sm;
+  line-height: $item-description-line-height;
+  color: var(--bs-secondary-color);
+}
+
+.item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacer * 0.5;
+}
+
+.item-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacer * 0.5;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}

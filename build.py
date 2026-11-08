@@ -110,6 +110,7 @@ EVIDENCE_FILES = (
     "rc-3-evidence.json",
     "2026-10-07-table-of-contents-evidence.json",
     "2026-10-09-empty-evidence.json",
+    "2026-11-08-item-evidence.json",
 )
 ACCEPTED_COMPONENT_EVIDENCE_STATUSES = {
     "preview-passed",

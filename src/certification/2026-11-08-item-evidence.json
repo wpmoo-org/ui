@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "0.1",
+  "status": "preview",
+  "releaseClaim": "none",
+  "description": "Item source/render contract evidence. This does not certify a whole Core profile or any host adapter.",
+  "components": [
+    {
+      "slug": "item",
+      "tier": 0,
+      "profile": "t0-static",
+      "status": "source-checked",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup"
+        ],
+        "not-applicable": [
+          "lifecycle"
+        ],
+        "manual": [
+          "real-device"
+        ],
+        "missing": [
+          "theme",
+          "rtl",
+          "responsive",
+          "keyboard",
+          "focus",
+          "accessibility",
+          "visual",
+          "host-conformance"
+        ]
+      },
+      "automatedEvidence": [
+        "tests/test_item.py",
+        "src/components/item.html.jinja",
+        "scss/components/_item.scss"
+      ],
+      "bootstrapEvidence": [
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/site/content/docs/5.3/utilities/flex.md"
+      ],
+      "checks": {
+        "command": ".venv/bin/python3 -m unittest tests.test_item",
+        "testsPassed": 10,
+        "testsFailed": 0,
+        "scope": "Escaped text, href and classes, required visible content, variant and size validation, link items without nested actions, and group list semantics"
+      },
+      "limitations": [
+        "The public .item namespace owns the default row styles; no runtime is introduced. Bootstrap 5 dropped its media object in favour of flex utilities, and .list-group models joined bordered lists."
+      ]
+    }
+  ]
+}

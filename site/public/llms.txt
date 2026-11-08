@@ -164,6 +164,7 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 - [Form](https://ui.wpmoo.org/components/form/)
 - [Input](https://ui.wpmoo.org/components/input/)
 - [Input Group](https://ui.wpmoo.org/components/input-group/)
+- [Item](https://ui.wpmoo.org/components/item/)
 - [Kbd](https://ui.wpmoo.org/components/kbd/)
 - [Menubar](https://ui.wpmoo.org/components/menubar/)
 - [Native Select](https://ui.wpmoo.org/components/select/)
