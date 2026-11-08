@@ -1248,6 +1248,10 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                         <ul class="sidebar-menu-sub collapse" data-slot="sidebar-menu-sub">
                           <li><button type="button" class="sidebar-menu-sub-button" tabindex="0" disabled>Archived</button></li>
                           <li hidden><a class="sidebar-menu-sub-button" href="#hidden">Hidden</a></li>
+                          <li inert><a class="sidebar-menu-sub-button" href="#inert">Inert</a></li>
+                          <li style="display: none"><a class="sidebar-menu-sub-button" href="#unrendered">Unrendered</a></li>
+                          <li style="visibility: hidden"><a class="sidebar-menu-sub-button" href="#invisible">Invisible</a></li>
+                          <li><fieldset disabled><input type="text" class="form-control" aria-label="Locked"></fieldset></li>
                           <li><a class="sidebar-menu-sub-button" href="#alpha">Alpha</a></li>
                           <li><a class="sidebar-menu-sub-button" href="#beta">Beta</a></li>
                           <li><input type="search" class="form-control" aria-label="Filter projects"></li>
@@ -1263,10 +1267,11 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             flyout = page.locator(".sidebar-menu-flyout")
             first_item = page.locator('.sidebar-menu-flyout a[href="#alpha"]')
             second_item = page.locator('.sidebar-menu-flyout a[href="#beta"]')
-            last_item = page.locator(".sidebar-menu-flyout input")
+            last_item = page.locator('.sidebar-menu-flyout input[type="search"]')
 
-            # Keyboard opening skips a disabled item that still has a tabindex
-            # and a hidden one.
+            # Keyboard opening skips a disabled item that still has a tabindex,
+            # hidden, inert, unrendered and invisible items, and a control
+            # disabled through its fieldset.
             trigger.focus()
             page.keyboard.press("Enter")
             expect(first_item).to_be_focused()
@@ -1283,7 +1288,22 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             page.keyboard.press("Tab")
             expect(last_item).to_be_focused()
             expect(flyout).to_have_count(1)
+            # Shift+Tab from the form control stays inside the flyout.
+            page.keyboard.press("Shift+Tab")
+            expect(second_item).to_be_focused()
+            expect(flyout).to_have_count(1)
             page.keyboard.press("Tab")
+            expect(last_item).to_be_focused()
+            page.keyboard.press("Tab")
+            expect(flyout).to_have_count(0)
+            expect(trigger).to_be_focused()
+
+            # Escape from the form control closes the flyout too.
+            page.keyboard.press("Enter")
+            page.keyboard.press("Tab")
+            page.keyboard.press("Tab")
+            expect(last_item).to_be_focused()
+            page.keyboard.press("Escape")
             expect(flyout).to_have_count(0)
             expect(trigger).to_be_focused()
 
