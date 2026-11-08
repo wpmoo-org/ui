@@ -284,6 +284,8 @@ export default class Combobox {
     });
     this._syncGroupVisibility();
     this._empty.hidden = true;
+    // The filtered result count no longer describes the list.
+    this._liveRegion.textContent = "";
   }
 
   _activeOption() {
@@ -490,8 +492,12 @@ export default class Combobox {
   }
 
   _handleKeydown(event) {
-    // Keys that confirm or browse an IME composition belong to it.
+    // Keys that confirm or browse an IME composition belong to it; Tab still
+    // moves focus away, so the list closes with it.
     if (event.isComposing || event.keyCode === 229) {
+      if (event.key === "Tab") {
+        this._closeMenu();
+      }
       return;
     }
     const available = this._visibleOptions();

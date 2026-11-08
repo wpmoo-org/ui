@@ -1101,20 +1101,41 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             total = options.count()
             self.assertGreater(total, 1)
 
+            live_region = root.locator("[data-combobox-live]")
+
             combobox_input.focus()
             combobox_input.fill("grace")
             expect(visible_options).to_have_count(1)
+            expect(live_region).to_have_text("1 result")
             combobox_input.dispatch_event(
                 "keydown", {"key": "Enter", "isComposing": True, "bubbles": True, "cancelable": True}
+            )
+            expect(combobox_input).to_have_value("grace")
+            expect(hidden_value).to_have_value("")
+            # Some browsers report only keyCode 229 while an IME composes.
+            combobox_input.evaluate(
+                """input => {
+                    const event = new KeyboardEvent("keydown", {
+                      key: "Enter", bubbles: true, cancelable: true,
+                    });
+                    Object.defineProperty(event, "keyCode", { value: 229 });
+                    input.dispatchEvent(event);
+                }"""
             )
             expect(combobox_input).to_have_value("grace")
             expect(hidden_value).to_have_value("")
             combobox_input.press("Enter")
             expect(combobox_input).to_have_value("Grace Hopper")
             expect(visible_options).to_have_count(total)
+            expect(live_region).to_have_text("")
             combobox_input.click()
             expect(combobox_input).to_have_attribute("aria-expanded", "true")
             expect(visible_options).to_have_count(total)
+            # Tab during a composition still leaves the field: the list closes.
+            combobox_input.dispatch_event(
+                "keydown", {"key": "Tab", "isComposing": True, "bubbles": True, "cancelable": True}
+            )
+            expect(combobox_input).to_have_attribute("aria-expanded", "false")
             evidence.assert_clean()
         finally:
             context.close()
