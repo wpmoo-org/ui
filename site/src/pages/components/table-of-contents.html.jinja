@@ -3,9 +3,8 @@
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/component-guide.html.jinja" import render_component_guide_about with context %}
 {% from "pages/blocks/previews/toc.html.jinja" import toc_demo with context %}
-
-{% block title %}Table of Contents — Moo UI{% endblock %}
 
 {% block content %}
   {{ render_page_header("Table of Contents", "Navigate sections of a document with a list or a compact control that shows the current section.") }}
@@ -24,6 +23,8 @@
       ],
       show_header=false
     ) }}
+
+    {{ render_component_guide_about() }}
 
     <h2 id="usage" class="h4 mt-5 mb-3">Usage</h2>
     <p class="mb-4">Supply ordered section IDs and plain-text labels. Moo UI renders native fragment links; the host owns headings, content and layout. Empty sections render nothing. A single section remains available.</p>

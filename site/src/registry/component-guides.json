@@ -1,26 +1,4 @@
 {
-  "accordion": {
-    "updated": "2026-11-08",
-    "metaTitle": "Accordion: Bootstrap 5 component with shadcn-style design",
-    "metaDescription": "A Bootstrap 5 Accordion with shadcn-style design, light and dark themes, and right-to-left support. It uses Bootstrap's own Collapse plugin and markup, with no Moo-specific JavaScript.",
-    "summary": "Moo UI keeps Bootstrap's own Accordion markup and Collapse plugin and changes only the presentation: shadcn-style borders, spacing, and typography that follow the light and dark themes. The same markup mirrors for Arabic and Hebrew without extra CSS, and any Bootstrap Accordion you already have picks up the new look unchanged.",
-    "whenToUse": [
-      "Frequently asked questions and help content that people scan before reading in full.",
-      "Settings or details that most people do not need at once, grouped under short, descriptive headings.",
-      "Long forms or records where secondary sections should stay out of the way until requested."
-    ],
-    "whenNotToUse": [
-      {"text": "To switch between views of the same content, where people compare panels side by side.", "slug": "tabs"},
-      {"text": "For a single show-and-hide region without a set of headings.", "slug": "collapsible"}
-    ],
-    "keyboard": [
-      {"keys": ["Tab"], "action": "Moves focus to the next accordion header button."},
-      {"keys": ["Shift", "Tab"], "action": "Moves focus to the previous accordion header button."},
-      {"keys": ["Enter"], "action": "Opens or closes the panel of the focused header."},
-      {"keys": ["Space"], "action": "Opens or closes the panel of the focused header."}
-    ],
-    "related": ["collapsible", "tabs", "card"]
-  },
   "button": {
     "updated": "2026-11-08",
     "metaTitle": "Button: Bootstrap 5 buttons with shadcn-style variants",
@@ -32,15 +10,743 @@
       "For a destructive action that needs a clear warning colour before people confirm it."
     ],
     "whenNotToUse": [
-      {"text": "To move to another page; use a link, or the link variant when it must look like a button."},
-      {"text": "For a set of mutually exclusive options; group related buttons instead.", "slug": "toggle-group"}
+      {
+        "text": "To move to another page; use a link, or the link variant when it must look like a button."
+      },
+      {
+        "text": "For a set of mutually exclusive options; group related buttons instead.",
+        "slug": "toggle-group"
+      }
     ],
     "keyboard": [
-      {"keys": ["Tab"], "action": "Moves focus to the button. Buttons with the disabled attribute are skipped."},
-      {"keys": ["Enter"], "action": "Activates the focused button or link button."},
-      {"keys": ["Space"], "action": "Activates the focused button."}
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the button. Buttons with the disabled attribute are skipped."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Activates the focused button or link button."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Activates the focused button."
+      }
     ],
-    "related": ["button-group", "toggle-group", "close-button", "spinner"]
+    "related": [
+      "button-group",
+      "toggle-group",
+      "close-button",
+      "spinner"
+    ]
+  },
+  "button-group": {
+    "updated": "2026-11-08",
+    "metaTitle": "Button Group: Bootstrap 5 joined buttons, toolbars, and RTL",
+    "metaDescription": "Bootstrap 5 button groups and toolbars with shadcn-style outline buttons, square icon buttons, small and large sizes, vertical rails, split dropdowns, and RTL.",
+    "summary": "Moo UI keeps Bootstrap's .btn-group, .btn-group-vertical, and .btn-toolbar markup and adds no tokens of its own, so group sizes reuse the button scale. It keeps icon-only buttons square in horizontal and vertical groups, stops a pressed segment from shifting away from its neighbours, and lets pointer hover follow source order so mixed-emphasis groups keep a stable joined edge. In right-to-left layouts the group keeps its joined order and edges while each label renders in its own direction.",
+    "whenToUse": [
+      "Closely related actions on the same object, such as archiving or reporting a message.",
+      "Editor or command toolbars where several labelled clusters share one row.",
+      "A main action paired with a dropdown of related variants, such as deploy targets."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a set of options with a visible pressed or selected state.",
+        "slug": "toggle-group"
+      },
+      {
+        "text": "To attach a button to a text field, where the field and button should share one border.",
+        "slug": "input-group"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next button; each button in the group is its own tab stop."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous button."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Activates the focused button."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Activates the focused button."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "On a dropdown trigger in the group, opens the menu and moves focus to the first item."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "While the menu or its trigger has focus, closes the open menu and returns focus to the trigger."
+      }
+    ],
+    "related": [
+      "button",
+      "toggle-group",
+      "dropdown-menu",
+      "input-group"
+    ]
+  },
+  "card": {
+    "updated": "2026-11-08",
+    "metaTitle": "Card: Bootstrap 5 card with header actions and a muted footer",
+    "metaDescription": "A Bootstrap 5 card with title, description, and header action, a muted footer strip, a compact size, a 16:9 image frame, scrollable body, and dark theme.",
+    "summary": "Moo UI keeps Bootstrap's .card, .card-header, .card-body, and .card-footer markup and restyles it with a hairline border, a soft shadow, and a footer tint that adapts to the light and dark themes. One --moo-card-spacing token sets the section gap and inner padding, and the compact size tightens both. The header can hold an action beside the title, a leading image sits in a 16:9 frame clipped to the top corners, and long content can scroll inside a card-scroll strip.",
+    "whenToUse": [
+      "A self-contained surface for one object, setting, or step, such as a sign-in form or a report summary.",
+      "Featured content with an image, a short description, and one clear action.",
+      "Terms or other long text that should scroll inside a fixed frame above its actions."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "To explain an empty collection and offer a first action.",
+        "slug": "empty"
+      },
+      {
+        "text": "For a temporary panel opened from the current page.",
+        "slug": "dialog"
+      }
+    ],
+    "related": [
+      "field",
+      "button",
+      "badge",
+      "empty"
+    ]
+  },
+  "empty": {
+    "updated": "2026-11-08",
+    "metaTitle": "Empty: Bootstrap 5 empty state with a dashed boundary",
+    "metaDescription": "An empty state for Bootstrap 5 with a dashed border, optional icon, title, description, and action, adjustable with Bootstrap utilities and no JavaScript.",
+    "summary": "Bootstrap has no empty-state component, so Moo UI adds .empty-state: a dashed border, rounded corners, a centred layout, and spacing built from Bootstrap's border, radius, and theme tokens. Header, icon, title, description, and action classes give the standard look without extra utilities or JavaScript. Bootstrap utilities on the root, such as border-0, bg-body-tertiary, or text-start, change the surface or alignment, and the same composition works in right-to-left pages.",
+    "whenToUse": [
+      "A list, table, or folder with no items yet, with an action to create the first one.",
+      "A search or filtered view with no matching results, with an option to clear the filters.",
+      "A section with nothing to show and no direct action, where a short message is enough."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For content that is still loading.",
+        "slug": "skeleton"
+      },
+      {
+        "text": "For an error or warning that needs attention.",
+        "slug": "alert"
+      }
+    ],
+    "related": [
+      "card",
+      "button",
+      "skeleton",
+      "alert"
+    ]
+  },
+  "item": {
+    "updated": "2026-11-08",
+    "metaTitle": "Item: Bootstrap 5 list row with icon, title, and actions",
+    "metaDescription": "A Bootstrap 5 item row with a framed icon, title, description, and actions, in default, outline, and muted styles, as links or grouped lists.",
+    "summary": "Bootstrap 5 dropped its media object in favour of flex utilities, and its list group joins rows into one bordered block. Moo UI's Item fills that gap with a standalone row: a framed icon or other media, a title and description, and optional actions, built from Bootstrap's spacing, border, radius, and theme tokens. Rows come in default, outline, and muted styles and a small size, follow the light and dark themes and right-to-left text, and need no JavaScript.",
+    "whenToUse": [
+      "Lists of short entries that each pair an icon with a title and a one-line description, such as settings, alerts, or resources.",
+      "A row that leads somewhere, where the whole row should be one link with a hover and focus state.",
+      "A single notice with an action beside it, such as a security alert with a Review button."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a row that contains a form control, such as a checkbox or switch.",
+        "slug": "field"
+      },
+      {
+        "text": "For tabular data with several comparable columns.",
+        "slug": "table"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next link item or action button. Items without a link or action are not tab stops."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous link item or action button."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Follows the focused link item, or activates the focused action button."
+      }
+    ],
+    "related": [
+      "card",
+      "empty",
+      "navigation",
+      "button"
+    ]
+  },
+  "typography": {
+    "updated": "2026-11-08",
+    "metaTitle": "Typography: Bootstrap 5 type scale with calmer display headings",
+    "metaDescription": "Bootstrap 5 headings, display sizes, lead text, lists, blockquotes, and text utilities with a themeable heading weight and font, and logical text alignment.",
+    "summary": "Moo UI keeps Bootstrap's semantic elements and text utilities and retunes the scale: display headings are smaller and use the heading weight instead of a light weight, and lead text is slightly smaller than Bootstrap's default. Heading weight and font family are runtime tokens, so a theme can change them in one place, and text-start and text-end map to logical start and end so they follow the reading direction. A small set of roles, such as page title, section title, muted text, and section label, keeps app screens consistent.",
+    "whenToUse": [
+      "Page and section headings that need a clear visual level while keeping a meaningful heading outline.",
+      "Supporting copy such as lead paragraphs, muted helper notes, and small section labels.",
+      "Quotes, abbreviations, inline code, and lists in documentation or help content."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "To show keyboard shortcuts; render each key separately.",
+        "slug": "kbd"
+      },
+      {
+        "text": "To label a status or count in a compact chip.",
+        "slug": "badge"
+      }
+    ],
+    "related": [
+      "kbd",
+      "badge",
+      "separator",
+      "card"
+    ]
+  },
+  "kbd": {
+    "updated": "2026-11-08",
+    "metaTitle": "Kbd: Bootstrap 5 keyboard keys as muted, readable chips",
+    "metaDescription": "Shows keyboard shortcuts as compact key chips on a muted surface in the sans-serif body font, for single keys, combinations, and RTL copy, with no JavaScript.",
+    "summary": "Bootstrap renders kbd as a dark, monospace label. Moo UI turns it into a fixed-height key chip on the muted surface token, set in the sans-serif body font at medium weight with the secondary text colour, so shortcuts sit quietly in running text in both themes. Each key is its own element, and separators such as plus signs stay outside the keys.",
+    "whenToUse": [
+      "Help text and tips that name a shortcut, such as Ctrl + K to open search.",
+      "Search fields or command surfaces that show a trailing shortcut hint.",
+      "Documentation of key combinations, with each key shown as its own chip."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For inline technical names such as class names or commands; use inline code.",
+        "slug": "typography"
+      },
+      {
+        "text": "As the only description of a required action; name the action and keep a pointer or menu path available."
+      }
+    ],
+    "related": [
+      "typography",
+      "input-group",
+      "badge",
+      "tooltip"
+    ]
+  },
+  "input": {
+    "updated": "2026-11-08",
+    "metaTitle": "Input: Bootstrap 5 text input with a compact shadcn-style look",
+    "metaDescription": "A Bootstrap 5 form-control with compact height, a 3px focus ring, quiet disabled and read-only states, file input, invalid state, and right-to-left labels.",
+    "summary": "Moo UI keeps Bootstrap's .form-control and native input types and changes the look: a compact height, a transparent surface, a large radius, and a 3px focus ring drawn from the theme's ring colour. Disabled inputs fade to half opacity over a faint tint instead of a solid grey fill, the file button gets a visible hover state, and text inputs match the outer height of an input group. Labels, helper text, and validation stay native Bootstrap markup and work in right-to-left layouts.",
+    "whenToUse": [
+      "Single-line values such as names, email addresses, URLs, API keys, and search terms.",
+      "Fields that benefit from a native type for mobile keyboards, browser validation, and autofill.",
+      "Values people should be able to copy but not change, such as a default region shown read-only."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For notes or messages that need more than one line.",
+        "slug": "textarea"
+      },
+      {
+        "text": "To choose one value from a fixed list.",
+        "slug": "select"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the input. Disabled inputs are skipped; read-only inputs stay focusable."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous control."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "In a single-line input, submits the surrounding form when it has a submit button (native browser behaviour)."
+      }
+    ],
+    "related": [
+      "field",
+      "input-group",
+      "textarea",
+      "form"
+    ]
+  },
+  "textarea": {
+    "updated": "2026-11-08",
+    "metaTitle": "Textarea: Bootstrap 5 multiline input with helper and error text",
+    "metaDescription": "A Bootstrap 5 textarea with roomier padding, a 3px focus ring, helper and error text linked by aria-describedby, disabled and invalid states, and RTL support.",
+    "summary": "Moo UI keeps a native textarea with Bootstrap's .form-control class and gives it the same border, radius, and 3px focus ring as Input, with roomier vertical padding for multiline text. Disabled textareas cannot be resized and fade like other disabled controls, and invalid textareas switch the focus ring to the destructive colour. Helper and error text sit below the control, linked with aria-describedby, and the pattern works in right-to-left layouts.",
+    "whenToUse": [
+      "Notes, messages, and summaries that need more than one line.",
+      "Review or issue context where teammates need enough detail to act.",
+      "A short composer paired with a send button."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a single-line value such as a name or email address.",
+        "slug": "input"
+      },
+      {
+        "text": "For rich formatting, attachments, or long documents; use a dedicated editor surface instead."
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the textarea. Disabled textareas are skipped."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous control."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Inserts a new line; it does not submit the form (native browser behaviour)."
+      }
+    ],
+    "related": [
+      "input",
+      "field",
+      "input-group",
+      "form"
+    ]
+  },
+  "input-group": {
+    "updated": "2026-11-08",
+    "metaTitle": "Input Group: Bootstrap 5 inputs with icons, addons, and buttons",
+    "metaDescription": "Bootstrap 5 input groups drawn as one bordered control, with icon and text addons, ghost buttons, dropdowns, spinners, shortcut hints, and block-end addons.",
+    "summary": "Bootstrap draws a border on each input-group child; Moo UI moves the border, radius, and focus ring to the group, so icons, text, and buttons read as parts of one control. Addons share the input surface, ghost buttons show a small inset hover surface instead of repainting the edge, and an invalid group marked has-validation shows the error ring around the whole group. Moo UI also adds block-start and block-end addons through data-align, which place a label, counter, or action above or below an input or textarea.",
+    "whenToUse": [
+      "A search field with a leading icon, a result count, or a shortcut hint.",
+      "Values with a fixed prefix or suffix, such as a currency, protocol, or email domain.",
+      "An input or textarea with an attached action, such as copy, send, or a search scope menu."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a row of related buttons without a text field.",
+        "slug": "button-group"
+      },
+      {
+        "text": "For a list of options that people search and pick from.",
+        "slug": "combobox"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus between the input and any buttons in the group, in source order. Text and icon addons are not tab stops."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous control in the group."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "On a dropdown button in the group, opens its menu and moves focus to the first item."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "While the menu or its button has focus, closes the open menu and returns focus to the button."
+      }
+    ],
+    "related": [
+      "input",
+      "button-group",
+      "dropdown-menu",
+      "kbd"
+    ]
+  },
+  "select": {
+    "updated": "2026-11-08",
+    "metaTitle": "Native Select: Bootstrap 5 select with themed chevron and prompt",
+    "metaDescription": "A native Bootstrap 5 form-select with option groups, a muted prompt option, disabled and invalid states, light and dark chevrons, and right-to-left support.",
+    "summary": "Moo UI keeps the browser's own select element with Bootstrap's .form-select class, so selection, mobile pickers, and form submission stay native. It shares the Input border, radius, and 3px focus ring, switches the chevron between the light and dark themes, and gives options the body text and background colours. An option marked data-placeholder=\"true\" shows the muted placeholder colour while it is selected, without JavaScript.",
+    "whenToUse": [
+      "Choosing one value from a short, fixed list, such as a queue or workspace.",
+      "Long static lists that are easier to scan in option groups.",
+      "Forms that should keep the browser's own picker on phones and tablets."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "When people need to search, filter, or load options as they type.",
+        "slug": "combobox"
+      },
+      {
+        "text": "For a few options that should all stay visible at once.",
+        "slug": "radio-group"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the select. Disabled selects are skipped."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "Moves to the next option, or opens the option list on some platforms (native browser behaviour)."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "Moves to the previous option (native browser behaviour)."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "In an open option list, chooses the highlighted option and closes the list."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Closes the open option list without changing the value."
+      }
+    ],
+    "related": [
+      "combobox",
+      "radio-group",
+      "field",
+      "input"
+    ]
+  },
+  "dropdown-menu": {
+    "updated": "2026-11-08",
+    "metaTitle": "Dropdown Menu: Bootstrap 5 dropdown with icons and shortcuts",
+    "metaDescription": "A Bootstrap 5 dropdown menu with icons, shortcut hints, headers, dividers, destructive items, and checkbox or radio controls, in light and dark themes.",
+    "summary": "Moo UI keeps Bootstrap's Dropdown plugin and markup, so opening, Popper placement, and keyboard support stay Bootstrap's own. The menu is restyled through Bootstrap's dropdown variables with Moo tokens for the surface, border, shadow, and hover rows, and adds leading icons, an optional bordered icon box, right-aligned shortcut text, and a destructive item variant. Only one row is highlighted at a time, even after a mouse click leaves focus on another item, and the same markup mirrors for Arabic and Hebrew.",
+    "whenToUse": [
+      "A short list of contextual actions behind one trigger, such as edit, duplicate, and delete for a project or row.",
+      "Temporary view options such as filters or a sort order, using checkboxes or radios with auto-close set to outside so the menu stays open.",
+      "An account or profile menu opened from an avatar in the header."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For actions that should open at the pointer on right-click.",
+        "slug": "context-menu"
+      },
+      {
+        "text": "For choosing one value that a form submits; use a select.",
+        "slug": "select"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "On the trigger, opens or closes the menu; on a menu item, activates it."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "On the trigger, opens or closes the menu; on a menu item, activates it."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "On the trigger, opens the menu and focuses the first item; in the menu, moves to the next item. Disabled items are skipped."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "On the trigger, opens the menu and focuses the last item; in the menu, moves to the previous item. Disabled items are skipped."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Closes the menu and returns focus to the trigger."
+      },
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus onward; the menu closes once focus leaves it."
+      }
+    ],
+    "related": [
+      "context-menu",
+      "menubar",
+      "button",
+      "avatar"
+    ]
+  },
+  "badge": {
+    "updated": "2026-11-08",
+    "metaTitle": "Badge: Bootstrap 5 badges with shadcn-style variants",
+    "metaDescription": "Bootstrap 5 badges in default, secondary, destructive, and outline variants plus warning and status colours, with pill shape and hidden context for counts.",
+    "summary": "Moo UI keeps Bootstrap's .badge and .text-bg-* classes and maps the main variants to Moo tokens: default uses the primary colour, secondary a muted surface, destructive red text on a light red tint, and outline a border with regular text. Badges get a fixed chip height and an inline-flex layout with a small gap between their contents, and they follow the light and dark themes and right-to-left text.",
+    "whenToUse": [
+      "Short status labels on rows, cards, or headings, such as Draft, Beta, or Blocked.",
+      "Counts next to a label, such as unread messages, with visually hidden text that explains the number.",
+      "Non-interactive tags that mark a category or state beside the item they describe."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a message that needs a sentence of explanation or an action; use an alert.",
+        "slug": "alert"
+      },
+      {
+        "text": "For a clickable filter or option; badges are static labels.",
+        "slug": "toggle-group"
+      }
+    ],
+    "related": [
+      "avatar",
+      "navigation",
+      "alert",
+      "button"
+    ]
+  },
+  "avatar": {
+    "updated": "2026-11-08",
+    "metaTitle": "Avatar: Bootstrap 5 avatar with initials fallback and badges",
+    "metaDescription": "A Bootstrap 5 avatar for people and accounts with an image or initials, small and large sizes, status dot or icon badges, and stacked groups with a count chip.",
+    "summary": "Bootstrap has no avatar component, so Moo UI adds a small .avatar extension built on Bootstrap's radius and border variables and Moo colour tokens. It shows a circular image or initials, comes in sm and lg sizes, and can carry a corner badge for a status dot or icon with an accessible label. Avatar groups overlap with a ring in the page background colour and can end in a count chip, and the badge uses logical positioning so it moves to the opposite corner in right-to-left layouts.",
+    "whenToUse": [
+      "Next to a name in lists, comments, or assignee fields so people are recognisable at a glance.",
+      "Showing the owners or reviewers of an item as a short stacked group, with a count for the rest.",
+      "As the trigger of an account menu in a header."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a status label or count that is not tied to a person or account; use a badge.",
+        "slug": "badge"
+      },
+      {
+        "text": "For large profile photos or other content images; use an ordinary image."
+      }
+    ],
+    "related": [
+      "badge",
+      "dropdown-menu",
+      "skeleton",
+      "sidebar"
+    ]
+  },
+  "navigation": {
+    "updated": "2026-11-08",
+    "metaTitle": "Navigation: Bootstrap 5 nav with pills, underline, and steps",
+    "metaDescription": "Bootstrap 5 navigation in pills, underline, base, and vertical sidebar styles, plus a steps list with connected icon frames, count badges, and descriptions.",
+    "summary": "Moo UI keeps Bootstrap's .nav, .nav-pills, and .nav-underline classes and recolours them through Bootstrap's nav variables, so the active pill gets a muted surface instead of a filled primary colour. It adds leading icons, trailing badges, secondary descriptions, and a steps style that connects icon frames with a line and marks completed steps. While the pointer hovers another link, the active pill's fill steps aside so only one link is highlighted; the active link carries aria-current and disabled links leave the tab order.",
+    "whenToUse": [
+      "Moving between peer routes of a workspace, such as Overview, Requests, and Settings, as a pill row.",
+      "A one-level vertical list of app sections with icons and counts.",
+      "A multi-page process where each step is its own route and completed steps should be marked."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "To switch panels on the same page without changing the route; use tabs.",
+        "slug": "tabs"
+      },
+      {
+        "text": "For a full application menu that collapses to icons with nested flyouts; use a sidebar.",
+        "slug": "sidebar"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next link. Disabled links are skipped."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous link."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Follows the focused link."
+      }
+    ],
+    "related": [
+      "sidebar",
+      "tabs",
+      "breadcrumb",
+      "table-of-contents"
+    ]
+  },
+  "table-of-contents": {
+    "updated": "2026-11-08",
+    "metaTitle": "Table of Contents: Bootstrap 5 section links with scroll tracking",
+    "metaDescription": "A Bootstrap 5 table of contents as a side list or compact dropdown of native fragment links, with optional current-section tracking from an ES module.",
+    "summary": "Moo UI renders the table of contents from ordered section IDs and labels as native fragment links, either as a vertical list with an indicator line or as a compact Bootstrap Dropdown that shows the current section beside its trigger. The optional TableOfContents ES module marks the section in view with aria-current, moves the indicator, and supports a separate scroll container and an activation offset; importing it does not initialise anything. Without JavaScript the links still work.",
+    "whenToUse": [
+      "Long documents, guides, or policies where readers jump between sections.",
+      "Pages with a side column on wide screens and a compact menu in the header on narrow screens, sharing the same section data.",
+      "Reading views inside a scrolling app region where the current section should stay visible."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "To move between separate pages or app routes; use navigation.",
+        "slug": "navigation"
+      },
+      {
+        "text": "For a short page whose few sections fit on one screen."
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next section link, or to the compact menu trigger."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Follows the focused section link; the browser moves to the section and updates the URL fragment."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "In the compact presentation, opens the menu from its trigger at the first section, then moves to the next section."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "In the compact presentation, opens the menu from its trigger at the last section, then moves to the previous section."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Closes the compact menu and returns focus to its trigger."
+      }
+    ],
+    "related": [
+      "navigation",
+      "dropdown-menu",
+      "sidebar"
+    ]
+  },
+  "separator": {
+    "updated": "2026-11-08",
+    "metaTitle": "Separator: Bootstrap 5 horizontal and vertical dividers",
+    "metaDescription": "Horizontal and vertical Bootstrap 5 separators built on hr and .vr, drawn in the flat border colour for light and dark themes and decorative by default.",
+    "summary": "Moo UI uses Bootstrap's hr element and .vr helper and draws both in the flat --moo-border colour at full opacity, instead of Bootstrap's reduced opacity over the current text colour, so separators match other hairline borders. The Jinja macro marks separators as decorative with aria-hidden by default; a vertical separator can instead expose a separator role with a vertical orientation when the split carries meaning.",
+    "whenToUse": [
+      "Between stacked content blocks or list rows when spacing alone does not separate them clearly.",
+      "Between short inline items in a flex row, such as workflow states or a label and its description."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "When the split introduces a new topic; use a real heading instead of a line.",
+        "slug": "typography"
+      },
+      {
+        "text": "To frame a block of related content; use a card.",
+        "slug": "card"
+      }
+    ],
+    "related": [
+      "card",
+      "typography",
+      "dropdown-menu"
+    ]
+  },
+  "skeleton": {
+    "updated": "2026-11-08",
+    "metaTitle": "Skeleton: Bootstrap 5 loading placeholders with fixed sizes",
+    "metaDescription": "Bootstrap 5 skeleton placeholders with explicit width and height, a glow animation, and the border colour, hidden from screen readers, for lists and cards.",
+    "summary": "Moo UI builds the skeleton on Bootstrap's .placeholder and .placeholder-glow utilities and wraps each shape in a .skeleton block with an explicit width and height, so it reserves the space of the final content. The shape is drawn in the border colour so it stays visible in light and dark themes, has rounded corners, and is hidden from assistive technology with aria-hidden. Add rounded-circle for avatar shapes.",
+    "whenToUse": [
+      "Lists, cards, tables, and forms whose layout is known before the data arrives.",
+      "Profile rows and feeds where an avatar and text lines should keep their place while loading."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a short action in progress, such as saving a form; use a spinner.",
+        "slug": "spinner"
+      },
+      {
+        "text": "For a task with measurable progress; use a progress bar.",
+        "slug": "progress"
+      }
+    ],
+    "related": [
+      "spinner",
+      "progress",
+      "card",
+      "table"
+    ]
   },
   "sidebar": {
     "updated": "2026-11-08",
@@ -53,17 +759,1404 @@
       "When the navigation has a second level that should stay reachable while the rail is collapsed."
     ],
     "whenNotToUse": [
-      {"text": "For a content site with a few top-level pages; a horizontal navigation bar is simpler.", "slug": "navigation"},
-      {"text": "For a temporary panel of settings or details; use a sheet instead.", "slug": "sheet"}
+      {
+        "text": "For a content site with a few top-level pages; a horizontal navigation bar is simpler.",
+        "slug": "navigation"
+      },
+      {
+        "text": "For a temporary panel of settings or details; use a sheet instead.",
+        "slug": "sheet"
+      }
     ],
     "keyboard": [
-      {"keys": ["Ctrl", "B"], "action": "Expands or collapses the sidebar on wide screens (Cmd + B on macOS). Ignored while typing in a field."},
-      {"keys": ["Enter"], "action": "On a collapsed submenu trigger, opens its flyout and moves focus to the first available item."},
-      {"keys": ["Tab"], "action": "Moves between flyout items; Tab past the last item closes the flyout and returns focus to its trigger."},
-      {"keys": ["Shift", "Tab"], "action": "Moves back through flyout items; from the first item it closes the flyout and returns focus to its trigger."},
-      {"keys": ["Escape"], "action": "Closes the open flyout and returns focus to its trigger."}
+      {
+        "keys": [
+          "Ctrl",
+          "B"
+        ],
+        "action": "Expands or collapses the sidebar on wide screens (Cmd + B on macOS). Ignored while typing in a field."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "On a collapsed submenu trigger, opens its flyout and moves focus to the first available item."
+      },
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves between flyout items; Tab past the last item closes the flyout and returns focus to its trigger."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves back through flyout items; from the first item it closes the flyout and returns focus to its trigger."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Closes the open flyout and returns focus to its trigger."
+      }
     ],
-    "related": ["navigation", "sheet", "breadcrumb", "tooltip"]
+    "related": [
+      "navigation",
+      "sheet",
+      "breadcrumb",
+      "tooltip"
+    ]
+  },
+  "close-button": {
+    "updated": "2026-11-08",
+    "metaTitle": "Close Button: Bootstrap 5 close button with a thin stroke icon",
+    "metaDescription": "A Bootstrap 5 close button with a thin stroke X icon, a circular hover surface, a focus state, a disabled state, and theme colours without filter inversion.",
+    "summary": "Moo UI keeps Bootstrap's .btn-close and its dismiss attributes but replaces the filled X with a thinner, stroke-style icon drawn through a CSS mask in the current text colour. The button is circular, shows a muted surface on hover and keyboard focus, and takes its colour from Moo tokens, so dark themes do not need Bootstrap's filter inversion. Disabled buttons drop pointer interaction and use the shared disabled opacity.",
+    "whenToUse": [
+      "Dismissing alerts, toasts, dialogs, and offcanvas panels from the edge of the surface.",
+      "Clearing a one-off notice in a flex row next to its message."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a labelled action such as Cancel in a dialog footer; use a button with visible text.",
+        "slug": "button"
+      },
+      {
+        "text": "When dismissing would lose work and needs confirmation; use an alert dialog.",
+        "slug": "alert-dialog"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the close button. Disabled close buttons are skipped."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Activates the close button and dismisses its surface when a dismiss target is set."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Activates the close button and dismisses its surface when a dismiss target is set."
+      }
+    ],
+    "related": [
+      "alert",
+      "toast",
+      "dialog",
+      "button"
+    ]
+  },
+  "alert": {
+    "updated": "2026-11-08",
+    "metaTitle": "Alert: Bootstrap 5 alerts with quiet shadcn-style variants",
+    "metaDescription": "Bootstrap 5 alerts with an icon, title, and description, quiet destructive, warning, success, and info variants, an inline action, and an optional close button.",
+    "summary": "Moo UI keeps Bootstrap's .alert markup, contextual classes, and dismiss plugin and changes the look: every variant keeps a neutral border, and colour comes from the text and a light tinted surface rather than Bootstrap's saturated fills, with the destructive variant on a transparent background. Alerts are laid out as a row with a leading icon, a title and description, an optional action, and a close button placed with logical properties so it moves to the left in right-to-left layouts.",
+    "whenToUse": [
+      "Inline feedback near the content it affects, such as a failed build or a storage limit.",
+      "Time-sensitive notices that need a clear severity, with the meaning stated in the text as well as the colour.",
+      "A message with one direct response, such as an upgrade button."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a brief confirmation that should appear and disappear on its own; use a toast.",
+        "slug": "toast"
+      },
+      {
+        "text": "When people must confirm or cancel before continuing; use an alert dialog.",
+        "slug": "alert-dialog"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the action or close button inside the alert."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "On the close button of a dismissible alert, dismisses the alert and removes it from the page."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "On the close button of a dismissible alert, dismisses the alert and removes it from the page."
+      }
+    ],
+    "related": [
+      "close-button",
+      "toast",
+      "alert-dialog",
+      "badge"
+    ]
+  },
+  "breadcrumb": {
+    "updated": "2026-11-08",
+    "metaTitle": "Breadcrumb: Bootstrap 5 breadcrumb with dropdown and ellipsis",
+    "metaDescription": "A Bootstrap 5 breadcrumb with chevron separators, muted parent links, custom divider glyphs, a dropdown segment for sibling pages, and an ellipsis marker.",
+    "summary": "Moo UI keeps Bootstrap's breadcrumb list and inverts its emphasis: parent links are muted and the current page reads at full strength. The default divider is a chevron icon that flips in right-to-left layouts, and any instance can swap it for another glyph through --bs-breadcrumb-divider. It adds a middle segment that opens a Bootstrap Dropdown of sibling pages and a static ellipsis for skipped levels.",
+    "whenToUse": [
+      "Pages nested two or more levels deep, such as a project inside a workspace.",
+      "Hierarchies where a middle level has sibling sections people may want to jump to.",
+      "Long trails where middle levels can collapse into an ellipsis."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For moving between peer pages at the same level; use navigation.",
+        "slug": "navigation"
+      },
+      {
+        "text": "For a flat site with one level of pages, where a trail adds nothing."
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next parent link or dropdown segment."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Follows the focused link, or opens and closes the focused dropdown segment."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "On a dropdown segment, opens its menu at the first sibling page; in the open menu, moves to the next sibling page."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "In an open segment menu, moves to the previous sibling page."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Closes the open segment menu and returns focus to its trigger."
+      }
+    ],
+    "related": [
+      "navigation",
+      "dropdown-menu",
+      "sidebar",
+      "pagination"
+    ]
+  },
+  "pagination": {
+    "updated": "2026-11-08",
+    "metaTitle": "Pagination: Bootstrap 5 pagination with square, icon-led links",
+    "metaDescription": "Bootstrap 5 pagination with square page links, chevron Previous and Next that shrink to icons on small screens, an ellipsis, disabled ends, and sm and lg sizes.",
+    "summary": "Moo UI keeps Bootstrap's .pagination markup and size classes and squares up each page link so single digits and icons share the same width and height. Previous and Next carry a chevron and show their text from the sm breakpoint up, keeping an accessible label when only the icon is visible on narrow screens. The current page carries aria-current, disabled ends are not focusable, and the skipped-pages ellipsis has hidden text for screen readers.",
+    "whenToUse": [
+      "Long result lists or tables split into numbered pages.",
+      "Search or archive pages where each page has its own URL."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a table that also needs search, filters, and sorting; use the data table, which includes pagination.",
+        "slug": "datatable"
+      },
+      {
+        "text": "To show a location in a hierarchy rather than a position in a list; use a breadcrumb.",
+        "slug": "breadcrumb"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next page link. Disabled Previous, Next, and ellipsis items are skipped."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous page link."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Follows the focused page link."
+      }
+    ],
+    "related": [
+      "datatable",
+      "table",
+      "navigation"
+    ]
+  },
+  "progress": {
+    "updated": "2026-11-08",
+    "metaTitle": "Progress: Bootstrap 5 progress bar with a circle variant",
+    "metaDescription": "A Bootstrap 5 progress bar with a slim themed track, an optional label above the bar, a compact SVG circle variant, and a fill that follows text direction.",
+    "summary": "Moo UI keeps Bootstrap's .progress and .progress-bar markup with the progressbar role and its value attributes, and binds the fill to the theme's primary colour token. The track is a slim 4px line, so the optional label shows the name and percentage above the bar rather than inside it. A circle variant renders the same value as a compact SVG ring that keeps the accessible numeric values.",
+    "whenToUse": [
+      "Uploads, downloads, and imports where the amount of work is known and can be shown as a percentage.",
+      "Multi-step setups where a compact circle and nearby text such as \"1 of 3 required steps complete\" summarise progress.",
+      "Comparing the completion of several related tasks with stacked bars."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "When the amount of work cannot be measured; do not show a fake percentage.",
+        "slug": "spinner"
+      },
+      {
+        "text": "For a value that people set themselves.",
+        "slug": "slider"
+      }
+    ],
+    "related": [
+      "spinner",
+      "skeleton",
+      "slider"
+    ]
+  },
+  "slider": {
+    "updated": "2026-11-08",
+    "metaTitle": "Slider: Bootstrap 5 range slider with a filled track and ranges",
+    "metaDescription": "A Bootstrap 5 slider on native range inputs, with a filled track, a live value output, two-thumb ranges, steps, vertical orientation, and RTL support.",
+    "summary": "Moo UI's Slider keeps one or two native range inputs with Bootstrap's .form-range, so keyboard behaviour, form submission, and the disabled state stay native. It adds a shadcn-style filled track and thumb in the theme's primary colour, a value output, a two-thumb range, and a vertical orientation. The optional ES module keeps the fill and output in sync, stops the two thumbs of a range from crossing, moves the nearest thumb when people click or drag the track, follows right-to-left layouts, and never scans the page on import.",
+    "whenToUse": [
+      "Approximate values such as volume, gain, or brightness, where the exact number matters less than the position.",
+      "Minimum and maximum filters, such as a price range, that submit as two ordinary form fields.",
+      "Ratings or settings that snap to fixed steps, such as half-point increments."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "When people need to enter an exact number.",
+        "slug": "input"
+      },
+      {
+        "text": "To show the progress of a task rather than collect a value.",
+        "slug": "progress"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the slider thumb; in a range slider, the next Tab moves to the second thumb. Disabled sliders are skipped."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous thumb or control."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "Increases the focused value by one step."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "Decreases the focused value by one step."
+      },
+      {
+        "keys": [
+          "ArrowRight"
+        ],
+        "action": "On a horizontal slider in a left-to-right layout, increases the value by one step."
+      },
+      {
+        "keys": [
+          "ArrowLeft"
+        ],
+        "action": "On a horizontal slider in a left-to-right layout, decreases the value by one step."
+      }
+    ],
+    "related": [
+      "progress",
+      "input",
+      "field",
+      "form"
+    ]
+  },
+  "table": {
+    "updated": "2026-11-08",
+    "metaTitle": "Table: Bootstrap 5 table with captions, footers, and row actions",
+    "metaDescription": "A Bootstrap 5 table with row headers, captions, aligned numeric columns, a summary footer, striped and compact modifiers, and a row actions dropdown menu.",
+    "summary": "Moo UI's Table is Bootstrap's own .table markup inside a responsive wrapper, with column headers, optional row headers, captions, per-column alignment, and a summary footer. Bootstrap's striped, hover, and small modifiers combine freely. A row actions column uses an icon-only button with a Dropdown Menu, and the wrapper lets the open menu overflow instead of clipping it; inside a card the table keeps a transparent surface so it takes on the card's background. It has no sorting, filtering, or pagination by design.",
+    "whenToUse": [
+      "Short, static records such as a service queue, where rows and columns need to stay visibly related.",
+      "Invoices and usage ledgers that close with a totals row.",
+      "Lists where each row needs a few actions, such as viewing logs or rolling back, kept in a menu."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "When people need to search, filter, sort, select, or page through many rows.",
+        "slug": "datatable"
+      },
+      {
+        "text": "To compare trends or totals at a glance.",
+        "slug": "chart"
+      }
+    ],
+    "related": [
+      "datatable",
+      "badge",
+      "dropdown-menu",
+      "card"
+    ]
+  },
+  "checkbox": {
+    "updated": "2026-11-08",
+    "metaTitle": "Checkbox: Bootstrap 5 checkbox with a themed checkmark",
+    "metaDescription": "A Bootstrap 5 checkbox with a themed checkmark, descriptions linked for screen readers, indeterminate and invalid states, groups, and table row selection.",
+    "summary": "Moo UI keeps Bootstrap's .form-check markup and native checkbox input, and redraws the checkmark so it follows the theme's primary colours at runtime instead of a colour fixed at compile time. Descriptions are linked to the input with aria-describedby. Valid checkboxes show the focus ring only for keyboard focus, while an invalid checkbox keeps its validation ring visible even after a mouse click. A label wrapper mode makes the whole table cell the hit target for row selection.",
+    "whenToUse": [
+      "A single independent option that can be on or off, such as accepting terms before submitting a form.",
+      "Several options that may be selected together, grouped under a fieldset and legend.",
+      "Selecting rows in a table for a batch action."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "When exactly one option from a set may be chosen.",
+        "slug": "radio-group"
+      },
+      {
+        "text": "For a setting that takes effect like a mode or preference.",
+        "slug": "switch"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next checkbox. Disabled checkboxes are skipped."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous checkbox."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Checks or clears the focused checkbox."
+      }
+    ],
+    "related": [
+      "radio-group",
+      "switch",
+      "field",
+      "datatable"
+    ]
+  },
+  "radio-group": {
+    "updated": "2026-11-08",
+    "metaTitle": "Radio Group: Bootstrap 5 radio buttons with choice cards",
+    "metaDescription": "Bootstrap 5 radio buttons grouped with a fieldset, with option descriptions, choice cards with icons or letter codes, disabled options, and group validation.",
+    "summary": "Moo UI's Radio Group keeps native radio inputs and Bootstrap's .form-check markup, and draws the selected dot in the theme's primary colours. It adds choice cards: the whole card is clickable, can show a Lucide icon or a one to three letter code, and can hide the radio visually while keeping native keyboard selection. An invalid group shows one feedback message linked to every option, and a reverse layout places the control on the other side for right-to-left text.",
+    "whenToUse": [
+      "One required choice from a short set of options that should all stay visible, such as an alert channel.",
+      "Plans, categories, or destinations where each option needs a short description, shown as choice cards.",
+      "Choices where an unavailable option should stay visible but disabled to explain the rule."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "When several options may be selected together.",
+        "slug": "checkbox"
+      },
+      {
+        "text": "For a long list of options that would crowd the page.",
+        "slug": "select"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus into the group, to the selected option, and then on to the next control."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "Moves to and selects the next option in the group."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "Moves to and selects the previous option in the group."
+      },
+      {
+        "keys": [
+          "ArrowRight"
+        ],
+        "action": "In a left-to-right layout, moves to and selects the next option."
+      },
+      {
+        "keys": [
+          "ArrowLeft"
+        ],
+        "action": "In a left-to-right layout, moves to and selects the previous option."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Selects the focused option when none is selected yet."
+      }
+    ],
+    "related": [
+      "checkbox",
+      "toggle-group",
+      "select",
+      "field"
+    ]
+  },
+  "switch": {
+    "updated": "2026-11-08",
+    "metaTitle": "Switch: Bootstrap 5 toggle switch with light and dark themes",
+    "metaDescription": "A Bootstrap 5 switch on a native checkbox with the switch role, a taller track, themed checked states, descriptions, validation, and native form values.",
+    "summary": "Moo UI's Switch is Bootstrap's .form-switch on a native checkbox with the switch role, with a taller track and a checked state in the theme's primary colour in both light and dark themes. The macro requires an accessible name, links descriptions with aria-describedby, and supports a field layout with the label and description beside the control. A name and optional value include a checked switch in native form submission; Switch adds no storage or submission JavaScript.",
+    "whenToUse": [
+      "Preferences that act like a mode, such as enabling notifications or background sync.",
+      "Feature flags and policies in an admin settings page.",
+      "A group of related settings under one fieldset, each with a short description of its effect."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "To choose one of several mutually exclusive options.",
+        "slug": "radio-group"
+      },
+      {
+        "text": "For one item in a list of options that are selected and submitted together.",
+        "slug": "checkbox"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next switch. Disabled switches are skipped."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous switch."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Turns the focused switch on or off."
+      }
+    ],
+    "related": [
+      "checkbox",
+      "field",
+      "form",
+      "toggle-group"
+    ]
+  },
+  "spinner": {
+    "updated": "2026-11-08",
+    "metaTitle": "Spinner: Bootstrap 5 loading spinner with a Lucide loader icon",
+    "metaDescription": "A Bootstrap 5 loading spinner that rotates the Lucide loader-circle icon, uses currentColor, and comes in a small size for buttons and dense controls.",
+    "summary": "Moo UI's Spinner replaces Bootstrap's thick spinner-border ring with the Lucide loader-circle icon, rotated with CSS and no JavaScript. It uses currentColor, so it follows the theme and the surrounding text colour without extra CSS, and it renders with the status role and a visually hidden label. A small size fits compact controls, and Button's loading option swaps its leading icon for the spinner.",
+    "whenToUse": [
+      "Loading data or waiting for a response whose duration is unknown.",
+      "Inside a disabled button while its action is running.",
+      "Next to a short label, such as \"Loading updates\", when the wait affects nearby content."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "When completion can be measured as a percentage.",
+        "slug": "progress"
+      },
+      {
+        "text": "To hold the layout of content that is still loading.",
+        "slug": "skeleton"
+      }
+    ],
+    "related": [
+      "progress",
+      "skeleton",
+      "button"
+    ]
+  },
+  "accordion": {
+    "updated": "2026-11-08",
+    "metaTitle": "Accordion: Bootstrap 5 component with shadcn-style design",
+    "metaDescription": "A Bootstrap 5 Accordion with shadcn-style design, light and dark themes, and right-to-left support. It uses Bootstrap's own Collapse plugin and markup, with no Moo-specific JavaScript.",
+    "summary": "Moo UI keeps Bootstrap's own Accordion markup and Collapse plugin and changes only the presentation: shadcn-style borders, spacing, and typography that follow the light and dark themes. The same markup mirrors for Arabic and Hebrew without extra CSS, and any Bootstrap Accordion you already have picks up the new look unchanged.",
+    "whenToUse": [
+      "Frequently asked questions and help content that people scan before reading in full.",
+      "Settings or details that most people do not need at once, grouped under short, descriptive headings.",
+      "Long forms or records where secondary sections should stay out of the way until requested."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "To switch between views of the same content, where people compare panels side by side.",
+        "slug": "tabs"
+      },
+      {
+        "text": "For a single show-and-hide region without a set of headings.",
+        "slug": "collapsible"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next accordion header button."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous accordion header button."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Opens or closes the panel of the focused header."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Opens or closes the panel of the focused header."
+      }
+    ],
+    "related": [
+      "collapsible",
+      "tabs",
+      "card"
+    ]
+  },
+  "tabs": {
+    "updated": "2026-11-08",
+    "metaTitle": "Tabs: Bootstrap 5 tabs with a segmented style and stable height",
+    "metaDescription": "Bootstrap 5 tabs styled as a segmented control, with a stable panel height, vertical orientation, disabled tabs, RTL support, and keyboard navigation.",
+    "summary": "Moo UI's Tabs use Bootstrap's own Tab plugin and tab roles, styled as a shadcn-style segmented control: a muted track with a raised active tab, and inactive labels coloured to meet WCAG AA contrast on that track. All panels share one grid cell, so the container keeps the height of the tallest panel and the page does not jump on each switch; setting the height to content opts out. A vertical orientation stacks the triggers beside the panel and returns to a horizontal row on small screens.",
+    "whenToUse": [
+      "Peer views of the same subject, such as overview, workflows, and settings, where one is visible at a time.",
+      "Settings or detail screens with a few short sections that people switch between quickly.",
+      "A short side rail of views, using the vertical orientation when labels scan better stacked."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For steps that must be completed in order, because required fields could hide in inactive panels."
+      },
+      {
+        "text": "When people may want several sections open at once.",
+        "slug": "accordion"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the active tab; pressing Tab again moves focus into its panel."
+      },
+      {
+        "keys": [
+          "ArrowRight"
+        ],
+        "action": "Moves focus to the next tab and shows its panel, wrapping from the last tab to the first. Disabled tabs are skipped."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "Moves focus to the next tab and shows its panel, wrapping from the last tab to the first."
+      },
+      {
+        "keys": [
+          "ArrowLeft"
+        ],
+        "action": "Moves focus to the previous tab and shows its panel, wrapping from the first tab to the last."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "Moves focus to the previous tab and shows its panel, wrapping from the first tab to the last."
+      },
+      {
+        "keys": [
+          "Home"
+        ],
+        "action": "Moves focus to the first enabled tab and shows its panel."
+      },
+      {
+        "keys": [
+          "End"
+        ],
+        "action": "Moves focus to the last enabled tab and shows its panel."
+      }
+    ],
+    "related": [
+      "accordion",
+      "toggle-group",
+      "navigation",
+      "card"
+    ]
+  },
+  "collapsible": {
+    "updated": "2026-11-08",
+    "metaTitle": "Collapsible: Bootstrap 5 collapse panel with an icon toggle",
+    "metaDescription": "A Bootstrap 5 collapsible section with a title, an icon-only toggle button, a bordered details panel, an open-by-default option, and custom header content.",
+    "summary": "Moo UI's Collapsible pairs a short title with an icon-only ghost button and a bordered details panel, and uses Bootstrap's Collapse plugin for showing and hiding, with no Moo-specific JavaScript. The trigger carries its own accessible name with aria-expanded and aria-controls, the panel can start open, and optional header content can replace the title presentation, for example with a progress summary. The layout follows right-to-left text.",
+    "whenToUse": [
+      "A single section of secondary details, such as product metadata, that most people do not need at once.",
+      "A summary line, such as a progress count, that expands into the saved details below it.",
+      "A one-off question and answer that does not belong to a larger list of headings."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a set of related sections, each with its own heading.",
+        "slug": "accordion"
+      },
+      {
+        "text": "To switch between peer views of the same content.",
+        "slug": "tabs"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the toggle button."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Opens or closes the details panel."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Opens or closes the details panel."
+      }
+    ],
+    "related": [
+      "accordion",
+      "tabs",
+      "button",
+      "card"
+    ]
+  },
+  "tooltip": {
+    "updated": "2026-11-08",
+    "metaTitle": "Tooltip: Bootstrap 5 tooltip with shadcn-style design and motion",
+    "metaDescription": "Bootstrap 5 tooltips with a solid shadcn-style bubble, a subtle zoom-in that respects reduced motion, keyboard shortcut hints, and right-to-left support.",
+    "summary": "Moo UI keeps Bootstrap's own Tooltip plugin and data attributes and retunes only its existing custom properties: a wider, fully opaque bubble with roomier padding and smaller text. The bubble opens with a subtle zoom and slide that is switched off for people who prefer reduced motion, and plain-text triggers get a dotted underline that stays readable on dark surfaces. Shortcut hints can use the Kbd component once the kbd tag is added to Bootstrap's sanitizer allowlist.",
+    "whenToUse": [
+      "Short, optional hints for icon-only buttons and compact toolbar actions.",
+      "Keyboard shortcut reminders next to a command that already has a visible purpose.",
+      "Brief status context, such as when a workspace last synced, that people do not need to read every time."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For content with a title or formatting that people need to read at their own pace; use a popover.",
+        "slug": "popover"
+      },
+      {
+        "text": "For essential instructions or error messages; keep them visible next to the field.",
+        "slug": "field"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the trigger and shows its tooltip; Bootstrap's default trigger includes focus."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus back to the previous control; the tooltip hides when its trigger loses focus."
+      }
+    ],
+    "related": [
+      "popover",
+      "button",
+      "kbd"
+    ]
+  },
+  "popover": {
+    "updated": "2026-11-08",
+    "metaTitle": "Popover: Bootstrap 5 popover with a shadcn-style card panel",
+    "metaDescription": "Bootstrap 5 popovers restyled as a fixed-width shadcn-style card with no arrow or divided header, plus placements, sanitized rich content, and focus dismissal.",
+    "summary": "Moo UI uses Bootstrap's own Popover plugin and data attributes and retunes only its custom properties: a 20rem card with a larger radius, a softer shadow, uniform padding, a header that blends into the body, and no directional arrow. A dedicated link trigger covers Bootstrap's dismiss-on-next-click pattern, which needs an anchor with a focus trigger rather than a button. The same markup works in right-to-left layouts.",
+    "whenToUse": [
+      "Short contextual details next to an action, such as what a review step will do.",
+      "Supporting notes with a title and lightly formatted text that should not take space on the page.",
+      "Help that people open on demand and dismiss with their next click."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a one-line hint on hover or focus; a tooltip is lighter.",
+        "slug": "tooltip"
+      },
+      {
+        "text": "For confirmations, long forms, or required instructions; use a dialog.",
+        "slug": "dialog"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the trigger. A focus-triggered popover opens as soon as its trigger receives focus."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "On a button trigger, opens or closes the popover."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "On a button trigger, opens or closes the popover."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus away from the trigger. A focus-triggered popover closes; a click-triggered popover stays open until its trigger is activated again."
+      }
+    ],
+    "related": [
+      "tooltip",
+      "dialog",
+      "button",
+      "dropdown-menu"
+    ]
+  },
+  "dialog": {
+    "updated": "2026-11-08",
+    "metaTitle": "Dialog: Bootstrap 5 modal with shadcn-style design and sizes",
+    "metaDescription": "A Bootstrap 5 modal dialog with a shadcn-style surface, sizes up to fullscreen, centered and scrollable layouts, a static backdrop option, and RTL support.",
+    "summary": "Dialog is Moo UI's name for Bootstrap's Modal: the markup, data attributes, focus handling, and dismissal all come from Bootstrap's own plugin, with no Moo-specific JavaScript. Moo UI retunes the modal's custom properties for a larger radius, a borderless header with the close button pinned to the top end corner, a lightly tinted footer, and a quieter border that follows the light and dark themes.",
+    "whenToUse": [
+      "Short, focused tasks that must sit above the page, such as editing a few details or sharing a link.",
+      "Choices where the page should wait until people confirm or cancel.",
+      "Longer content that should scroll inside the dialog instead of moving the page."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "To confirm an irreversible or destructive action; use an alert dialog that cannot be dismissed by accident.",
+        "slug": "alert-dialog"
+      },
+      {
+        "text": "For filters, settings, or details that should keep the page in view; use a sheet.",
+        "slug": "sheet"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next control inside the dialog; focus stays within the dialog while it is open."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous control, wrapping within the dialog."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Activates the focused button, such as Cancel, Save, or the close button."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Closes the dialog and returns focus to its trigger. A dialog with a static backdrop ignores Escape."
+      }
+    ],
+    "related": [
+      "alert-dialog",
+      "sheet",
+      "button",
+      "form"
+    ]
+  },
+  "toast": {
+    "updated": "2026-11-08",
+    "metaTitle": "Toast: Bootstrap 5 toast with status variants and live regions",
+    "metaDescription": "Bootstrap 5 toasts with success, info, warning, destructive, and loading variants, polite or assertive announcements, an optional Undo action, and auto-hide.",
+    "summary": "Moo UI keeps Bootstrap's Toast markup, lifecycle, and auto-hide, and retunes its custom properties for a larger radius, a quieter border, and an elevated shadow. The macro adds status variants with icons, including a loading spinner that stops for people who prefer reduced motion, an optional link-style action such as Undo, and a priority setting that chooses polite status or assertive alert semantics. Container placements cover each corner and the top and bottom centre.",
+    "whenToUse": [
+      "Confirming that a background action finished, such as an event being created.",
+      "Short, temporary updates that should not interrupt the current task.",
+      "Offering a quick follow-up action, such as Undo, right after a change."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a message that must stay visible until it is resolved; use an inline alert.",
+        "slug": "alert"
+      },
+      {
+        "text": "For a decision people must make before continuing; use an alert dialog.",
+        "slug": "alert-dialog"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the toast's action or close button. While focus is inside the toast, auto-hide pauses."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Activates the focused close or action button, which dismisses the toast."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Activates the focused close or action button, which dismisses the toast."
+      }
+    ],
+    "related": [
+      "alert",
+      "alert-dialog",
+      "button",
+      "spinner"
+    ]
+  },
+  "sheet": {
+    "updated": "2026-11-08",
+    "metaTitle": "Sheet: Bootstrap 5 offcanvas side panel with shadcn-style design",
+    "metaDescription": "A Bootstrap 5 Offcanvas side panel with shadcn-style design: four edges, optional backdrop and body scrolling, open-on-load, autofocus support, and RTL.",
+    "summary": "Sheet is Moo UI's name for Bootstrap's Offcanvas: Bootstrap's plugin handles opening, focus, Escape, and the backdrop. Moo UI scopes its styling to a sheet class so the Sidebar drawer is unaffected, with a 24rem default width, a quieter border, an elevation shadow, and a 16px title. An optional side-effect-free ES module, initSheets(root), opens sheets marked to open on load and moves focus to a field with the autofocus attribute once the panel is shown.",
+    "whenToUse": [
+      "Filters or settings for the current list that should open without leaving the page.",
+      "Details or follow-up actions for a selected record alongside the main view.",
+      "A light side panel that keeps the page visible and scrollable while it is open."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a short decision or confirmation that needs full attention; use a dialog.",
+        "slug": "dialog"
+      },
+      {
+        "text": "For the main application navigation; use the sidebar.",
+        "slug": "sidebar"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next control inside the sheet. Focus stays within the sheet, unless it opens with body scrolling and no backdrop."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous control inside the sheet."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Closes the sheet and returns focus to the trigger that opened it."
+      }
+    ],
+    "related": [
+      "dialog",
+      "sidebar",
+      "button"
+    ]
+  },
+  "field": {
+    "updated": "2026-11-08",
+    "metaTitle": "Field: Bootstrap 5 form fields with labels, help, and errors",
+    "metaDescription": "Compose labelled Bootstrap 5 fields with helper and error text, field groups, fieldsets with legends, invalid and disabled states, and a password checklist.",
+    "summary": "Field is layout around the existing Input, Textarea, Native Select, Checkbox, Radio Group, and Switch controls and adds no control of its own. It spaces each label, control, and helper or error text with one gap, groups fields with .field-group, and uses a native fieldset and legend for related questions. Validation stays Bootstrap's own: data-invalid colours the label while the control keeps is-invalid and linked feedback. An optional PasswordRequirements ES module lists which password rules are met as people type, without sending or storing the value.",
+    "whenToUse": [
+      "Any labelled control that needs helper text, an error message, or both.",
+      "Several related controls that answer one question under a fieldset legend.",
+      "Sign-up or password-change forms that should show which password rules are met."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a complete set of fields that are submitted together; wrap the fields in a form.",
+        "slug": "form"
+      },
+      {
+        "text": "To attach an icon, unit, or button to the control itself.",
+        "slug": "input-group"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next control. Labels, descriptions, and errors are not tab stops, and disabled controls are skipped."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous control."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Toggles the focused checkbox or switch (native browser behaviour)."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "In a radio group, selects the next option (native browser behaviour)."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "In a radio group, selects the previous option (native browser behaviour)."
+      }
+    ],
+    "related": [
+      "form",
+      "input",
+      "textarea",
+      "radio-group"
+    ]
+  },
+  "form": {
+    "updated": "2026-11-08",
+    "metaTitle": "Form: Bootstrap 5 forms from fieldsets with native validation",
+    "metaDescription": "Build Bootstrap 5 forms from a native form element, fieldsets with legends, labelled fields, helper text, validation feedback, and form-level submit and reset.",
+    "summary": "Moo UI's Form is a native form element with the .field-form class, which stacks fieldsets, field groups, and actions with one token-based gap. Each row is a Field, related controls sit in a fieldset with a legend and optional description, and submit and reset buttons stay at form level. Validation uses native attributes such as required and Bootstrap's is-invalid and was-validated classes; Moo UI adds no validation script of its own, and the layout works in right-to-left pages.",
+    "whenToUse": [
+      "Account, profile, or settings pages that save a set of related fields together.",
+      "Requests that need required fields and inline validation messages before they are sent.",
+      "Policies or preferences where several choices answer one question under a legend."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a single labelled control with helper text; a field is enough.",
+        "slug": "field"
+      },
+      {
+        "text": "For a quick confirmation that only needs a yes or no answer.",
+        "slug": "alert-dialog"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves through the controls and actions in source order. Disabled controls are skipped."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous control."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "In a single-line input, submits the surrounding form when it has a submit button (native browser behaviour)."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Toggles the focused checkbox or switch, or activates the focused button."
+      }
+    ],
+    "related": [
+      "field",
+      "input",
+      "select",
+      "checkbox"
+    ]
+  },
+  "combobox": {
+    "updated": "2026-11-08",
+    "metaTitle": "Combobox: Bootstrap 5 autocomplete with single or multiple select",
+    "metaDescription": "A Bootstrap 5 combobox that filters a suggestion list as you type, with single or multiple selection, removable chips, groups, a clear button, and form values.",
+    "summary": "Bootstrap 5.3 has no Combobox plugin, so Moo UI composes a form-control with a dropdown-menu listbox and adds an optional side-effect-free ES module for the missing behaviour. The module filters options as people type, tracks the active option with aria-activedescendant, announces the number of results, and keeps hidden form fields in sync for single or multiple selection. Multiple selection shows removable chips, and dispose() removes the module's listeners and generated nodes.",
+    "whenToUse": [
+      "Picking one value from a known list long enough to need searching, such as reviewers or time zones.",
+      "Choosing several values, shown as removable chips, from the same searchable list.",
+      "Lists that read better with group headings or a second line of description per option."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a short list of a few options that needs no search; a native select is simpler.",
+        "slug": "select"
+      },
+      {
+        "text": "For commands rather than values; use a dropdown menu.",
+        "slug": "dropdown-menu"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "Opens the list and moves the active option down, wrapping from the last option to the first. Disabled and filtered-out options are skipped."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "Opens the list and moves the active option up, wrapping from the first option to the last."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Selects the active option. A single combobox closes the list; a multiple combobox toggles the option and keeps the list open."
+      },
+      {
+        "keys": [
+          "Backspace"
+        ],
+        "action": "In a multiple combobox with an empty input, removes the last selected chip."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Closes the list and keeps focus in the input."
+      },
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Closes the list and moves focus on. While an input method editor is composing text, other keys are left to it and only Tab is handled."
+      }
+    ],
+    "related": [
+      "select",
+      "dropdown-menu",
+      "input",
+      "field"
+    ]
+  },
+  "toggle-group": {
+    "updated": "2026-11-08",
+    "metaTitle": "Toggle Group: Bootstrap 5 toggle buttons for single or multiple",
+    "metaDescription": "Bootstrap 5 toggle buttons on native radio and checkbox inputs, for single or multiple selection, with default and outline variants, sizes, and vertical layout.",
+    "summary": "Moo UI's Toggle Group uses Bootstrap's .btn-check pattern, so native radio or checkbox inputs hold the state and form values while labels render the buttons. Unlike Bootstrap's joined .btn-group, items stay individually rounded with a small gap, and come in default and outline variants with small and large sizes and a vertical layout. The pressed item uses the theme's primary colours and changes in place without the button press nudge, and the group takes its accessible name from its legend.",
+    "whenToUse": [
+      "Switching a view mode, such as list, grid, or table, where exactly one item stays pressed.",
+      "Choosing one short option, such as a shipment method, with button-like items.",
+      "Turning several independent options on and off, such as notification channels."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "When the controls run actions rather than select modes.",
+        "slug": "button-group"
+      },
+      {
+        "text": "When each option needs a description or a longer label.",
+        "slug": "radio-group"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus into the group. In single selection, focus goes to the pressed item; in multiple selection, each item is its own stop."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "In single selection, moves to and presses the next item."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "In single selection, moves to and presses the previous item."
+      },
+      {
+        "keys": [
+          "ArrowRight"
+        ],
+        "action": "In single selection and a left-to-right layout, moves to and presses the next item."
+      },
+      {
+        "keys": [
+          "ArrowLeft"
+        ],
+        "action": "In single selection and a left-to-right layout, moves to and presses the previous item."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "In multiple selection, presses or releases the focused item."
+      }
+    ],
+    "related": [
+      "button-group",
+      "radio-group",
+      "button",
+      "tabs"
+    ]
+  },
+  "alert-dialog": {
+    "updated": "2026-11-08",
+    "metaTitle": "Alert Dialog: Bootstrap 5 confirmation modal with static backdrop",
+    "metaDescription": "A Bootstrap 5 confirmation dialog on Modal's static backdrop that ignores Escape and backdrop clicks, with a small size, optional icon, and destructive action.",
+    "summary": "Alert Dialog is a confirmation-only form of Dialog built on Bootstrap's Modal plugin. It always uses a static backdrop with keyboard dismissal turned off, centers by default, and leaves out the header close button, so people must choose one of the footer actions. Moo UI adds a narrower 24rem layout, a title with a short description, and an optional icon beside the title.",
+    "whenToUse": [
+      "Before an irreversible action, such as deleting a customer record or discarding a draft.",
+      "When leaving or stopping a process would lose work and people must decide explicitly.",
+      "Short confirmations with one title, one sentence of explanation, and a cancel and a confirm action."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For forms or tasks that people may close freely; use a dialog.",
+        "slug": "dialog"
+      },
+      {
+        "text": "For a status message that needs no decision; use an alert or a toast.",
+        "slug": "alert"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next action inside the alert dialog; focus stays within it while it is open."
+      },
+      {
+        "keys": [
+          "Shift",
+          "Tab"
+        ],
+        "action": "Moves focus to the previous action, wrapping within the alert dialog."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Activates the focused action, such as Cancel or Delete."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Does nothing: the alert dialog stays open until one of its actions is chosen."
+      }
+    ],
+    "related": [
+      "dialog",
+      "button",
+      "alert"
+    ]
+  },
+  "menubar": {
+    "updated": "2026-11-08",
+    "metaTitle": "Menubar: Bootstrap 5 menu bar of grouped dropdown menus",
+    "metaDescription": "A Bootstrap 5 menubar that groups several Dropdown Menus in one bordered row, with shortcuts, icons, toggle and radio options, destructive items, and RTL.",
+    "summary": "Moo UI's Menubar is a bordered row of standard Bootstrap Dropdown Menus with no JavaScript of its own. Each trigger stays an ordinary dropdown button, and the row is a labelled group rather than an ARIA menubar, because Bootstrap provides no arrow-key movement between triggers. The open trigger gets a stronger label, and items reuse the same shortcut, icon, header, divider, and toggle rows as Dropdown Menu.",
+    "whenToUse": [
+      "Document or editor commands grouped under short labels such as File, Edit, and View.",
+      "Workspace tools where several related menus sit side by side at the same level.",
+      "View options that people toggle on and off while the menu stays open."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For links to pages of a site or application; use navigation.",
+        "slug": "navigation"
+      },
+      {
+        "text": "For one main action with a few extra options; use a button group or a single dropdown menu.",
+        "slug": "button-group"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves focus to the next menu trigger. Triggers are ordinary buttons in the tab order; Left and Right arrows do not move between them."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "Opens or closes the focused trigger's menu."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Opens or closes the focused trigger's menu."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "On a trigger, opens its menu and focuses the first item; inside a menu, moves to the next item. Disabled items are skipped."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "On a trigger, opens its menu and focuses the last item; inside a menu, moves to the previous item."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Closes the open menu and returns focus to its trigger."
+      }
+    ],
+    "related": [
+      "dropdown-menu",
+      "context-menu",
+      "button-group",
+      "navigation"
+    ]
+  },
+  "context-menu": {
+    "updated": "2026-11-08",
+    "metaTitle": "Context Menu: Bootstrap 5 right-click menu with keyboard access",
+    "metaDescription": "A Bootstrap 5 context menu that opens at the pointer on right-click, from the keyboard with Shift+F10 or the ContextMenu key, and from a visible menu button.",
+    "summary": "Bootstrap provides the dropdown-menu surface but no right-click trigger, so Moo UI adds an optional side-effect-free ES module that opens a Bootstrap Dropdown at the pointer on right-click, or at the focused surface with Shift+F10 or the ContextMenu key. Every menu also has a visible corner button for touch and keyboard users. Toggle items keep the menu open, grouped toggles act as single-select options, and Escape returns focus to whichever trigger opened the menu.",
+    "whenToUse": [
+      "Secondary actions on a file, row, or card, such as rename, duplicate, or delete.",
+      "Shortcuts for frequent users that also stay reachable through the visible menu button.",
+      "View and sort options for a folder or list that people change without closing the menu."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "As the only way to reach required actions; also offer a visible button or toolbar.",
+        "slug": "button"
+      },
+      {
+        "text": "For a menu opened from a labelled button; use a dropdown menu.",
+        "slug": "dropdown-menu"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Shift",
+          "F10"
+        ],
+        "action": "On the focused surface, opens the menu there and focuses the first enabled item."
+      },
+      {
+        "keys": [
+          "Menu"
+        ],
+        "action": "The context menu key opens the menu the same way as Shift + F10."
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "On the corner menu button, opens or closes the menu; on a focused item, activates it."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "On the corner menu button, opens or closes the menu while focus stays on the button."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "Moves to the next enabled item; after a pointer open, moves to the first item. Disabled items are skipped."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "Moves to the previous enabled item; after a pointer open, moves to the last item."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Closes the menu and returns focus to the trigger that opened it."
+      }
+    ],
+    "related": [
+      "dropdown-menu",
+      "menubar",
+      "card"
+    ]
   },
   "datatable": {
     "updated": "2026-11-08",
@@ -76,14 +2169,166 @@
       "Tables that must stay usable on phones, where a card view replaces wide rows."
     ],
     "whenNotToUse": [
-      {"text": "For a short, static table of facts; a plain table is lighter.", "slug": "table"},
-      {"text": "To compare trends or totals at a glance; a chart shows them faster.", "slug": "chart"}
+      {
+        "text": "For a short, static table of facts; a plain table is lighter.",
+        "slug": "table"
+      },
+      {
+        "text": "To compare trends or totals at a glance; a chart shows them faster.",
+        "slug": "chart"
+      }
     ],
     "keyboard": [
-      {"keys": ["Enter"], "action": "In the search field, closes the open filter menu and keeps the current results."},
-      {"keys": ["ArrowDown"], "action": "In a filter's search field, moves focus to the first matching option."},
-      {"keys": ["Escape"], "action": "Clears the row selection, unless a menu, dialog, or list owns the key."}
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "In the search field, closes the open filter menu and keeps the current results."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "In a filter's search field, moves focus to the first matching option."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Clears the row selection, unless a menu, dialog, or list owns the key."
+      }
     ],
-    "related": ["table", "pagination", "checkbox", "dropdown-menu"]
+    "related": [
+      "table",
+      "pagination",
+      "checkbox",
+      "dropdown-menu"
+    ]
+  },
+  "chart": {
+    "updated": "2026-11-08",
+    "metaTitle": "Chart: Bootstrap 5 charts themed from Bootstrap CSS variables",
+    "metaDescription": "Bootstrap 5 charts built on Chart.js, with area, line, bar, pie, doughnut, polar area, radar, scatter, and bubble types themed from Bootstrap CSS variables.",
+    "summary": "Moo UI's Chart is a thin wrapper around Chart.js, installed separately as an optional peer: a .chart root with a canvas takes its type, data, and JSON options from data attributes. Colours come from the --moo-chart-1 to --moo-chart-5 tokens, falling back to Bootstrap's --bs-* tokens, and charts re-theme without a reload when the light or dark theme changes. The optional ES module never scans the page on import, and dispose() releases Chart.js and the theme observer.",
+    "whenToUse": [
+      "Trends over time, such as visitors per month, as an area or line chart.",
+      "Comparing totals across categories with a bar chart.",
+      "Showing parts of a whole with a pie or doughnut chart."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "When people need to read, copy, or compare exact values.",
+        "slug": "table"
+      },
+      {
+        "text": "For the completion of a single task.",
+        "slug": "progress"
+      }
+    ],
+    "related": [
+      "table",
+      "datatable",
+      "card"
+    ]
+  },
+  "datepicker": {
+    "updated": "2026-11-08",
+    "metaTitle": "Date Picker: Bootstrap 5 date and range picker, keyboard-ready",
+    "metaDescription": "A dependency-free Bootstrap 5 date picker for single dates and ranges, with min and max dates, disabled days, presets, month and year selects, and locales.",
+    "summary": "Bootstrap ships no date picker, so Moo UI pairs a Bootstrap button trigger with its own popover and calendar, driven by an optional ES module with no third-party runtime that does not scan the page on import. The same calendar serves single dates, ranges, and an inline layout, writes yyyy-mm-dd values to hidden form fields, and respects minimum and maximum dates and individually disabled days. The locale sets visible formatting and the first day of the week, and the popover follows the trigger's text direction.",
+    "whenToUse": [
+      "Scheduling a single date, such as a deploy or due date, inside a form.",
+      "Choosing a start and end date for reports, bookings, or filters.",
+      "Dates far in the past, such as a date of birth, where month and year selects save clicks."
+    ],
+    "whenNotToUse": [
+      {
+        "text": "For a time of day on its own; a native time input is simpler.",
+        "slug": "input"
+      },
+      {
+        "text": "For a choice between a few fixed dates; offer them as options in a select.",
+        "slug": "select"
+      }
+    ],
+    "keyboard": [
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": "On the trigger, opens the calendar with focus on the active day; on a day, selects it. A single date or a completed range closes the popover and returns focus to the trigger."
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": "Same as Enter. In the range picker, the first selection sets the start and keeps the calendar open."
+      },
+      {
+        "keys": [
+          "ArrowRight"
+        ],
+        "action": "Moves to the next day, skipping disabled dates."
+      },
+      {
+        "keys": [
+          "ArrowLeft"
+        ],
+        "action": "Moves to the previous day, skipping disabled dates."
+      },
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": "Moves to the same weekday in the next week, skipping disabled dates."
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": "Moves to the same weekday in the previous week, skipping disabled dates."
+      },
+      {
+        "keys": [
+          "Home"
+        ],
+        "action": "Moves to the first day of the week for the calendar's locale."
+      },
+      {
+        "keys": [
+          "End"
+        ],
+        "action": "Moves to the last day of the week for the calendar's locale."
+      },
+      {
+        "keys": [
+          "PageUp"
+        ],
+        "action": "Moves to the same day in the previous month, stopping at the minimum date."
+      },
+      {
+        "keys": [
+          "PageDown"
+        ],
+        "action": "Moves to the same day in the next month, stopping at the maximum date."
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": "Closes the popover and returns focus to the trigger."
+      },
+      {
+        "keys": [
+          "Tab"
+        ],
+        "action": "Moves between the calendar's controls; only the active day is in the tab order. In the range picker, moving focus out of the picker closes it."
+      }
+    ],
+    "related": [
+      "input",
+      "field",
+      "form"
+    ]
   }
 }

@@ -1,6 +1,6 @@
-{% from "includes/component-guide.html.jinja" import render_component_guide with context %}
+{% from "includes/component-guide.html.jinja" import render_component_guide_details with context %}
 {% macro render_reference(lead, href, label, show_details=true, limitation="", extra_references=[]) %}
-  {{ render_component_guide() }}
+  {{ render_component_guide_details() }}
   {% set details = none %}
   {% if show_details and component_ownership is defined and current_slug is defined and current_slug in component_ownership %}
     {% set details = component_ownership[current_slug] %}

@@ -7,8 +7,6 @@
 {% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
-{% block title %}Menubar — Moo UI{% endblock %}
-
 {% block content %}
   {% set menubar_dropdown_offset = "0,8" %}
   {{ render_page_header(

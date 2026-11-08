@@ -29,31 +29,54 @@ class ComponentGuideContractTests(CatalogTestCase):
         if result.returncode != 0:
             raise AssertionError(result.stderr)
 
-    def test_guided_component_renders_guide_before_reference(self) -> None:
+    @staticmethod
+    def section(html: str, marker: str) -> re.Match[str] | None:
+        return re.search(
+            rf"<section[^>]*{marker}[^>]*>(.*?)</section>",
+            html,
+            re.DOTALL,
+        )
+
+    def test_guide_about_precedes_usage(self) -> None:
+        # The about part opens the page: after the first example, before Usage.
         for slug, guide in GUIDES.items():
             with self.subTest(slug=slug):
                 html = self.read_output(f"components/{slug}/index.html")
-                section = re.search(
-                    r"<section[^>]*data-moo-component-guide[^>]*>(.*?)</section>",
+                about = self.section(html, r"data-moo-component-guide(?=[\s>])")
+                self.assertIsNotNone(about)
+                self.assertIn(f'aria-labelledby="{slug}-guide-title"', about.group(0))
+                # The page outline lists the section by its short label.
+                self.assertRegex(
                     html,
-                    re.DOTALL,
+                    rf'<a[^>]*href="#{slug}-guide-title"[^>]*>(?:\s|<span>)*About(?:\s|</span>)*</a>',
                 )
-                self.assertIsNotNone(section)
-                body = section.group(1)
-                self.assertIn(f'aria-labelledby="{slug}-guide-title"', section.group(0))
-                reference = html.find("data-moo-component-reference")
-                self.assertLess(section.start(), reference)
+                usage = re.search(r'<h2[^>]*id="usage"', html)
+                self.assertIsNotNone(usage)
+                self.assertLess(about.start(), usage.start())
+
+                alternatives = {
+                    item["slug"] for item in guide.get("whenNotToUse", []) if item.get("slug")
+                }
+                linked = set(re.findall(r'href="(?:\.\./)*components/([a-z-]+)/"', about.group(1)))
+                self.assertEqual(linked, alternatives)
+
+    def test_guide_details_close_the_page_before_reference(self) -> None:
+        for slug, guide in GUIDES.items():
+            with self.subTest(slug=slug):
+                html = self.read_output(f"components/{slug}/index.html")
+                details = self.section(html, "data-moo-component-guide-details")
+                if not guide.get("keyboard") and not guide.get("related"):
+                    self.assertIsNone(details)
+                    continue
+                self.assertIsNotNone(details)
+                self.assertLess(details.start(), html.find("data-moo-component-reference"))
 
                 # Every keyboard key renders through the Kbd component.
                 keys = [key for entry in guide.get("keyboard", []) for key in entry["keys"]]
-                self.assertEqual(re.findall(r"<kbd>([^<]*)</kbd>", body), keys)
+                self.assertEqual(re.findall(r"<kbd>([^<]*)</kbd>", details.group(1)), keys)
 
-                # Related and alternative components link to catalog pages.
-                linked = set(re.findall(r'href="(?:\.\./)*components/([a-z-]+)/"', body))
-                expected = set(guide.get("related", [])) | {
-                    item["slug"] for item in guide.get("whenNotToUse", []) if item.get("slug")
-                }
-                self.assertEqual(linked, expected)
+                linked = set(re.findall(r'href="(?:\.\./)*components/([a-z-]+)/"', details.group(1)))
+                self.assertEqual(linked, set(guide.get("related", [])))
 
     def test_guided_component_uses_guide_title_and_description(self) -> None:
         for slug, guide in GUIDES.items():
@@ -65,12 +88,22 @@ class ComponentGuideContractTests(CatalogTestCase):
                 self.assertEqual(unescape(description.group(1)), guide["metaDescription"])
 
     def test_unguided_component_keeps_registry_metadata(self) -> None:
-        catalog = {entry["slug"]: entry for entry in site_build.load_catalog()}
-        slug = next(slug for slug in sorted(catalog) if slug not in GUIDES)
-        html = self.read_output(f"components/{slug}/index.html")
-        self.assertNotIn("data-moo-component-guide", html)
-        title = re.search(r"<title>([^<]*)</title>", html).group(1)
-        self.assertEqual(unescape(title), f"{catalog[slug]['label']} — Moo UI")
+        # Without a guide entry, a component page falls back to the Core
+        # registry label and description.
+        catalog = site_build.load_catalog()
+        entry = next(item for item in catalog if item["slug"] == "badge")
+        metadata = site_build.page_metadata(
+            site_build.PAGES / "components/badge.html.jinja",
+            site_build.Path("components/badge.html"),
+            [],
+            catalog,
+            [],
+            [],
+            [],
+            guides={},
+        )
+        self.assertEqual(metadata["title"], f"{entry['label']} — Moo UI")
+        self.assertEqual(metadata["description"], entry["description"])
 
     def test_component_pages_carry_article_and_breadcrumb_data(self) -> None:
         html = self.read_output("components/accordion/index.html")
@@ -102,7 +135,7 @@ class ComponentGuideContractTests(CatalogTestCase):
         self.assertEqual(
             dated,
             {
-                f"https://ui.wpmoo.org/components/{slug}/": guide["updated"]
+                site_build.canonical_url(f"components/{slug}.html"): guide["updated"]
                 for slug, guide in GUIDES.items()
             },
         )

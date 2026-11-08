@@ -5,6 +5,7 @@
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/component-guide.html.jinja" import render_component_guide_about with context %}
 {% from "pages/examples/dashboard/tasks.html.jinja" import tasks_body with context %}
 
 {% block content %}
@@ -33,6 +34,8 @@
       ],
       show_header=false
     ) }}
+
+    {{ render_component_guide_about() }}
 
     <h2 id="usage" class="h4 mt-5 mb-3">Usage</h2>
     <p class="mb-4">

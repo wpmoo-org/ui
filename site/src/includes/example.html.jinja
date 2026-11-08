@@ -1,6 +1,7 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "components/tabs.html.jinja" import tabs %}
 {% from "includes/codepen.html.jinja" import codepen_button_if_available with context %}
+{% from "includes/component-guide.html.jinja" import render_component_guide_about with context %}
 {% from "includes/component-icons.html.jinja" import component_icons %}
 
 {% macro render_example(
@@ -83,6 +84,8 @@
       {{ rendered_preview | safe }}
     </div>
   </div>
+
+  {{ render_component_guide_about() }}
 
   <section class="moo-example" aria-labelledby="usage">
     <h2 class="h4" id="usage">Usage</h2>

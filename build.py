@@ -847,7 +847,12 @@ def example_toc_items(value: object) -> list[dict[str, str]]:
             target_id = child.attrs.get("aria-labelledby")
             title_node = parser.by_id.get(target_id or "")
 
-        label = title_node.text_content() if title_node else ""
+        # A heading may carry a shorter outline label than its visible text.
+        label = (
+            (title_node.attrs.get("data-toc-label") or title_node.text_content())
+            if title_node
+            else ""
+        )
         if target_id and label and target_id not in seen:
             items.append({"id": target_id, "label": label})
             seen.add(target_id)
