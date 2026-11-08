@@ -1,12 +1,17 @@
 import { findThemeOwner, ownerPortalRoot } from "../theme-owner.js";
 
 const instances = new WeakMap();
-const FLYOUT_FOCUSABLE_SELECTOR = "a[href], button, [tabindex]";
+const FLYOUT_FOCUSABLE_SELECTOR = "a[href], button, input, select, textarea, [tabindex]";
 
-// Flyout items that keyboard focus can reach, in Tab order.
+// Flyout items that keyboard focus can reach, in Tab order: enabled,
+// rendered, and not hidden or inert.
 function flyoutFocusables(flyout) {
   return [...flyout.querySelectorAll(FLYOUT_FOCUSABLE_SELECTOR)].filter(
-    (element) => !element.disabled && element.tabIndex >= 0
+    (element) =>
+      !element.disabled &&
+      element.tabIndex >= 0 &&
+      !element.closest("[hidden], [inert]") &&
+      element.getClientRects().length > 0
   );
 }
 

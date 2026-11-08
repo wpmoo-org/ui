@@ -1247,8 +1247,10 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                         </button>
                         <ul class="sidebar-menu-sub collapse" data-slot="sidebar-menu-sub">
                           <li><button type="button" class="sidebar-menu-sub-button" tabindex="0" disabled>Archived</button></li>
+                          <li hidden><a class="sidebar-menu-sub-button" href="#hidden">Hidden</a></li>
                           <li><a class="sidebar-menu-sub-button" href="#alpha">Alpha</a></li>
                           <li><a class="sidebar-menu-sub-button" href="#beta">Beta</a></li>
+                          <li><input type="search" class="form-control" aria-label="Filter projects"></li>
                         </ul>
                       </li>`);
                 }"""
@@ -1260,9 +1262,11 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             trigger = page.locator("#certification-flyout-trigger")
             flyout = page.locator(".sidebar-menu-flyout")
             first_item = page.locator('.sidebar-menu-flyout a[href="#alpha"]')
-            last_item = page.locator('.sidebar-menu-flyout a[href="#beta"]')
+            second_item = page.locator('.sidebar-menu-flyout a[href="#beta"]')
+            last_item = page.locator(".sidebar-menu-flyout input")
 
-            # Keyboard opening skips a disabled item that still has a tabindex.
+            # Keyboard opening skips a disabled item that still has a tabindex
+            # and a hidden one.
             trigger.focus()
             page.keyboard.press("Enter")
             expect(first_item).to_be_focused()
@@ -1270,9 +1274,12 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             expect(flyout).to_have_count(0)
             expect(trigger).to_be_focused()
 
-            # Tab moves between items; only Tab out of the last one closes.
+            # Tab moves between items, form controls included; only Tab out of
+            # the last one closes.
             page.keyboard.press("Enter")
             expect(first_item).to_be_focused()
+            page.keyboard.press("Tab")
+            expect(second_item).to_be_focused()
             page.keyboard.press("Tab")
             expect(last_item).to_be_focused()
             expect(flyout).to_have_count(1)
