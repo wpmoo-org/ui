@@ -6,9 +6,12 @@ const instances = new WeakMap();
 // the reader's alphabet ("Ärzte" next to "Arzt"), not by code point.
 const SORT_COLLATOR = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
 
+// Plain decimals only: "-3", "0.5", "12". Identifiers such as "1e5" or
+// "0x10" stay text, so they keep their reading order.
+const PLAIN_NUMBER = /^[-+]?(?:\d+\.?\d*|\.\d+)$/;
+
 function sortNumber(value) {
-  const number = value === "" ? NaN : Number(value);
-  return Number.isFinite(number) ? number : null;
+  return PLAIN_NUMBER.test(value) ? Number(value) : null;
 }
 
 // Two plain numbers compare by value, so signs and decimals count

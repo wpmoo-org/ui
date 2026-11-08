@@ -1470,6 +1470,13 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(rows.nth(0)).to_have_attribute("id", "cert-row-3")
             expect(rows.nth(1)).to_have_attribute("id", "cert-row-2")
             expect(rows.nth(2)).to_have_attribute("id", "cert-row-1")
+
+            # Exponent-like identifiers are text: 1e5 reads before 12e3.
+            set_sort_values({"cert-row-1": "12e3", "cert-row-2": "1e5", "cert-row-3": "0.5"})
+            sort("asc")
+            expect(rows.nth(0)).to_have_attribute("id", "cert-row-3")
+            expect(rows.nth(1)).to_have_attribute("id", "cert-row-2")
+            expect(rows.nth(2)).to_have_attribute("id", "cert-row-1")
             evidence.assert_clean()
         finally:
             context.close()
