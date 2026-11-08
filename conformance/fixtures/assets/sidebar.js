@@ -45,6 +45,13 @@ __name(ownerPortalRoot, "ownerPortalRoot");
 
 // src/js/components/sidebar.js
 var instances = /* @__PURE__ */ new WeakMap();
+var FLYOUT_FOCUSABLE_SELECTOR = "a[href], button, [tabindex]";
+function flyoutFocusables(flyout) {
+  return [...flyout.querySelectorAll(FLYOUT_FOCUSABLE_SELECTOR)].filter(
+    (element) => !element.disabled && element.tabIndex >= 0
+  );
+}
+__name(flyoutFocusables, "flyoutFocusables");
 var _Sidebar = class _Sidebar {
   static getInstance(element) {
     return element?.nodeType === 1 ? instances.get(element) || null : null;
@@ -472,7 +479,37 @@ var _Sidebar = class _Sidebar {
       this._closeFlyouts();
     } else {
       this._openFlyout(item);
+      if (event.detail === 0) {
+        if (this._flyout) {
+          flyoutFocusables(this._flyout)[0]?.focus();
+        }
+      }
     }
+  }
+  // The flyout lives in a portal, away from its trigger, so Escape and Tab
+  // out of it return to the trigger instead of wandering. Tab between its
+  // items stays native; a key a flyout control already handled is left alone.
+  _handleFlyoutKeydown(event) {
+    const owner = this._flyoutOwner;
+    if (event.defaultPrevented || !this._flyout || !owner || !(event.key === "Escape" || event.key === "Tab")) {
+      return false;
+    }
+    const inFlyout = this._flyout.contains(event.target);
+    if (!inFlyout && !(event.key === "Escape" && owner.contains(event.target))) {
+      return false;
+    }
+    if (event.key === "Tab") {
+      const items = flyoutFocusables(this._flyout);
+      const edge = event.shiftKey ? items[0] : items[items.length - 1];
+      if (edge && event.target !== edge) {
+        return false;
+      }
+    }
+    event.preventDefault();
+    const trigger = owner.querySelector(":scope > .sidebar-menu-sub-trigger");
+    this._closeFlyouts();
+    trigger?.focus();
+    return true;
   }
   _handleOutsideFlyoutClick(event) {
     if (!this._flyout) {
@@ -485,6 +522,9 @@ var _Sidebar = class _Sidebar {
     }
   }
   _handleShortcut(event) {
+    if (this._handleFlyoutKeydown(event)) {
+      return;
+    }
     const target = event.target;
     const isEditable = target instanceof this._window.Element && (target.matches("input, textarea, select") || target.isContentEditable);
     if (event.defaultPrevented || event.isComposing || isEditable || !this._config.keyboard || !(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "b" || !this._isDesktop()) {
