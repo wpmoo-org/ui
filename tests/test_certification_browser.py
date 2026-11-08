@@ -5955,17 +5955,28 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 # Disposing an open menu also closes it.
                 surface.click(button="right")
                 expect(menu).to_have_class("dropdown-menu context-menu-menu show")
-                self.assertTrue(
-                    root.evaluate(
-                        """
-                        element => {
-                          window.certificationContextMenu.dispose();
-                          return window.CertificationContextMenu.getInstance(element) === null;
-                        }
-                        """
-                    )
+                disposal = root.evaluate(
+                    """
+                    element => {
+                      const trigger = element.querySelector(":scope > .context-menu-trigger");
+                      let expandedWhenHidden = null;
+                      element.addEventListener("hidden.bs.dropdown", () => {
+                        expandedWhenHidden = trigger.getAttribute("aria-expanded");
+                      }, { once: true });
+                      // A hide listener that disposes again is ignored.
+                      element.addEventListener("hide.bs.dropdown", () => {
+                        window.certificationContextMenu.dispose();
+                      }, { once: true });
+                      window.certificationContextMenu.dispose();
+                      return {
+                        disposed: window.CertificationContextMenu.getInstance(element) === null,
+                        expandedWhenHidden,
+                      };
+                    }
+                    """
                 )
-                expect(menu).not_to_have_class("dropdown-menu context-menu-menu show")
+                self.assertEqual(disposal, {"disposed": True, "expandedWhenHidden": "false"})
+                expect(menu).not_to_have_class(re.compile(r"\bshow\b"))
                 self.assertEqual(surface.get_attribute("aria-expanded"), "false")
                 surface.click(button="right")
                 expect(menu).not_to_have_class("dropdown-menu context-menu-menu show")

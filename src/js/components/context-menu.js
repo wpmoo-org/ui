@@ -72,14 +72,20 @@ export default class ContextMenu {
   }
 
   dispose() {
+    // A hide listener that disposes again must not hide the menu twice.
+    if (this._disposing) {
+      return;
+    }
+    this._disposing = true;
     this._listeners.forEach(({ target, type, handler, options }) => {
       target.removeEventListener(type, handler, options);
     });
     this._listeners = [];
+    // Triggers report the menu closed before its hidden event is heard;
     // dispose() alone leaves an open menu shown at its last position.
+    this._syncExpanded(false);
     this._dropdown.hide();
     this._dropdown.dispose();
-    this._syncExpanded(false);
     this._invoker = null;
     this._pointerRect = null;
     instances.delete(this._element);
