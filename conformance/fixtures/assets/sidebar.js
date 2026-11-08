@@ -47,8 +47,9 @@ __name(ownerPortalRoot, "ownerPortalRoot");
 var instances = /* @__PURE__ */ new WeakMap();
 var FLYOUT_FOCUSABLE_SELECTOR = "a[href], button, input, select, textarea, [tabindex]";
 function flyoutFocusables(flyout) {
+  const view = flyout.ownerDocument.defaultView;
   return [...flyout.querySelectorAll(FLYOUT_FOCUSABLE_SELECTOR)].filter(
-    (element) => !element.disabled && element.tabIndex >= 0 && !element.closest("[hidden], [inert]") && element.getClientRects().length > 0
+    (element) => !element.matches(":disabled") && element.tabIndex >= 0 && !element.closest("[hidden], [inert]") && element.getClientRects().length > 0 && view.getComputedStyle(element).visibility === "visible"
   );
 }
 __name(flyoutFocusables, "flyoutFocusables");
