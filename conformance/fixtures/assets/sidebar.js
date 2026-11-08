@@ -45,10 +45,10 @@ __name(ownerPortalRoot, "ownerPortalRoot");
 
 // src/js/components/sidebar.js
 var instances = /* @__PURE__ */ new WeakMap();
-var FLYOUT_FOCUSABLE_SELECTOR = "a[href], button, [tabindex]";
+var FLYOUT_FOCUSABLE_SELECTOR = "a[href], button, input, select, textarea, [tabindex]";
 function flyoutFocusables(flyout) {
   return [...flyout.querySelectorAll(FLYOUT_FOCUSABLE_SELECTOR)].filter(
-    (element) => !element.disabled && element.tabIndex >= 0
+    (element) => !element.disabled && element.tabIndex >= 0 && !element.closest("[hidden], [inert]") && element.getClientRects().length > 0
   );
 }
 __name(flyoutFocusables, "flyoutFocusables");
