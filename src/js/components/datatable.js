@@ -14,13 +14,18 @@ function sortNumber(value) {
   return PLAIN_NUMBER.test(value) ? Number(value) : null;
 }
 
-// Two plain numbers compare by value, so signs and decimals count
-// (-10 before -2, 1.10 before 1.2); anything else uses the collator.
+// Plain numbers compare by value, so signs and decimals count (-10 before
+// -2, 1.10 before 1.2), and come before text, which uses the collator.
+// Keeping the two groups apart keeps the order transitive: comparing
+// "1.10" with "1.2a" by collator would contradict the numeric order.
 function compareSortValues(a, b) {
   const aNumber = sortNumber(a);
   const bNumber = sortNumber(b);
   if (aNumber !== null && bNumber !== null) {
     return Math.sign(aNumber - bNumber);
+  }
+  if (aNumber !== null || bNumber !== null) {
+    return aNumber !== null ? -1 : 1;
   }
   return SORT_COLLATOR.compare(a, b);
 }

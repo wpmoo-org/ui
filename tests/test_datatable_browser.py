@@ -1477,6 +1477,19 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(rows.nth(0)).to_have_attribute("id", "cert-row-3")
             expect(rows.nth(1)).to_have_attribute("id", "cert-row-2")
             expect(rows.nth(2)).to_have_attribute("id", "cert-row-1")
+
+            # Mixed numbers and text: numbers first, by value, then text. The
+            # order holds whatever order the rows start in.
+            set_sort_values({"cert-row-1": "1.2a", "cert-row-2": "1.2", "cert-row-3": "1.10"})
+            sort("asc")
+            expect(rows.nth(0)).to_have_attribute("id", "cert-row-3")
+            expect(rows.nth(1)).to_have_attribute("id", "cert-row-2")
+            expect(rows.nth(2)).to_have_attribute("id", "cert-row-1")
+            set_sort_values({"cert-row-1": "1.10", "cert-row-2": "1.2a", "cert-row-3": "1.2"})
+            sort("asc")
+            expect(rows.nth(0)).to_have_attribute("id", "cert-row-1")
+            expect(rows.nth(1)).to_have_attribute("id", "cert-row-3")
+            expect(rows.nth(2)).to_have_attribute("id", "cert-row-2")
             evidence.assert_clean()
         finally:
             context.close()
