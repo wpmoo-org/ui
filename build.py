@@ -54,6 +54,7 @@ SITE_ROOT_ASSETS = tuple(
         "icon-512.png",
         "site.webmanifest",
         "_headers",
+        "sitemap.xsl",
     )
 )
 BOOTSTRAP = ROOT / "vendor/bootstrap"
@@ -2708,6 +2709,55 @@ def sitemap_lastmod() -> dict[str, str]:
     }
 
 
+SITEMAP_GROUPS = (
+    ("", "Pages"),
+    ("components", "Components"),
+    ("blocks", "Blocks"),
+    ("utils", "Utilities"),
+    ("examples", "Examples"),
+    ("layouts", "Layouts"),
+)
+
+
+def sitemap_page_groups(
+    sections: list[dict[str, str]],
+    catalog: list[dict[str, str]],
+    utilities: list[dict[str, str]],
+    blocks: list[dict[str, str]],
+    layouts: list[dict[str, str]],
+    guides: dict[str, dict[str, object]],
+) -> list[dict[str, object]]:
+    """The public pages of sitemap.xml, grouped and labelled for people."""
+    lastmod = sitemap_lastmod()
+    grouped: dict[str, list[dict[str, str]]] = {key: [] for key, _ in SITEMAP_GROUPS}
+    for path in public_page_paths(layouts):
+        logical = Path(path)
+        metadata = page_metadata(
+            PAGES / f"{path}.jinja", logical, sections, catalog, utilities, blocks, layouts, guides
+        )
+        key = logical.parts[0] if len(logical.parts) > 1 else ""
+        if key not in grouped:
+            key = ""
+        title = _strip_site_suffix(str(metadata["title"])) or SITE_NAME
+        if metadata["kind"] == "component":
+            title = next(entry["label"] for entry in catalog if entry["slug"] == metadata["slug"])
+        url = str(metadata["url"])
+        grouped[key].append(
+            {
+                "title": title,
+                "description": str(metadata["description"]),
+                "href": pretty_url(path),
+                "url": url,
+                "lastmod": lastmod.get(url, ""),
+            }
+        )
+    return [
+        {"key": key or "pages", "label": label, "pages": sorted(grouped[key], key=lambda page: page["title"].lower())}
+        for key, label in SITEMAP_GROUPS
+        if grouped[key]
+    ]
+
+
 def write_sitemap(layouts: list[dict[str, str]] | None = None) -> None:
     lastmod = sitemap_lastmod()
     urls = "\n".join(
@@ -2724,6 +2774,7 @@ def write_sitemap(layouts: list[dict[str, str]] | None = None) -> None:
     sitemap = "\n".join(
         (
             '<?xml version="1.0" encoding="UTF-8"?>',
+            '<?xml-stylesheet type="text/xsl" href="sitemap.xsl"?>',
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
             urls,
             "</urlset>",
@@ -2778,6 +2829,9 @@ def render_pages(
         examples,
         layouts,
     )
+    sitemap_groups = sitemap_page_groups(
+        sections, catalog, utilities, blocks, layouts, component_guides
+    )
     version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
@@ -2824,6 +2878,7 @@ def render_pages(
             component_ownership=component_ownership,
             component_guides=component_guides,
             component_labels=component_labels,
+            sitemap_groups=sitemap_groups,
             site_pages=site_pages,
             current_section=current_section,
             current_slug=metadata["slug"],
