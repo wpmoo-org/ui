@@ -687,10 +687,13 @@ export class MooCalendar {
       nextDate = addDays(this._activeDate, 6 - weekdayOffset);
     } else if (event.key === "PageUp" || event.key === "PageDown") {
       const target = addMonths(this._activeDate, event.key === "PageUp" ? -1 : 1);
-      nextDate = limitToRange(target, this._config.minDate, this._config.maxDate);
-      // A month past the range edge stops at the edge, then looks back
-      // toward the active day for one that can be chosen.
-      stepTowardActive = compareDates(nextDate, target) !== 0;
+      const { minDate, maxDate } = this._config;
+      nextDate = limitToRange(target, minDate, maxDate);
+      // Paging stops at the range edge, and from the edge looks back toward
+      // the active day for one that can be chosen.
+      stepTowardActive = [minDate, maxDate].some(
+        (edge) => edge && compareDates(nextDate, edge) === 0
+      );
     } else if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
       event.preventDefault();
       this._selectDate(this._activeDate, true);

@@ -1163,6 +1163,42 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             expect(page.locator(":focus")).to_have_attribute("data-calendar-day", "2026-08-31")
             page.keyboard.press("Escape")
 
+            # A month that lands exactly on a disabled range edge also looks
+            # back toward the active day.
+            page.evaluate(
+                """() => {
+                    document.body.insertAdjacentHTML("beforeend", `
+                      <div class="moo-calendar" id="edge-calendar" data-calendar
+                        data-calendar-mode="single" data-calendar-locale="en"
+                        data-calendar-value="2026-08-20"
+                        data-calendar-min-date="2026-07-20" data-calendar-max-date="2026-09-20"
+                        data-calendar-disabled-dates='["2026-07-20", "2026-09-20"]'
+                        aria-label="Edge calendar" tabindex="-1"></div>`);
+                    window.CertificationCalendar.getOrCreateInstance(
+                      document.querySelector("#edge-calendar")
+                    );
+                }"""
+            )
+            edge_calendar = page.locator("#edge-calendar")
+            edge_calendar.locator('[data-calendar-day][tabindex="0"]').focus()
+            page.keyboard.press("PageDown")
+            expect(page.locator(":focus")).to_have_attribute("data-calendar-day", "2026-09-19")
+            page.evaluate(
+                """() => window.CertificationCalendar
+                  .getInstance(document.querySelector("#edge-calendar"))
+                  .setDate("2026-08-20", { emit: false })"""
+            )
+            edge_calendar.locator('[data-calendar-day][tabindex="0"]').focus()
+            page.keyboard.press("PageUp")
+            expect(page.locator(":focus")).to_have_attribute("data-calendar-day", "2026-07-21")
+            page.evaluate(
+                """() => {
+                    const element = document.querySelector("#edge-calendar");
+                    window.CertificationCalendar.getInstance(element).dispose();
+                    element.remove();
+                }"""
+            )
+
             reset_input = page.locator('#certification-reset-datepicker input[name="reset_date"]')
             page.locator("#certification-reset-datepicker-trigger").click()
             page.locator('#certification-reset-datepicker-calendar [data-calendar-day="2026-08-20"]').click()
