@@ -122,24 +122,6 @@ class ComponentGuideContractTests(CatalogTestCase):
         self.assertEqual([item["@type"] for item in items], ["WebSite"])
         self.assertEqual(items[0]["url"], "https://ui.wpmoo.org/")
 
-    def test_sitemap_dates_only_pages_with_a_declared_update(self) -> None:
-        sitemap = (SITE_DIST / "sitemap.xml").read_text(encoding="utf-8")
-        entries = re.findall(r"<url>(.*?)</url>", sitemap, re.DOTALL)
-        dated = {
-            re.search(r"<loc>([^<]*)</loc>", entry).group(1): re.search(
-                r"<lastmod>([^<]*)</lastmod>", entry
-            ).group(1)
-            for entry in entries
-            if "<lastmod>" in entry
-        }
-        self.assertEqual(
-            dated,
-            {
-                site_build.canonical_url(f"components/{slug}.html"): guide["updated"]
-                for slug, guide in GUIDES.items()
-            },
-        )
-
     def test_non_indexed_pages_carry_no_structured_data(self) -> None:
         for path in ("acceptance/rc2/index.html", "404.html"):
             with self.subTest(path=path):
@@ -160,7 +142,6 @@ class ComponentGuideRegistryTests(unittest.TestCase):
 
     def guide(self, **overrides: object) -> dict[str, object]:
         return {
-            "updated": "2026-11-08",
             "metaTitle": "Title",
             "metaDescription": "Description",
             "summary": "Summary",
@@ -181,10 +162,6 @@ class ComponentGuideRegistryTests(unittest.TestCase):
             self.load({"accordion": self.guide(related=["drawer"])})
         with self.assertRaisesRegex(ValueError, "links unknown component 'drawer'"):
             self.load({"accordion": self.guide(whenNotToUse=[{"text": "x", "slug": "drawer"}])})
-
-    def test_update_date_must_be_iso(self) -> None:
-        with self.assertRaisesRegex(ValueError, "updated must be YYYY-MM-DD"):
-            self.load({"accordion": self.guide(updated="08.11.2026")})
 
     def test_missing_required_field_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "accordion needs summary"):

@@ -44,6 +44,7 @@ PACKAGE_DIST = ROOT / "dist"
 SITE_DIST = ROOT / "site-dist"
 SITE_PUBLIC = SITE / "public"
 LLMS_TXT = SITE_PUBLIC / "llms.txt"
+PAGE_DATES = SITE_REGISTRY / "page-dates.json"
 SITE_ROOT_ASSETS = tuple(
     SITE_PUBLIC / name
     for name in (
@@ -172,7 +173,6 @@ BUILD_LOCK = (
     / f"moo-ui-build-{hashlib.sha256(str(ROOT).encode()).hexdigest()[:16]}.lock"
 )
 SITE_NAME = "Moo UI"
-ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 SITE_ORIGIN = "https://ui.wpmoo.org"
 DEFAULT_META_DESCRIPTION = (
     "Moo UI is a Bootstrap 5.3-compatible HTML component system with "
@@ -1209,6 +1209,7 @@ def structured_data(
     title: str,
     description: str,
     label: str,
+    modified: str = "",
 ) -> list[dict[str, object]]:
     """Schema.org JSON-LD for the home page and component pages."""
     home = canonical_url("index.html")
@@ -1217,15 +1218,18 @@ def structured_data(
         return [{"@context": "https://schema.org", **website, "description": description}]
     if kind != "component" or not url or not label:
         return []
+    article: dict[str, object] = {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": title,
+        "description": description,
+        "url": url,
+        "isPartOf": website,
+    }
+    if modified:
+        article["dateModified"] = modified
     return [
-        {
-            "@context": "https://schema.org",
-            "@type": "TechArticle",
-            "headline": title,
-            "description": description,
-            "url": url,
-            "isPartOf": website,
-        },
+        article,
         {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
@@ -1331,6 +1335,7 @@ def page_metadata(
             title,
             description,
             (entry or {}).get("label", ""),
+            sitemap_lastmod().get(url, ""),
         ),
         "site_name": SITE_NAME,
         "title": title,
@@ -1979,11 +1984,9 @@ def load_component_guides(labels: dict[str, str]) -> dict[str, dict[str, object]
     for slug, guide in guides.items():
         if slug not in labels:
             fail(f"component-guides.json: unknown component {slug!r}")
-        for field in ("updated", "metaTitle", "metaDescription", "summary", "whenToUse"):
+        for field in ("metaTitle", "metaDescription", "summary", "whenToUse"):
             if not guide.get(field):
                 fail(f"component-guides.json: {slug} needs {field}")
-        if not ISO_DATE.fullmatch(str(guide["updated"])):
-            fail(f"component-guides.json: {slug} updated must be YYYY-MM-DD")
         linked = list(guide.get("related", [])) + [
             item["slug"] for item in guide.get("whenNotToUse", []) if item.get("slug")
         ]
@@ -2697,16 +2700,16 @@ def public_canonical_urls(layouts: list[dict[str, str]] | None = None) -> list[s
 
 
 def sitemap_lastmod() -> dict[str, str]:
-    """Content dates declared in the site guides, keyed by canonical URL.
+    """Recorded content dates, keyed by canonical URL.
 
-    A date is listed only where the source declares one: build or checkout
-    times would mark every page as changed and teach crawlers to ignore it.
+    scripts/record-page-dates.py owns page-dates.json and moves a page's
+    date only when its rendered content changes; build or checkout times
+    would mark every page as changed and teach crawlers to ignore them.
     """
-    labels = {component["slug"]: component["label"] for component in load_catalog()}
-    return {
-        canonical_url(f"components/{slug}.html"): str(guide["updated"])
-        for slug, guide in load_component_guides(labels).items()
-    }
+    if not PAGE_DATES.exists():
+        return {}
+    dates = json.loads(PAGE_DATES.read_text(encoding="utf-8"))
+    return {canonical_url(route): str(entry["updated"]) for route, entry in dates.items()}
 
 
 SITEMAP_GROUPS = (
