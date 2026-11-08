@@ -37,195 +37,195 @@
   },
   "components/accordion/": {
     "updated": "2026-11-08",
-    "hash": "sha256:9c1a744ea2f8948c"
+    "hash": "sha256:93bc8e6d600d1d70"
   },
   "components/alert-dialog/": {
     "updated": "2026-11-08",
-    "hash": "sha256:6242bacf2a9c4fe1"
+    "hash": "sha256:07b1cef7568955ea"
   },
   "components/alert/": {
     "updated": "2026-11-08",
-    "hash": "sha256:3c00b396a8bdeae6"
+    "hash": "sha256:b52ef430bc9741f9"
   },
   "components/avatar/": {
     "updated": "2026-11-08",
-    "hash": "sha256:29ca61362cf0f85e"
+    "hash": "sha256:2ddee9ea326074ae"
   },
   "components/badge/": {
     "updated": "2026-11-08",
-    "hash": "sha256:06de0f163973ed29"
+    "hash": "sha256:8c3b613a7fd8ab79"
   },
   "components/breadcrumb/": {
     "updated": "2026-11-08",
-    "hash": "sha256:f169340b0322521a"
+    "hash": "sha256:f8b5316308234175"
   },
   "components/button-group/": {
     "updated": "2026-11-08",
-    "hash": "sha256:f7e93abbd917115e"
+    "hash": "sha256:28967d27c5d447ac"
   },
   "components/button/": {
     "updated": "2026-11-08",
-    "hash": "sha256:2cc05aa349299386"
+    "hash": "sha256:e92c4b1c2ed6ee28"
   },
   "components/card/": {
     "updated": "2026-11-08",
-    "hash": "sha256:1ae6ab4b07b1e0a0"
+    "hash": "sha256:29a2555a2853d892"
   },
   "components/chart/": {
     "updated": "2026-11-08",
-    "hash": "sha256:d29c572a511cae64"
+    "hash": "sha256:4a0f5836dc63f8dc"
   },
   "components/checkbox/": {
     "updated": "2026-11-08",
-    "hash": "sha256:86d2c7ffbc38df12"
+    "hash": "sha256:aeb9c0dbffb67682"
   },
   "components/close-button/": {
     "updated": "2026-11-08",
-    "hash": "sha256:a41a68322b54786f"
+    "hash": "sha256:6070a0fb653b178d"
   },
   "components/collapsible/": {
     "updated": "2026-11-08",
-    "hash": "sha256:0f8f0e3989188b6a"
+    "hash": "sha256:bb65c082615621d7"
   },
   "components/combobox/": {
     "updated": "2026-11-08",
-    "hash": "sha256:4d8cd84d06479891"
+    "hash": "sha256:940df62574eab454"
   },
   "components/context-menu/": {
     "updated": "2026-11-08",
-    "hash": "sha256:9f2011b308927413"
+    "hash": "sha256:e3894413ac0c4010"
   },
   "components/datatable/": {
     "updated": "2026-11-08",
-    "hash": "sha256:33bee934fb285575"
+    "hash": "sha256:6688913273ea10bf"
   },
   "components/datepicker/": {
     "updated": "2026-11-08",
-    "hash": "sha256:5d0d19e81870ff6d"
+    "hash": "sha256:98ddddf0b1848408"
   },
   "components/dialog/": {
     "updated": "2026-11-08",
-    "hash": "sha256:73a8112c2f1fd6d8"
+    "hash": "sha256:1f375e349221b007"
   },
   "components/dropdown-menu/": {
     "updated": "2026-11-08",
-    "hash": "sha256:975badbb9e463a44"
+    "hash": "sha256:2173179091712959"
   },
   "components/empty/": {
     "updated": "2026-11-08",
-    "hash": "sha256:701c83b483d9ee83"
+    "hash": "sha256:5f4c4cddba14b15d"
   },
   "components/field/": {
     "updated": "2026-11-08",
-    "hash": "sha256:29385dffa7a9c77c"
+    "hash": "sha256:ab2a4a684ac42a99"
   },
   "components/form/": {
     "updated": "2026-11-08",
-    "hash": "sha256:7def061526487bbd"
+    "hash": "sha256:143cef792f0c4c11"
   },
   "components/input-group/": {
     "updated": "2026-11-08",
-    "hash": "sha256:d11a78e343d2d0b1"
+    "hash": "sha256:e39ad4f49c370cf8"
   },
   "components/input/": {
     "updated": "2026-11-08",
-    "hash": "sha256:e1932c5ea7204b8e"
+    "hash": "sha256:2ab789b3a92dea9d"
   },
   "components/item/": {
     "updated": "2026-11-08",
-    "hash": "sha256:dca0f510a9f048a4"
+    "hash": "sha256:53ffa768bec0af77"
   },
   "components/kbd/": {
     "updated": "2026-11-08",
-    "hash": "sha256:d7345de84fba1833"
+    "hash": "sha256:a5727bf307a41f68"
   },
   "components/menubar/": {
     "updated": "2026-11-08",
-    "hash": "sha256:a0f9c9df1062997c"
+    "hash": "sha256:234e3d27c0deb38b"
   },
   "components/navigation/": {
     "updated": "2026-11-08",
-    "hash": "sha256:45d9407b94b1f179"
+    "hash": "sha256:aa4b8de1cb1e1729"
   },
   "components/pagination/": {
     "updated": "2026-11-08",
-    "hash": "sha256:5ec97880b4a363c4"
+    "hash": "sha256:d7edf59467e2c2ec"
   },
   "components/popover/": {
     "updated": "2026-11-08",
-    "hash": "sha256:972d89f90ef76b67"
+    "hash": "sha256:e263bae6fe003bfc"
   },
   "components/progress/": {
     "updated": "2026-11-08",
-    "hash": "sha256:c297dbfe37e0e022"
+    "hash": "sha256:f77f8a81f43416ad"
   },
   "components/radio-group/": {
     "updated": "2026-11-08",
-    "hash": "sha256:8d873c5031c5f71f"
+    "hash": "sha256:2e77a940f7a86bb8"
   },
   "components/select/": {
     "updated": "2026-11-08",
-    "hash": "sha256:a446f596937f28ba"
+    "hash": "sha256:045486e4d40f11f5"
   },
   "components/separator/": {
     "updated": "2026-11-08",
-    "hash": "sha256:7ad317eec51081e3"
+    "hash": "sha256:35641b7a94afe139"
   },
   "components/sheet/": {
     "updated": "2026-11-08",
-    "hash": "sha256:bc885bbfec08027d"
+    "hash": "sha256:5de1c5ff69b0c956"
   },
   "components/sidebar/": {
     "updated": "2026-11-08",
-    "hash": "sha256:1914606b91ba0cb8"
+    "hash": "sha256:6311db9526c889a3"
   },
   "components/skeleton/": {
     "updated": "2026-11-08",
-    "hash": "sha256:1257bba9b860f206"
+    "hash": "sha256:dbde736f5548d90b"
   },
   "components/slider/": {
     "updated": "2026-11-08",
-    "hash": "sha256:a5b28e600cf0cedc"
+    "hash": "sha256:a17bccda8f69b1cc"
   },
   "components/spinner/": {
     "updated": "2026-11-08",
-    "hash": "sha256:52c27e16a966e39a"
+    "hash": "sha256:ada52b0fb0048d82"
   },
   "components/switch/": {
     "updated": "2026-11-08",
-    "hash": "sha256:b4ee0fc5c8cf265b"
+    "hash": "sha256:490715796fba5d2e"
   },
   "components/table/": {
     "updated": "2026-11-08",
-    "hash": "sha256:dc39fb62ea90d492"
+    "hash": "sha256:32ba491aa2526385"
   },
   "components/tabs/": {
     "updated": "2026-11-08",
-    "hash": "sha256:79ecb95918c0fdd4"
+    "hash": "sha256:9aa2b3c166ec648a"
   },
   "components/textarea/": {
     "updated": "2026-11-08",
-    "hash": "sha256:ef6bfd8ced6f685a"
+    "hash": "sha256:052ce78af5a6609c"
   },
   "components/toast/": {
     "updated": "2026-11-08",
-    "hash": "sha256:b05b1c352079c852"
+    "hash": "sha256:c75bf247f4e9672a"
   },
   "components/toc/": {
     "updated": "2026-11-08",
-    "hash": "sha256:7746007bf8b0adbc"
+    "hash": "sha256:1685ee122cacfd91"
   },
   "components/toggle-group/": {
     "updated": "2026-11-08",
-    "hash": "sha256:8014839c54b51557"
+    "hash": "sha256:2d6b0e64c59830bb"
   },
   "components/tooltip/": {
     "updated": "2026-11-08",
-    "hash": "sha256:03454d10ffdff6ce"
+    "hash": "sha256:a1735b3801a09a1b"
   },
   "components/typography/": {
     "updated": "2026-11-08",
-    "hash": "sha256:c91abe5c8e739d81"
+    "hash": "sha256:e991ce632967682a"
   },
   "contributing/": {
     "updated": "2026-07-30",

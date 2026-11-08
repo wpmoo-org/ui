@@ -65,11 +65,15 @@
 
       {% if guide.get("related") %}
       <h2 class="h3 pb-3 mb-3 mt-5 border-bottom" id="{{ current_slug }}-related-title">Related components</h2>
-      <ul>
-        {% for slug in guide.related if slug in component_labels %}
-        <li><a href="{{ root_path }}components/{{ slug }}/">{{ component_labels[slug] }}</a></li>
+      {% call item_group() %}
+        {% for slug in guide.related %}
+          {% set entry = catalog | selectattr("slug", "equalto", slug) | first %}
+          {% if entry %}
+            {% set related_icon %}{{ render_icon(component_icons.get(entry.slug, "component"), "inline-start") }}{% endset %}
+            {{ item(entry.label, description=entry.description, media=related_icon, href=root_path ~ "components/" ~ entry.slug ~ "/", variant="outline", listitem=true) }}
+          {% endif %}
         {% endfor %}
-      </ul>
+      {% endcall %}
       {% endif %}
     </section>
   {% endif %}
