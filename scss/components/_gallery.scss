@@ -46,6 +46,9 @@ $moo-gallery-strip-gutter: if($moo-gallery-strip-bleed, $moo-gallery-strip-bleed
   flex-wrap: nowrap;
   overflow-x: auto;
   scroll-snap-type: x proximity;
+  // The strip takes its width from its container, never from the row of
+  // photos, so a grid or flex parent cannot grow to the strip's length.
+  contain: inline-size;
 
   > * {
     flex: none;

@@ -212,6 +212,7 @@ class ImageGalleryTests(CatalogTestCase):
             self.assertIn(knob, settings)
         self.assertIn("scroll-snap-type: x proximity;", component)
         self.assertIn("max-width: 85%;", component)
+        self.assertIn("contain: inline-size;", component)
         self.assertIn("height: $moo-gallery-stage-height;", component)
 
     def test_compiled_css_ships_the_gallery_helpers(self) -> None:

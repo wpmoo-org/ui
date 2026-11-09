@@ -197,7 +197,9 @@ class ImageGalleryBrowserTests(CatalogTestCase):
             <!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">
             <link rel="stylesheet" href="/moo-ui.css"></head><body>
             <main class="moo-ui container py-4" data-bs-theme="light">
-              {{ image_gallery("strip", images, layout="strip", strip_until="md", strip_bleed=true) }}
+              <div class="d-grid">
+                {{ image_gallery("strip", images, layout="strip", strip_until="md", strip_bleed=true) }}
+              </div>
             </main></body></html>''').render(images=images)
         assets = {"/moo-ui.css": ((ROOT / "dist/assets/css/moo-ui.css").read_bytes(), "text/css")}
         for name in PHOTOS:
@@ -248,6 +250,8 @@ class ImageGalleryBrowserTests(CatalogTestCase):
                                     self.assertAlmostEqual(image_height, box_height, delta=1)
                                 # Full bleed: the strip reaches the screen edge.
                                 self.assertAlmostEqual(geometry["stripLeft"], 0, delta=1)
+                                # A grid parent keeps its width: the strip scrolls inside it.
+                                self.assertLessEqual(geometry["width"], width)
                                 region.focus()
                                 page.keyboard.press("ArrowRight")
                                 page.wait_for_function(
