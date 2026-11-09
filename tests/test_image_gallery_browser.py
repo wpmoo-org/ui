@@ -105,6 +105,12 @@ class ImageGalleryBrowserTests(CatalogTestCase):
                             expect(counter).to_have_text("3 of 5")
 
                             page.locator("#album-lightbox-fullscreen").click()
+                            # The dialog grows into full screen instead of jumping.
+                            self.assertEqual(
+                                dialog.locator(".modal-content").evaluate(
+                                    "element => element.getAnimations().map(a => a.effect.getTiming().duration)"),
+                                [250],
+                            )
                             expect(dialog.locator(".modal-dialog")).to_have_class(has_class("modal-fullscreen"))
                             expect(dialog.locator("[data-gallery-stage]")).not_to_have_class(has_class("gallery-stage"))
                             expect(page.locator("#album-lightbox-windowed")).to_be_focused()
@@ -113,12 +119,27 @@ class ImageGalleryBrowserTests(CatalogTestCase):
                             expect(dialog.locator(".modal-dialog")).not_to_have_class(has_class("modal-fullscreen"))
                             expect(dialog.locator("[data-gallery-stage]")).to_have_class(has_class("gallery-stage"))
 
+                            progress = dialog.locator(".progress")
+                            expect(progress).to_be_hidden()
+                            expect(progress).to_have_attribute("aria-hidden", "true")
                             page.locator("#album-lightbox-play").click()
                             expect(page.locator("#album-lightbox-pause")).to_be_focused()
                             expect(counter).to_have_attribute("aria-live", "off")
+                            expect(progress).to_be_visible()
+                            # The bar fills over one photo's time, then the next photo shows.
+                            page.wait_for_timeout(2500)
+                            filled = progress.evaluate(
+                                "track => track.querySelector('.progress-bar').getBoundingClientRect().width"
+                                " / track.getBoundingClientRect().width")
+                            self.assertGreater(filled, 0.3)
+                            self.assertLess(filled, 0.7)
+                            expect(counter).to_have_text("4 of 5", timeout=4000)
                             page.locator("#album-lightbox-pause").click()
                             expect(page.locator("#album-lightbox-play")).to_be_visible()
+                            expect(progress).to_be_hidden()
                             expect(counter).to_have_attribute("aria-live", "polite")
+                            page.wait_for_timeout(5500)
+                            expect(counter).to_have_text("4 of 5")
 
                             page.keyboard.press("Escape")
                             expect(dialog).to_be_hidden()
@@ -134,6 +155,17 @@ class ImageGalleryBrowserTests(CatalogTestCase):
                                 "document.querySelector('#album-lightbox').contains(document.activeElement)")
                             page.keyboard.press("Escape")
                             expect(dialog).to_be_hidden()
+                            page.emulate_media(reduced_motion="reduce")
+                            trigger.click()
+                            page.wait_for_function(
+                                "document.querySelector('#album-lightbox').contains(document.activeElement)")
+                            page.locator("#album-lightbox-fullscreen").click()
+                            self.assertEqual(dialog.locator(".modal-content").evaluate(
+                                "element => element.getAnimations().length"), 0)
+                            page.locator("#album-lightbox-windowed").click()
+                            page.keyboard.press("Escape")
+                            expect(dialog).to_be_hidden()
+                            page.emulate_media(reduced_motion="no-preference")
                             page.set_viewport_size({"width": 390, "height": 844})
                             trigger.click()
                             expect(dialog).to_be_visible()

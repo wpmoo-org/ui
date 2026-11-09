@@ -112,8 +112,10 @@ class ImageGalleryTests(CatalogTestCase):
         for control in ("previous", "play", "pause", "next", "fullscreen", "windowed"):
             self.assertIn(f'id="album-lightbox-{control}"', lightbox)
         self.assertIn('data-bs-dismiss="modal"', lightbox)
+        self.assertIn('class="progress rounded-0 d-none" role="progressbar" aria-label="Time until the next photo"', lightbox)
         single = self.render(images=IMAGES[:1])
         self.assertNotIn('id="album-lightbox-play"', single)
+        self.assertNotIn('class="progress', single)
         self.assertIn('id="album-lightbox-fullscreen"', single)
 
     def test_lightbox_shows_a_caption_and_credit_when_given(self) -> None:
@@ -129,13 +131,15 @@ class ImageGalleryTests(CatalogTestCase):
         labels = {
             "title": "Fotos", "close": "Schließen", "previous": "Zurück",
             "next": "Weiter", "play": "Diashow starten", "pause": "Diashow anhalten",
+            "progress": "Zeit bis zum nächsten Foto",
             "fullscreen": "Vollbild", "exit_fullscreen": "Vollbild beenden",
             "counter": "{current} von {total}", "show_all": "Alle {total} Fotos anzeigen",
         }
         output = self.render(images=IMAGES * 4, labels=labels)
         for text in ("Alle 12 Fotos anzeigen", "1 von 12", "Zurück </button>", "Weiter <svg"):
             self.assertIn(text, output)
-        for name in ("Fotos", "Schließen", "Diashow starten", "Diashow anhalten", "Vollbild", "Vollbild beenden"):
+        for name in ("Fotos", "Schließen", "Diashow starten", "Diashow anhalten", "Vollbild", "Vollbild beenden",
+                     "Zeit bis zum nächsten Foto"):
             self.assertIn(f'aria-label="{name}"', output)
         self.assertIn('data-gallery-counter="{current} von {total}"', output)
 

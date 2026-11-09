@@ -5,7 +5,9 @@
    page's colour mode that fills the screen below the lg breakpoint: a header
    with the counter and ghost full-screen and close buttons, a muted stage of
    one height (gallery-stage) holding a Bootstrap Carousel, and a footer with
-   the caption and credit beside Previous, play or pause and Next.
+   the caption and credit beside Previous, play or pause and Next. While the
+   slideshow plays, a Progress bar above the footer shows the time to the
+   next photo.
 
    Every thumbnail is a link to the large image, so the gallery works without
    JavaScript. With Bootstrap the link opens the lightbox instead (Modal data
@@ -25,6 +27,7 @@
                                a muted line under it, such as place or author #}
 {% from "components/button.html.jinja" import button %}
 {% from "components/dialog.html.jinja" import dialog, dialog_body %}
+{% from "components/progress.html.jinja" import progress %}
 
 {% set image_gallery_layouts = ["grid", "justified", "masonry", "featured"] %}
 {% set image_gallery_ratios = ["1x1", "4x3", "3x2"] %}
@@ -36,6 +39,7 @@
   "next": "Next",
   "play": "Play slideshow",
   "pause": "Pause slideshow",
+  "progress": "Time until the next photo",
   "fullscreen": "Full screen",
   "exit_fullscreen": "Exit full screen",
   "counter": "{current} of {total}",
@@ -148,6 +152,9 @@
           </div>
         </div>
       {% endcall %}
+      {% if total > 1 %}
+        {{ progress(0, aria_label=text.progress, extra_class="rounded-0 d-none") }}
+      {% endif %}
       <div class="d-flex flex-wrap align-items-center gap-3 border-top px-3 px-sm-4 py-3">
         <div class="me-auto">
           <p class="m-0 fw-medium" data-gallery-caption>{{ images[0].get("caption") or images[0].alt }}</p>
