@@ -3,6 +3,13 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 2.1.1 Page Title Weight and Component Fixes
+
+The page-title Typography role follows `--moo-heading-font-weight` on its
+owner. The default remains 600 and an explicit weight utility still takes
+precedence. See the [component fixes](https://github.com/wpmoo-org/ui/pull/116)
+for the affected runtime behavior.
+
 ## 2.1.0 Owner Options and Document Shell
 
 Hosts can initialize `PasswordRequirements` with an optional `options.messages`
