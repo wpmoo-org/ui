@@ -72,12 +72,20 @@ export default class ContextMenu {
   }
 
   dispose() {
+    // A hide listener that disposes again must not hide the menu twice.
+    if (this._disposing) {
+      return;
+    }
+    this._disposing = true;
     this._listeners.forEach(({ target, type, handler, options }) => {
       target.removeEventListener(type, handler, options);
     });
     this._listeners = [];
-    this._dropdown.dispose();
+    // Triggers report the menu closed before its hidden event is heard;
+    // dispose() alone leaves an open menu shown at its last position.
     this._syncExpanded(false);
+    this._dropdown.hide();
+    this._dropdown.dispose();
     this._invoker = null;
     this._pointerRect = null;
     instances.delete(this._element);
@@ -212,7 +220,7 @@ export default class ContextMenu {
       event.stopPropagation();
       const group = radioButton.dataset.contextMenuRadioGroup;
       this._menu
-        .querySelectorAll(`[data-context-menu-radio-group="${group}"]`)
+        .querySelectorAll(`[data-context-menu-radio-group="${CSS.escape(String(group))}"]`)
         .forEach((button) => {
           const checked = button === radioButton;
           button.classList.toggle("active", checked);

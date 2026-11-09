@@ -2,8 +2,47 @@ import { findThemeOwner, ownerPortalRoot } from "../theme-owner.js";
 
 const instances = new WeakMap();
 
+// Numbers inside sort values compare as numbers (9 before 10) and letters by
+// the reader's alphabet ("Ärzte" next to "Arzt"), not by code point.
+const SORT_COLLATOR = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+
+// Plain decimals only: "-3", "0.5", "12". Identifiers such as "1e5" or
+// "0x10" stay text, so they keep their reading order.
+const PLAIN_NUMBER = /^[-+]?(?:\d+\.?\d*|\.\d+)$/;
+
+function sortNumber(value) {
+  return PLAIN_NUMBER.test(value) ? Number(value) : null;
+}
+
+// Plain numbers compare by value, so signs and decimals count (-10 before
+// -2, 1.10 before 1.2), and come before text, which uses the collator.
+// Keeping the two groups apart keeps the order transitive: comparing
+// "1.10" with "1.2a" by collator would contradict the numeric order.
+function compareSortValues(a, b) {
+  const aNumber = sortNumber(a);
+  const bNumber = sortNumber(b);
+  if (aNumber !== null && bNumber !== null) {
+    return Math.sign(aNumber - bNumber);
+  }
+  if (aNumber !== null || bNumber !== null) {
+    return aNumber !== null ? -1 : 1;
+  }
+  return SORT_COLLATOR.compare(a, b);
+}
+
 function normalize(value) {
   return (value ?? "").toString().trim().toLowerCase();
+}
+
+// Escape that closes a menu, dialog or popup list belongs to that overlay,
+// not to the table selection. Read in the window capture phase, before
+// Bootstrap's document-level handlers have closed the overlay.
+const ESCAPE_OWNER_SELECTOR = ".modal, .offcanvas, .dropdown-menu, .popover, [role='dialog'], [role='menu'], [role='listbox']";
+
+function escapeBelongsElsewhere(event) {
+  const target = event.target;
+  return typeof target?.closest === "function" &&
+    (Boolean(target.closest(ESCAPE_OWNER_SELECTOR)) || target.getAttribute("aria-expanded") === "true");
 }
 
 export default class DataTable {
@@ -515,7 +554,7 @@ export default class DataTable {
   }
 
   _sortValue(row, key) {
-    const cell = row.element.querySelector(`:scope > [data-datatable-column="${key}"]`);
+    const cell = row.element.querySelector(`:scope > [data-datatable-column="${CSS.escape(String(key))}"]`);
     if (!cell) {
       return "";
     }
@@ -544,10 +583,8 @@ export default class DataTable {
       filtered.sort((a, b) => {
         const aValue = this._sortValue(a, this._sortKey);
         const bValue = this._sortValue(b, this._sortKey);
-        if (aValue === bValue) {
-          return a.index - b.index;
-        }
-        return aValue > bValue ? direction : -direction;
+        const order = compareSortValues(aValue, bValue);
+        return order ? order * direction : a.index - b.index;
       });
     } else {
       filtered.sort((a, b) => a.index - b.index);
@@ -630,7 +667,7 @@ export default class DataTable {
           summary.appendChild(this._createFacetBadge(`${selected.size} selected`));
         } else {
           selected.forEach((value) => {
-            const option = facetRoot.querySelector(`[data-datatable-facet-option="${value}"]`);
+            const option = facetRoot.querySelector(`[data-datatable-facet-option="${CSS.escape(String(value))}"]`);
             const label = option?.querySelector("[data-datatable-facet-option-label]")?.textContent ?? value;
             summary.appendChild(this._createFacetBadge(label));
           });
@@ -893,7 +930,7 @@ export default class DataTable {
 
   _isColumnFixed(key) {
     return this._element
-      .querySelector(`th[data-datatable-column="${key}"]`)
+      .querySelector(`th[data-datatable-column="${CSS.escape(String(key))}"]`)
       ?.hasAttribute("data-datatable-column-fixed") || false;
   }
 
@@ -901,11 +938,11 @@ export default class DataTable {
     if (!visible && this._isColumnFixed(key)) {
       return;
     }
-    this._element.querySelectorAll(`[data-datatable-column="${key}"], [data-datatable-detail-column="${key}"]`).forEach((cell) => {
+    this._element.querySelectorAll(`[data-datatable-column="${CSS.escape(String(key))}"], [data-datatable-detail-column="${CSS.escape(String(key))}"]`).forEach((cell) => {
       cell.classList.toggle("datatable-col-hidden", !visible);
     });
     if (syncViewToggle) {
-      this._element.querySelectorAll(`[data-datatable-column-toggle="${key}"]`).forEach((toggle) => {
+      this._element.querySelectorAll(`[data-datatable-column-toggle="${CSS.escape(String(key))}"]`).forEach((toggle) => {
         toggle.classList.toggle("active", visible);
         toggle.setAttribute("aria-pressed", String(visible));
       });
@@ -1054,8 +1091,8 @@ export default class DataTable {
     if (group) {
       const key = group.dataset.datatableFilterGroup;
       this._showFilterPickerPanel(key);
-      const search = this._element.querySelector(`[data-datatable-filter-option-search="${key}"]`);
-      const option = this._element.querySelector(`[data-datatable-filter-option-key="${key}"]`);
+      const search = this._element.querySelector(`[data-datatable-filter-option-search="${CSS.escape(String(key))}"]`);
+      const option = this._element.querySelector(`[data-datatable-filter-option-key="${CSS.escape(String(key))}"]`);
       (search || option)?.focus({ preventScroll: true });
       return;
     }
@@ -1071,7 +1108,7 @@ export default class DataTable {
     }
     const key = search.dataset.datatableFilterOptionSearch;
     const query = normalize(search.value);
-    this._element.querySelectorAll(`[data-datatable-filter-option-key="${key}"]`).forEach((option) => {
+    this._element.querySelectorAll(`[data-datatable-filter-option-key="${CSS.escape(String(key))}"]`).forEach((option) => {
       const label = normalize(option.querySelector("[data-datatable-filter-option-label]")?.textContent || option.textContent);
       option.closest("li")?.classList.toggle("datatable-filter-option-search-hidden", query.length > 0 && !label.includes(query));
     });
@@ -1089,7 +1126,7 @@ export default class DataTable {
     }
     const key = search.dataset.datatableFilterOptionSearch;
     const options = Array.from(
-      this._element.querySelectorAll(`[data-datatable-filter-option-key="${key}"]`)
+      this._element.querySelectorAll(`[data-datatable-filter-option-key="${CSS.escape(String(key))}"]`)
     );
     const firstVisible = options.find(
       (option) => !option.closest("li")?.classList.contains("datatable-filter-option-search-hidden")
@@ -1222,7 +1259,7 @@ export default class DataTable {
       }
       row.element.setAttribute(`data-datatable-facet-${key}`, value);
       row.facets[key] = value;
-      const cell = row.element.querySelector(`[data-datatable-column="${key}"]`);
+      const cell = row.element.querySelector(`[data-datatable-column="${CSS.escape(String(key))}"]`);
       if (!cell) {
         return;
       }
@@ -1236,7 +1273,7 @@ export default class DataTable {
       if (currentIcon && icon) {
         currentIcon.replaceWith(icon.cloneNode(true));
       }
-      const cardValue = row.cardElement?.querySelector(`[data-datatable-detail-column="${key}"] .datatable-card-value`);
+      const cardValue = row.cardElement?.querySelector(`[data-datatable-detail-column="${CSS.escape(String(key))}"] .datatable-card-value`);
       if (cardValue) {
         cardValue.innerHTML = cell.innerHTML;
       }
@@ -1336,16 +1373,16 @@ export default class DataTable {
     });
     this._listen(this._document, "click", (event) => this._handleSortAction(event));
 
-    // Bound to the document, not this._element: a checkbox click does not
+    // Bound to the window, not this._element: a checkbox click does not
     // reliably move focus into the table (WebKit never focuses form
     // controls on click, and even where it does the bulk-actions bar itself
     // sits outside the table's DOM flow), so a listener scoped to the table
     // would miss Escape whenever focus is elsewhere on the page.
-    this._listen(this._document, "keydown", (event) => {
-      if (event.key === "Escape" && this._selectedIds.size > 0) {
+    this._listen(this._window, "keydown", (event) => {
+      if (event.key === "Escape" && this._selectedIds.size > 0 && !escapeBelongsElsewhere(event)) {
         this._clearSelection();
       }
-    });
+    }, { capture: true });
 
     // A hover-triggered tooltip does not hide itself when a click opens the
     // same button's dropdown (Bootstrap Tooltip only listens for

@@ -1428,6 +1428,72 @@ class DataTableBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_sort_orders_plain_numbers_by_value(self) -> None:
+        context, page, evidence = self.open_certification_fixture()
+        try:
+            root = page.locator("#certification-datatable")
+            root.locator(".datatable-page-size-trigger").click()
+            root.locator('[data-datatable-page-size-option="10"]').click()
+            ticket_trigger = root.locator(
+                'th[data-datatable-column="ticket"] [data-datatable-sort-key]'
+            )
+            rows = root.locator("tbody > tr[data-datatable-row]:not([hidden])")
+            expect(rows).to_have_count(3)
+
+            def set_sort_values(values: dict[str, str]) -> None:
+                page.evaluate(
+                    """values => {
+                        for (const [rowId, value] of Object.entries(values)) {
+                          document.querySelector(`#${rowId} [data-datatable-column="ticket"]`)
+                            .dataset.datatableSortValue = value;
+                        }
+                    }""",
+                    values,
+                )
+
+            def sort(direction: str) -> None:
+                ticket_trigger.click()
+                page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show").locator(
+                    f'[data-datatable-sort-action="{direction}"]'
+                ).click()
+
+            # Negative numbers: -10 comes before -2.
+            set_sort_values({"cert-row-1": "-2", "cert-row-2": "1.2", "cert-row-3": "-10"})
+            sort("asc")
+            expect(rows.nth(0)).to_have_attribute("id", "cert-row-3")
+            expect(rows.nth(1)).to_have_attribute("id", "cert-row-1")
+            expect(rows.nth(2)).to_have_attribute("id", "cert-row-2")
+
+            # Decimals: 1.2 is greater than 1.10, and 10 greater than both.
+            set_sort_values({"cert-row-1": "1.10", "cert-row-2": "1.2", "cert-row-3": "10"})
+            sort("desc")
+            expect(rows.nth(0)).to_have_attribute("id", "cert-row-3")
+            expect(rows.nth(1)).to_have_attribute("id", "cert-row-2")
+            expect(rows.nth(2)).to_have_attribute("id", "cert-row-1")
+
+            # Exponent-like identifiers are text: 1e5 reads before 12e3.
+            set_sort_values({"cert-row-1": "12e3", "cert-row-2": "1e5", "cert-row-3": "0.5"})
+            sort("asc")
+            expect(rows.nth(0)).to_have_attribute("id", "cert-row-3")
+            expect(rows.nth(1)).to_have_attribute("id", "cert-row-2")
+            expect(rows.nth(2)).to_have_attribute("id", "cert-row-1")
+
+            # Mixed numbers and text: numbers first, by value, then text. The
+            # order holds whatever order the rows start in.
+            set_sort_values({"cert-row-1": "1.2a", "cert-row-2": "1.2", "cert-row-3": "1.10"})
+            sort("asc")
+            expect(rows.nth(0)).to_have_attribute("id", "cert-row-3")
+            expect(rows.nth(1)).to_have_attribute("id", "cert-row-2")
+            expect(rows.nth(2)).to_have_attribute("id", "cert-row-1")
+            set_sort_values({"cert-row-1": "1.10", "cert-row-2": "1.2a", "cert-row-3": "1.2"})
+            sort("asc")
+            expect(rows.nth(0)).to_have_attribute("id", "cert-row-1")
+            expect(rows.nth(1)).to_have_attribute("id", "cert-row-3")
+            expect(rows.nth(2)).to_have_attribute("id", "cert-row-2")
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_certification_fixture_sort_menu_escapes_table_frame(self) -> None:
         context, page, evidence = self.open_certification_fixture()
         try:
@@ -1601,6 +1667,42 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(rows).to_have_count(3)
             expect(summary).to_have_text("Showing 1-3 of 3")
             expect(root.locator('[data-datatable-page-size-value]')).to_have_text("10")
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_escape_that_closes_a_menu_keeps_the_selection(self) -> None:
+        context, page, evidence = self.open_certification_fixture()
+        try:
+            root = page.locator("#certification-datatable")
+            root.locator("#cert-row-1 [data-datatable-select-row]").check()
+            bulk_actions = root.locator("[data-datatable-bulk-actions]")
+            expect(bulk_actions).to_be_visible()
+
+            trigger = root.locator('[data-bs-toggle="dropdown"][aria-label="Update status"]')
+            trigger.click()
+            expect(trigger).to_have_attribute("aria-expanded", "true")
+            page.keyboard.press("Escape")
+            expect(trigger).to_have_attribute("aria-expanded", "false")
+            expect(bulk_actions).to_be_visible()
+
+            # A dialog that closes on Escape, such as a bulk-delete confirmation.
+            page.evaluate(
+                """() => {
+                    const dialog = document.createElement("div");
+                    dialog.setAttribute("role", "dialog");
+                    dialog.id = "escape-owner-dialog";
+                    dialog.innerHTML = '<button type="button">Cancel</button>';
+                    document.body.append(dialog);
+                    dialog.querySelector("button").focus();
+                }"""
+            )
+            page.keyboard.press("Escape")
+            expect(bulk_actions).to_be_visible()
+            page.evaluate("() => document.querySelector('#escape-owner-dialog').remove()")
+
+            page.keyboard.press("Escape")
+            expect(bulk_actions).to_be_hidden()
             evidence.assert_clean()
         finally:
             context.close()

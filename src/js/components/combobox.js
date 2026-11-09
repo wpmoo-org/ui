@@ -266,11 +266,7 @@ export default class Combobox {
   _clearStaleSelection() {
     if (this._isMultiple) {
       this._input.value = "";
-      this._options.forEach((option) => {
-        option.hidden = false;
-      });
-      this._syncGroupVisibility();
-      this._empty.hidden = true;
+      this._showAllOptions();
       return;
     }
     const selected = this._selectedOptions()[0] || null;
@@ -280,6 +276,16 @@ export default class Combobox {
     }
     this._clearSelection();
     this._input.value = "";
+  }
+
+  _showAllOptions() {
+    this._options.forEach((option) => {
+      option.hidden = false;
+    });
+    this._syncGroupVisibility();
+    this._empty.hidden = true;
+    // The filtered result count no longer describes the list.
+    this._liveRegion.textContent = "";
   }
 
   _activeOption() {
@@ -382,6 +388,8 @@ export default class Combobox {
     if (this._hidden) {
       this._hidden.value = option.dataset.value || "";
     }
+    // The typed filter is spent: reopening shows every option again.
+    this._showAllOptions();
     this._toggleClear(true);
     this._setActiveOption(option);
     this._emitChange();
@@ -484,6 +492,14 @@ export default class Combobox {
   }
 
   _handleKeydown(event) {
+    // Keys that confirm or browse an IME composition belong to it; Tab still
+    // moves focus away, so the list closes with it.
+    if (event.isComposing || event.keyCode === 229) {
+      if (event.key === "Tab") {
+        this._closeMenu();
+      }
+      return;
+    }
     const available = this._visibleOptions();
     const current = available.findIndex(
       (option) => option.id === this._input.getAttribute("aria-activedescendant")

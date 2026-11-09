@@ -496,6 +496,37 @@ report("thin-strokes", {{ reportByType }});
                 self.assertEqual(report_by_type[chart_type]["pointRadius"], 3)
                 self.assertEqual(report_by_type[chart_type]["pointHoverRadius"], 5)
 
+    def test_tooltip_shows_the_value_not_the_category_index(self) -> None:
+        case = self.run_chart_case(
+            f"""
+const dataByType = {{
+  line: {VALID_DATA},
+  bar: {VALID_DATA},
+  radar: {{ labels: ["Speed", "Quality"], datasets: [{{ label: "Score", data: [7, 9] }}] }},
+}};
+const labels = {{}};
+for (const publicType of Object.keys(dataByType)) {{
+  const root = makeRoot({{
+    "data-chart": publicType,
+    "data-chart-data": JSON.stringify(dataByType[publicType]),
+  }});
+  const instance = MooChart.getOrCreateInstance(root);
+  const chart = instance.chart;
+  const meta = chart.getDatasetMeta(0);
+  const dataset = chart.data.datasets[0];
+  labels[publicType] = chart.options.plugins.tooltip.callbacks.label({{
+    chart, dataset, datasetIndex: 0, dataIndex: 1,
+    parsed: meta._parsed[1], raw: dataset.data[1], label: chart.data.labels[1],
+  }});
+  instance.dispose();
+}}
+report("tooltip-labels", {{ labels }});
+"""
+        )
+        self.assertEqual(case["labels"]["line"], "Revenue: 2")
+        self.assertEqual(case["labels"]["bar"], "Revenue: 2")
+        self.assertEqual(case["labels"]["radar"], "Score: 9")
+
     def test_explicit_dataset_colors_are_preserved_during_retheme(self) -> None:
         chart_data = {
             "labels": ["Jan", "Feb"],

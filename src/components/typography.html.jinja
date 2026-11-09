@@ -2,7 +2,8 @@
   {% if extra_class is not string %}{{ fail("Typography extra_class must be a string") }}{% endif %}
   {% set utilities = " " ~ (extra_class | forceescape) if extra_class else "" %}
   {% if variant == "page-title" -%}
-    <h1 class="fw-semibold{{ utilities }}"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h1>
+    {#- The weight comes from the owner heading token, so a theme can change it. #}
+    <h1{% if extra_class %} class="{{ extra_class | forceescape }}"{% endif %}{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h1>
   {%- elif variant == "page-description" -%}
     <p class="moo-page-description text-body-secondary mb-0{{ utilities }}">{{ content }}</p>
   {%- elif variant == "section-title" -%}

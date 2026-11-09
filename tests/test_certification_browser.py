@@ -1078,6 +1078,256 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_combobox_ignores_ime_enter_and_reopens_with_every_option(self) -> None:
+        case = CERTIFICATION_CASES[0]
+        context = new_case_context(self.browser, case)
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/tests/fixtures/certification/combobox.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, case)
+
+            root = page.locator("#certification-combobox")
+            combobox_input = page.locator("#certification-combobox-input")
+            options = root.locator(".combobox-option")
+            visible_options = root.locator(".combobox-option:not([hidden])")
+            hidden_value = root.locator('input[type="hidden"]')
+            expect(page.locator("body")).to_have_attribute("data-combobox-ready", "true")
+            total = options.count()
+            self.assertGreater(total, 1)
+
+            live_region = root.locator("[data-combobox-live]")
+
+            combobox_input.focus()
+            combobox_input.fill("grace")
+            expect(visible_options).to_have_count(1)
+            expect(live_region).to_have_text("1 result")
+            combobox_input.dispatch_event(
+                "keydown", {"key": "Enter", "isComposing": True, "bubbles": True, "cancelable": True}
+            )
+            expect(combobox_input).to_have_value("grace")
+            expect(hidden_value).to_have_value("")
+            # Some browsers report only keyCode 229 while an IME composes.
+            combobox_input.evaluate(
+                """input => {
+                    const event = new KeyboardEvent("keydown", {
+                      key: "Enter", bubbles: true, cancelable: true,
+                    });
+                    Object.defineProperty(event, "keyCode", { value: 229 });
+                    input.dispatchEvent(event);
+                }"""
+            )
+            expect(combobox_input).to_have_value("grace")
+            expect(hidden_value).to_have_value("")
+            combobox_input.press("Enter")
+            expect(combobox_input).to_have_value("Grace Hopper")
+            expect(visible_options).to_have_count(total)
+            expect(live_region).to_have_text("")
+            combobox_input.click()
+            expect(combobox_input).to_have_attribute("aria-expanded", "true")
+            expect(visible_options).to_have_count(total)
+            # Tab during a composition still leaves the field: the list closes.
+            combobox_input.dispatch_event(
+                "keydown", {"key": "Tab", "isComposing": True, "bubbles": True, "cancelable": True}
+            )
+            expect(combobox_input).to_have_attribute("aria-expanded", "false")
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_datepicker_pages_to_range_edges_and_resets_to_form_default(self) -> None:
+        case = CERTIFICATION_CASES[0]
+        context = new_case_context(self.browser, case)
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/tests/fixtures/certification/datepicker.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, case)
+
+            page.locator("#certification-datepicker-trigger").click()
+            calendar = page.locator("#certification-datepicker-calendar")
+            calendar.locator('[data-calendar-day][tabindex="0"]').focus()
+            page.keyboard.press("PageUp")
+            expect(page.locator(":focus")).to_have_attribute("data-calendar-day", "2026-08-15")
+            page.keyboard.press("PageDown")
+            expect(page.locator(":focus")).to_have_attribute("data-calendar-day", "2026-08-31")
+            page.keyboard.press("Escape")
+
+            # A month that lands exactly on a disabled range edge also looks
+            # back toward the active day.
+            page.evaluate(
+                """() => {
+                    document.body.insertAdjacentHTML("beforeend", `
+                      <div class="moo-calendar" id="edge-calendar" data-calendar
+                        data-calendar-mode="single" data-calendar-locale="en"
+                        data-calendar-value="2026-08-20"
+                        data-calendar-min-date="2026-07-20" data-calendar-max-date="2026-09-20"
+                        data-calendar-disabled-dates='["2026-07-20", "2026-09-20"]'
+                        aria-label="Edge calendar" tabindex="-1"></div>`);
+                    window.CertificationCalendar.getOrCreateInstance(
+                      document.querySelector("#edge-calendar")
+                    );
+                }"""
+            )
+            edge_calendar = page.locator("#edge-calendar")
+            edge_calendar.locator('[data-calendar-day][tabindex="0"]').focus()
+            page.keyboard.press("PageDown")
+            expect(page.locator(":focus")).to_have_attribute("data-calendar-day", "2026-09-19")
+            page.evaluate(
+                """() => window.CertificationCalendar
+                  .getInstance(document.querySelector("#edge-calendar"))
+                  .setDate("2026-08-20", { emit: false })"""
+            )
+            edge_calendar.locator('[data-calendar-day][tabindex="0"]').focus()
+            page.keyboard.press("PageUp")
+            expect(page.locator(":focus")).to_have_attribute("data-calendar-day", "2026-07-21")
+            page.evaluate(
+                """() => {
+                    const element = document.querySelector("#edge-calendar");
+                    window.CertificationCalendar.getInstance(element).dispose();
+                    element.remove();
+                }"""
+            )
+
+            reset_input = page.locator('#certification-reset-datepicker input[name="reset_date"]')
+            page.locator("#certification-reset-datepicker-trigger").click()
+            page.locator('#certification-reset-datepicker-calendar [data-calendar-day="2026-08-20"]').click()
+            expect(reset_input).to_have_value("2026-08-20")
+            page.evaluate(
+                """() => {
+                    const element = document.querySelector("#certification-reset-datepicker");
+                    window.certificationResetDatepicker.dispose();
+                    window.certificationResetDatepicker = window.CertificationDatepicker
+                      .getOrCreateInstance(element);
+                    document.querySelector("#certification-datepicker-reset-form").reset();
+                }"""
+            )
+            expect(reset_input).to_have_value("")
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_collapsed_sidebar_flyout_is_reachable_by_keyboard(self) -> None:
+        case = CERTIFICATION_CASES[0]
+        context = new_case_context(self.browser, case)
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/tests/fixtures/certification/sidebar.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, case)
+            expect(page.locator("body")).to_have_attribute("data-sidebar-ready", "true")
+            page.evaluate(
+                """() => {
+                    const menu = document.querySelector(
+                      '#certification-sidebar [data-slot="sidebar-group-content"] > .sidebar-menu'
+                    );
+                    menu.insertAdjacentHTML("beforeend", `
+                      <li class="sidebar-menu-item" data-slot="sidebar-menu-item">
+                        <button type="button" id="certification-flyout-trigger"
+                          class="sidebar-menu-button sidebar-menu-sub-trigger" aria-expanded="false"
+                          data-slot="sidebar-menu-button">
+                          <span class="sidebar-menu-button__text">
+                            <span class="sidebar-menu-button__title">Projects</span>
+                          </span>
+                        </button>
+                        <ul class="sidebar-menu-sub collapse" data-slot="sidebar-menu-sub">
+                          <li><button type="button" class="sidebar-menu-sub-button" tabindex="0" disabled>Archived</button></li>
+                          <li hidden><a class="sidebar-menu-sub-button" href="#hidden">Hidden</a></li>
+                          <li inert><a class="sidebar-menu-sub-button" href="#inert">Inert</a></li>
+                          <li style="display: none"><a class="sidebar-menu-sub-button" href="#unrendered">Unrendered</a></li>
+                          <li style="visibility: hidden"><a class="sidebar-menu-sub-button" href="#invisible">Invisible</a></li>
+                          <li><fieldset disabled><input type="text" class="form-control" aria-label="Locked"></fieldset></li>
+                          <li><a class="sidebar-menu-sub-button" href="#alpha">Alpha</a></li>
+                          <li><a class="sidebar-menu-sub-button" href="#beta">Beta</a></li>
+                          <li><input type="search" class="form-control" aria-label="Filter projects"></li>
+                        </ul>
+                      </li>`);
+                }"""
+            )
+            page.locator("#certification-sidebar-trigger").click()
+            expect(page.locator('[data-slot="sidebar-wrapper"]')).to_have_attribute(
+                "data-sidebar-state", "collapsed"
+            )
+            trigger = page.locator("#certification-flyout-trigger")
+            flyout = page.locator(".sidebar-menu-flyout")
+            first_item = page.locator('.sidebar-menu-flyout a[href="#alpha"]')
+            second_item = page.locator('.sidebar-menu-flyout a[href="#beta"]')
+            last_item = page.locator('.sidebar-menu-flyout input[type="search"]')
+
+            # Keyboard opening skips a disabled item that still has a tabindex,
+            # hidden, inert, unrendered and invisible items, and a control
+            # disabled through its fieldset.
+            trigger.focus()
+            page.keyboard.press("Enter")
+            expect(first_item).to_be_focused()
+            page.keyboard.press("Escape")
+            expect(flyout).to_have_count(0)
+            expect(trigger).to_be_focused()
+
+            # Tab moves between items, form controls included; only Tab out of
+            # the last one closes.
+            page.keyboard.press("Enter")
+            expect(first_item).to_be_focused()
+            page.keyboard.press("Tab")
+            expect(second_item).to_be_focused()
+            page.keyboard.press("Tab")
+            expect(last_item).to_be_focused()
+            expect(flyout).to_have_count(1)
+            # Shift+Tab from the form control stays inside the flyout.
+            page.keyboard.press("Shift+Tab")
+            expect(second_item).to_be_focused()
+            expect(flyout).to_have_count(1)
+            page.keyboard.press("Tab")
+            expect(last_item).to_be_focused()
+            page.keyboard.press("Tab")
+            expect(flyout).to_have_count(0)
+            expect(trigger).to_be_focused()
+
+            # Escape from the form control closes the flyout too.
+            page.keyboard.press("Enter")
+            page.keyboard.press("Tab")
+            page.keyboard.press("Tab")
+            expect(last_item).to_be_focused()
+            page.keyboard.press("Escape")
+            expect(flyout).to_have_count(0)
+            expect(trigger).to_be_focused()
+
+            page.keyboard.press("Enter")
+            expect(first_item).to_be_focused()
+            page.keyboard.press("Shift+Tab")
+            expect(flyout).to_have_count(0)
+            expect(trigger).to_be_focused()
+
+            # Escape a flyout control already handled stays with that control.
+            page.keyboard.press("Enter")
+            expect(first_item).to_be_focused()
+            page.evaluate(
+                """() => window.addEventListener("keydown", (event) => {
+                    if (event.key === "Escape") event.preventDefault();
+                }, { capture: true, once: true })"""
+            )
+            page.keyboard.press("Escape")
+            expect(flyout).to_have_count(1)
+            expect(first_item).to_be_focused()
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_sidebar_fixture_proves_desktop_mobile_state_and_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
@@ -5729,16 +5979,31 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
 
                 # Repeated init returns the same instance; dispose removes
                 # listeners/generated state and permits re-initialization.
-                self.assertTrue(
-                    root.evaluate(
-                        """
-                        element => {
-                          window.certificationContextMenu.dispose();
-                          return window.CertificationContextMenu.getInstance(element) === null;
-                        }
-                        """
-                    )
+                # Disposing an open menu also closes it.
+                surface.click(button="right")
+                expect(menu).to_have_class("dropdown-menu context-menu-menu show")
+                disposal = root.evaluate(
+                    """
+                    element => {
+                      const trigger = element.querySelector(":scope > .context-menu-trigger");
+                      let expandedWhenHidden = null;
+                      element.addEventListener("hidden.bs.dropdown", () => {
+                        expandedWhenHidden = trigger.getAttribute("aria-expanded");
+                      }, { once: true });
+                      // A hide listener that disposes again is ignored.
+                      element.addEventListener("hide.bs.dropdown", () => {
+                        window.certificationContextMenu.dispose();
+                      }, { once: true });
+                      window.certificationContextMenu.dispose();
+                      return {
+                        disposed: window.CertificationContextMenu.getInstance(element) === null,
+                        expandedWhenHidden,
+                      };
+                    }
+                    """
                 )
+                self.assertEqual(disposal, {"disposed": True, "expandedWhenHidden": "false"})
+                expect(menu).not_to_have_class(re.compile(r"\bshow\b"))
                 self.assertEqual(surface.get_attribute("aria-expanded"), "false")
                 surface.click(button="right")
                 expect(menu).not_to_have_class("dropdown-menu context-menu-menu show")
