@@ -138,11 +138,27 @@ class ImageGalleryTests(CatalogTestCase):
         self.assertIn('class="m-0 small text-body-secondary" data-gallery-credit>Schoolyard, 2025 · Photo by A. Teacher<', output)
         self.assertIn('class="m-0 small text-body-secondary d-none" data-gallery-credit><', self.render())
 
+    def test_photos_without_alt_text_get_a_name_from_their_place(self) -> None:
+        images = [IMAGES[0], dict(IMAGES[1], alt=""), dict(IMAGES[2], alt="", caption="Sports day")]
+        for layout in ("grid", "justified", "masonry", "featured", "strip"):
+            with self.subTest(layout=layout):
+                links = self.thumbnails(self.render(images=images, layout=layout))
+                self.assertNotIn("aria-label", links[0])
+                self.assertIn('aria-label="Photo 2 of 3"', links[1])
+                self.assertIn('aria-label="Photo 3 of 3"', links[2])
+        output = self.render(images=images)
+        self.assertIn('data-gallery-slide-title="Photo 2 of 3"', output)
+        self.assertIn('data-gallery-slide-title="Sports day"', output)
+        self.assertIn('alt="" loading="lazy"', output)
+        german = self.render(images=[dict(IMAGES[0], alt="")] * 2, labels={"photo": "Foto {current} von {total}"})
+        self.assertIn('aria-label="Foto 2 von 2"', german)
+        self.assertIn("data-gallery-caption>Foto 1 von 2<", german)
+
     def test_every_label_is_translatable(self) -> None:
         labels = {
             "title": "Fotos", "strip": "Fotos, seitlich scrollen", "close": "Schließen", "previous": "Zurück",
             "next": "Weiter", "play": "Diashow starten", "pause": "Diashow anhalten",
-            "progress": "Zeit bis zum nächsten Foto",
+            "progress": "Zeit bis zum nächsten Foto", "photo": "Foto {current} von {total}",
             "fullscreen": "Vollbild", "exit_fullscreen": "Vollbild beenden",
             "counter": "{current} von {total}", "show_all": "Alle {total} Fotos anzeigen",
         }

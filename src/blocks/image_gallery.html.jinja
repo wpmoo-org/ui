@@ -24,7 +24,9 @@
    opens one.
 
    images: list of mappings with
-     src, width, height, alt   the thumbnail and its intrinsic size (required)
+     src, width, height, alt   the thumbnail and its intrinsic size (required;
+                               an empty alt names the link and the lightbox
+                               title "Photo 3 of 28", label "photo")
      srcset, sizes             optional thumbnail candidates
      href                      the large image (defaults to src)
      large_srcset              optional large candidates for the lightbox
@@ -49,11 +51,19 @@
   "fullscreen": "Full screen",
   "exit_fullscreen": "Exit full screen",
   "counter": "{current} of {total}",
+  "photo": "Photo {current} of {total}",
   "show_all": "Show all {total} photos"
 } %}
 
-{% macro image_gallery_thumbnail(image, index, lightbox_id, link_class, image_class, hidden=false, ratio_property=false) -%}
-  <a class="{{ link_class }}{% if hidden %} d-none{% endif %}" href="{{ image.get("href") or image.src }}" data-bs-toggle="modal" data-bs-target="#{{ lightbox_id }}" data-gallery-index="{{ index }}"{% if ratio_property %} style="--moo-gallery-ratio: {{ (image.width / image.height) | round(4) }}"{% endif %}>
+{# The name of a photo without a description, such as "Photo 3 of 28". #}
+{% macro image_gallery_photo_name(template, index, total) -%}
+  {{- template | replace("{current}", (index + 1) | string) | replace("{total}", total | string) -}}
+{%- endmacro %}
+
+{# A thumbnail link takes its name from the image's alt text; a photo with
+   empty alt is named by its place in the album instead. #}
+{% macro image_gallery_thumbnail(image, index, lightbox_id, link_class, image_class, hidden=false, ratio_property=false, name="") -%}
+  <a class="{{ link_class }}{% if hidden %} d-none{% endif %}" href="{{ image.get("href") or image.src }}" data-bs-toggle="modal" data-bs-target="#{{ lightbox_id }}" data-gallery-index="{{ index }}"{% if name and not image.alt | trim %} aria-label="{{ name }}"{% endif %}{% if ratio_property %} style="--moo-gallery-ratio: {{ (image.width / image.height) | round(4) }}"{% endif %}>
     <img class="{{ image_class }}" src="{{ image.src }}"{% if image.get("srcset") %} srcset="{{ image.srcset }}" sizes="{{ image.get("sizes") or "100vw" }}"{% endif %} width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt }}" loading="lazy" decoding="async">
   </a>
 {%- endmacro %}
@@ -108,27 +118,27 @@
     {% if layout == "justified" %}
       <div class="gallery-justified gap-{{ gap }}">
         {% for image in images %}
-          {{ image_gallery_thumbnail(image, loop.index0, lightbox_id, "d-block rounded overflow-hidden", natural_image, hidden=loop.index > shown, ratio_property=true) }}
+          {{ image_gallery_thumbnail(image, loop.index0, lightbox_id, "d-block rounded overflow-hidden", natural_image, hidden=loop.index > shown, ratio_property=true, name=image_gallery_photo_name(text.photo, loop.index0, total)) }}
         {% endfor %}
       </div>
     {% elif layout == "strip" %}
       {% set strip_classes = "gallery-justified gallery-strip-" ~ strip_until ~ "-down" if strip_until else "gallery-strip" %}
       <div class="{{ strip_classes }}{% if strip_bleed %} gallery-strip-bleed{% endif %} scroll-smooth gap-{{ gap }}" role="region" tabindex="0" aria-label="{{ text.strip }}">
         {% for image in images %}
-          {{ image_gallery_thumbnail(image, loop.index0, lightbox_id, "d-block rounded overflow-hidden", "d-block w-100 h-100 object-fit-cover", ratio_property=true) }}
+          {{ image_gallery_thumbnail(image, loop.index0, lightbox_id, "d-block rounded overflow-hidden", "d-block w-100 h-100 object-fit-cover", ratio_property=true, name=image_gallery_photo_name(text.photo, loop.index0, total)) }}
         {% endfor %}
       </div>
     {% elif layout == "masonry" %}
       <div class="{{ classes.masonry | trim }} column-gap-{{ gap }}">
         {% for image in images %}
-          {{ image_gallery_thumbnail(image, loop.index0, lightbox_id, "d-inline-block w-100 mb-" ~ gap ~ " rounded overflow-hidden", natural_image, hidden=loop.index > shown) }}
+          {{ image_gallery_thumbnail(image, loop.index0, lightbox_id, "d-inline-block w-100 mb-" ~ gap ~ " rounded overflow-hidden", natural_image, hidden=loop.index > shown, name=image_gallery_photo_name(text.photo, loop.index0, total)) }}
         {% endfor %}
       </div>
     {% else %}
       {% set rest = images[1:] if layout == "featured" else images %}
       {% if layout == "featured" %}
         <div class="mb-{{ gap }}">
-          {{ image_gallery_thumbnail(images[0], 0, lightbox_id, "ratio ratio-16x9 d-block rounded overflow-hidden", tile_image) }}
+          {{ image_gallery_thumbnail(images[0], 0, lightbox_id, "ratio ratio-16x9 d-block rounded overflow-hidden", tile_image, name=image_gallery_photo_name(text.photo, 0, total)) }}
         </div>
       {% endif %}
       {% if rest %}
@@ -136,7 +146,7 @@
           {% for image in rest %}
             {% set index = loop.index0 + (1 if layout == "featured" else 0) %}
             <div class="col{% if index >= shown %} d-none{% endif %}">
-              {{ image_gallery_thumbnail(image, index, lightbox_id, tile_link, tile_image) }}
+              {{ image_gallery_thumbnail(image, index, lightbox_id, tile_link, tile_image, name=image_gallery_photo_name(text.photo, index, total)) }}
             </div>
           {% endfor %}
         </div>
@@ -162,7 +172,7 @@
         <div class="carousel slide{% if transition == "fade" %} carousel-fade{% endif %} flex-grow-1 gallery-stage" id="{{ lightbox_id }}-carousel" data-bs-interval="false" data-bs-touch="true" data-gallery-stage>
           <div class="carousel-inner h-100">
             {% for image in images %}
-              <div class="carousel-item h-100{% if loop.first %} active{% endif %}" data-gallery-slide-title="{{ image.get("caption") or image.alt }}"{% if image.get("credit") %} data-gallery-slide-credit="{{ image.credit }}"{% endif %}>
+              <div class="carousel-item h-100{% if loop.first %} active{% endif %}" data-gallery-slide-title="{{ image.get("caption") or image.alt or image_gallery_photo_name(text.photo, loop.index0, total) }}"{% if image.get("credit") %} data-gallery-slide-credit="{{ image.credit }}"{% endif %}>
                 {# Each slide carries the stage colour, so a fading-in photo covers the
                    previous one whatever their shapes. #}
                 <div class="h-100 d-flex align-items-center justify-content-center p-3 p-sm-4 bg-body-tertiary">
@@ -180,7 +190,7 @@
       {% endcall %}
       <div class="d-flex flex-wrap align-items-center gap-3 border-top px-3 px-sm-4 py-3">
         <div class="me-auto">
-          <p class="m-0 fw-medium" data-gallery-caption>{{ images[0].get("caption") or images[0].alt }}</p>
+          <p class="m-0 fw-medium" data-gallery-caption>{{ images[0].get("caption") or images[0].alt or image_gallery_photo_name(text.photo, 0, total) }}</p>
           <p class="m-0 small text-body-secondary{% if not images[0].get("credit") %} d-none{% endif %}" data-gallery-credit>{{ images[0].get("credit", "") }}</p>
         </div>
         {% if total > 1 %}
