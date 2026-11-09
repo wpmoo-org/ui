@@ -66,3 +66,10 @@ d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:g
 d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:758
 d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:847
 d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:generic-api-key:885
+
+# 9c6bc69: 2.1.1 release banner and catalog cache-key hashes.
+9c6bc696481a93087f0e4f7e5fecc20c79a16e60:tests/fixtures/boundary-baseline.json:generic-api-key:18
+9c6bc696481a93087f0e4f7e5fecc20c79a16e60:tests/fixtures/boundary-baseline.json:generic-api-key:738
+9c6bc696481a93087f0e4f7e5fecc20c79a16e60:tests/fixtures/boundary-baseline.json:generic-api-key:758
+9c6bc696481a93087f0e4f7e5fecc20c79a16e60:tests/fixtures/boundary-baseline.json:generic-api-key:847
+9c6bc696481a93087f0e4f7e5fecc20c79a16e60:tests/fixtures/boundary-baseline.json:generic-api-key:885
