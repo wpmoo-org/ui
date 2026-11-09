@@ -23,29 +23,28 @@
         <header class="d-flex flex-column gap-3">
           <div class="d-flex flex-wrap align-items-center gap-3 small text-body-secondary">
             {{ badge("v" ~ product.version, variant="dark") }}
-            <span>Patch release</span>
+            <span>Minor release</span>
           </div>
           {{ typography("Moo UI " ~ product.version, variant="section-title", id=release_id, extra_class="mb-0") }}
           <p class="text-body-secondary mb-0">
-            Component behavior fixes and consistent page-title heading weight.
+            Media blocks, Item rows and richer component documentation.
           </p>
         </header>
 
-        <section aria-labelledby="{{ release_id }}-fixed">
-          {{ typography("Fixed", variant="subsection-title", id=release_id ~ "-fixed", extra_class="mb-3") }}
+        <section aria-labelledby="{{ release_id }}-added">
+          {{ typography("Added", variant="subsection-title", id=release_id ~ "-added", extra_class="mb-3") }}
           <ul class="mb-0 ps-4">
-            <li>Chart tooltips show the value or radius for the affected chart types.</li>
-            <li>DataTable sorts numbers and accented words consistently and keeps selection when Escape closes an overlay.</li>
-            <li>Combobox respects IME composition and restores options after selection. Context Menu hides an open menu on disposal.</li>
-            <li>Date Picker respects range edges and restores the original form default on reset.</li>
-            <li>Keyboard users can enter, navigate, and leave collapsed Sidebar submenu flyouts.</li>
-            <li>Page titles inherit the existing owner heading weight token. The default remains 600.</li>
+            <li><a href="{{ root_path }}blocks/image-gallery/">Image Gallery</a> with grid, justified, masonry, featured and strip layouts; a lazy-loaded Bootstrap lightbox, slideshow, full-screen controls, fade or slide transitions, and translated labels.</li>
+            <li><a href="{{ root_path }}blocks/video-dialog/">Video Dialog</a> with round and labelled play controls and reduced-motion-aware breathing animation.</li>
+            <li><a href="{{ root_path }}components/item/">Item</a> rows for media, descriptions and actions, including linked, outlined and muted variants.</li>
+            <li>Usage guidance, alternatives, keyboard references and related component links across all 48 component pages.</li>
+            <li>Search descriptions, structured metadata, content-derived modification dates and a browsable <a href="{{ root_path }}sitemap/">Sitemap</a> with a styled XML view.</li>
           </ul>
         </section>
 
         <p class="small text-body-secondary mb-0">
-          Component certification remains in preview. See the
-          <a href="https://github.com/wpmoo-org/ui/pull/116">component fixes</a> for details.
+          Component certification remains in preview. Existing package exports,
+          Bootstrap peer ranges and plugin ownership are preserved.
         </p>
       {% endcall %}
     </article>

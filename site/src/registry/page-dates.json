@@ -1,7 +1,7 @@
 {
   "./": {
     "updated": "2026-11-09",
-    "hash": "sha256:b9e6eaed99cba7aa"
+    "hash": "sha256:7cbe0f9f150a00cc"
   },
   "blocks/": {
     "updated": "2026-11-09",
@@ -29,7 +29,7 @@
   },
   "changelog/": {
     "updated": "2026-11-09",
-    "hash": "sha256:526812df90496783"
+    "hash": "sha256:ff409cc13d10ba86"
   },
   "charts/": {
     "updated": "2026-10-20",
@@ -285,7 +285,7 @@
   },
   "installation/": {
     "updated": "2026-11-09",
-    "hash": "sha256:3cc1473f00f98832"
+    "hash": "sha256:3c55a01551312319"
   },
   "introduction/": {
     "updated": "2026-09-01",
@@ -301,11 +301,11 @@
   },
   "skills/": {
     "updated": "2026-11-09",
-    "hash": "sha256:b41c890fd81bbd4b"
+    "hash": "sha256:e4e9d9c42c48c2b4"
   },
   "support/": {
     "updated": "2026-11-09",
-    "hash": "sha256:63112979115b55ac"
+    "hash": "sha256:8c4cdd833443d453"
   },
   "utils/": {
     "updated": "2026-10-04",

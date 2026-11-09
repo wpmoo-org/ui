@@ -290,6 +290,12 @@ calm.
 
 ## Status And Support
 
+The `2.2.0` minor release adds the Item component, Image Gallery and Video
+Dialog blocks, and component usage guides. Image Gallery includes five layouts,
+a lazy-loaded lightbox, slideshow and full-screen controls through the optional
+`@wpmoo/ui/image-gallery.js` module. The catalog adds structured metadata,
+content-derived page dates and a browsable sitemap.
+
 The `2.1.1` patch release improves Chart tooltips, DataTable sorting
 and selection, Combobox input, Context Menu disposal, Date Picker controls,
 and Sidebar keyboard navigation. Page titles follow their owner heading weight.
@@ -322,7 +328,7 @@ paths live in the [Installation guide](https://ui.wpmoo.org/installation/).
 Moo UI source code is MIT licensed. License details live in
 [LICENSE](LICENSE) and the [License page](https://ui.wpmoo.org/license/).
 Third-party distribution details and notices are kept separately in
-[THIRD_PARTY_NOTICES.md](https://github.com/wpmoo-org/ui/blob/v2.1.1/THIRD_PARTY_NOTICES.md).
+[THIRD_PARTY_NOTICES.md](https://github.com/wpmoo-org/ui/blob/v2.2.0/THIRD_PARTY_NOTICES.md).
 Catalog visual assets and their license are repository-only and are not
 included in the npm package. Asset terms live in the
-[visual asset license](https://github.com/wpmoo-org/ui/blob/v2.1.1/ASSET_LICENSE.md).
+[visual asset license](https://github.com/wpmoo-org/ui/blob/v2.2.0/ASSET_LICENSE.md).
