@@ -50,6 +50,7 @@ LAZY_COMPONENT_MODULES = (
     "datatable.js",
     "datepicker.js",
     "floating-panel.js",
+    "image-gallery.js",
     "slider.js",
 )
 

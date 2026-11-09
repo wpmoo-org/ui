@@ -34,6 +34,7 @@
       "./table-of-contents.js",
       "./sheet.js",
       "./floating-panel.js",
+      "./image-gallery.js",
       "./chart.js",
       "./chart.min.js",
       "./datepicker.js",

@@ -1,0 +1,10 @@
+{% extends "layouts/block-preview.html.jinja" %}
+{% from "blocks/image_gallery_example.html.jinja" import render_image_gallery_example %}
+
+{% block title %}Image Gallery Preview — Moo UI{% endblock %}
+
+{% block content %}
+  <div class="container py-4">
+    {{ render_image_gallery_example("gallery-preview", root_path, layout="justified", limit=9) }}
+  </div>
+{% endblock %}

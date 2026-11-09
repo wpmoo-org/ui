@@ -4,12 +4,16 @@
     "hash": "sha256:62f6d05c60efd7bf"
   },
   "blocks/": {
-    "updated": "2026-11-08",
-    "hash": "sha256:6d690f8029cae683"
+    "updated": "2026-11-09",
+    "hash": "sha256:ebf9802ce720fa68"
   },
   "blocks/accordion-panels/": {
     "updated": "2026-10-14",
     "hash": "sha256:b1bf4b3c415b91d4"
+  },
+  "blocks/image-gallery/": {
+    "updated": "2026-11-09",
+    "hash": "sha256:2b06423665ef7558"
   },
   "blocks/sidebar-floating/": {
     "updated": "2026-07-30",
@@ -300,8 +304,8 @@
     "hash": "sha256:92f6dba647f8ac2b"
   },
   "support/": {
-    "updated": "2026-09-17",
-    "hash": "sha256:9dcdc8b340eefb68"
+    "updated": "2026-11-09",
+    "hash": "sha256:242ff9ff024973c4"
   },
   "utils/": {
     "updated": "2026-10-04",

@@ -70,6 +70,7 @@ CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
     "password-requirements.js",
     "floating-panel.js",
+    "image-gallery.js",
     "overlay-scrollbar.js",
     "combobox.js",
     "context-menu.js",

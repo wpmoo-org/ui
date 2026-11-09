@@ -520,3 +520,11 @@ $moo-toast-stack-enter-y: 150% !default;
 $moo-toast-stack-transition-duration: .5s !default;
 $moo-toast-stack-height-transition-duration: .15s !default;
 $moo-toast-stack-transition-timing-function: cubic-bezier(.22, 1, .36, 1) !default;
+
+// Image Gallery justified rows: Bootstrap has no target row height. Photos
+// grow from this height until the row is full.
+$moo-gallery-row-height: 6rem !default;
+$moo-gallery-row-height-md: 8rem !default;
+// Image Gallery lightbox stage: one height for photos of any shape, within
+// short screens. Bootstrap sizes only by aspect ratio or the whole viewport.
+$moo-gallery-stage-height: unquote("min(62svh, 38rem)") !default;

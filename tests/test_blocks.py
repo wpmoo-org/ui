@@ -112,6 +112,11 @@ class BlocksTests(CatalogTestCase):
                     "label": "Video Dialog",
                     "status": "ready",
                 },
+                {
+                    "slug": "image-gallery",
+                    "label": "Image Gallery",
+                    "status": "ready",
+                },
             ],
         )
 

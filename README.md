@@ -195,6 +195,21 @@ application-owned, account-specific key when appropriate. This is a local UI
 preference, not authorization or server-side task state. See the
 [Card example](https://ui.wpmoo.org/components/card/#floating-panel) for markup.
 
+For the Image Gallery block, bind its lightbox after Bootstrap's Modal and
+Carousel are available on the document's window:
+
+```js
+import { initImageGalleries } from "@wpmoo/ui/image-gallery.js";
+const release = initImageGalleries(document);
+// release(); // remove the listeners again
+```
+
+Without the module every thumbnail still links to its large image. With it the
+lightbox opens at the clicked photo, keeps the counter and caption current,
+runs the slideshow and full-screen buttons, adds arrow keys and loads only the
+current photo and its neighbours. See the
+[Image Gallery block](https://ui.wpmoo.org/blocks/image-gallery/) for markup.
+
 For an opt-in document overlay scrollbar, load the stylesheet first and pass
 the resolved page theme owner explicitly:
 

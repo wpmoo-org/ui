@@ -519,6 +519,7 @@ console.log(JSON.stringify(Object.fromEntries(
             {
                 "_background_color.scss",
                 "_border.scss",
+                "_gallery.scss",
                 "_motion.scss",
                 "_motion_primitives.scss",
                 "_overlay_scrollbar.scss",
@@ -585,6 +586,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "bootstrap/scss/mixins",
                 "bootstrap/scss/utilities",
                 "utilities/text_alignment",
+                "utilities/gallery",
                 "utilities/overlay_scrollbar",
                 "themes/theme",
                 "bootstrap/scss/root",
@@ -637,6 +639,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "bootstrap/scss/mixins",
                 "bootstrap/scss/utilities",
                 "utilities/text_alignment",
+                "utilities/gallery",
                 "utilities/overlay_scrollbar",
                 "themes/theme",
                 "foundations/globals",

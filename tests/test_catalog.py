@@ -2787,8 +2787,12 @@ class CatalogContractTests(CatalogTestCase):
         ]
         self.assert_page_actions_region(block_header)
         self.assert_page_actions_region(block)
-        self.assertIn('aria-label="Previous page: Accordion Panels"', block)
+        self.assertIn('aria-label="Previous page: Image Gallery"', block)
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
+
+        gallery_block = self.read_output("blocks/image-gallery.html")
+        self.assertIn('aria-label="Previous page: Accordion Panels"', gallery_block)
+        self.assertIn('aria-label="Next page: Sidebar (Floating)"', gallery_block)
 
         inset_block = self.read_output("blocks/sidebar-inset.html")
         self.assertIn('aria-label="Next page: Video Dialog"', inset_block)

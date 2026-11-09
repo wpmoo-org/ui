@@ -1,0 +1,32 @@
+// Bootstrap ships the 1x1, 4x3, 16x9 and 21x9 ratios and no multi-column
+// utility (vendor/bootstrap/scss/_variables.scss $aspect-ratios and
+// _utilities.scss). Image Gallery tiles also crop to 3x2, and its masonry
+// layout flows photos through CSS columns, so both extend Bootstrap's own
+// maps: helpers/ratio emits .ratio-3x2 and the utility API emits
+// .columns-{breakpoint}-{1-4}.
+$aspect-ratios: map-merge($aspect-ratios, ("3x2": calc(2 / 3 * 100%)));
+$utilities: map-merge(
+  $utilities,
+  (
+    "column-count": (
+      responsive: true,
+      property: column-count,
+      class: columns,
+      values: (1: 1, 2: 2, 3: 3, 4: 4),
+    ),
+  )
+);
+
+// Embedded hosts keep their own Bootstrap build outside the Moo scope.
+@mixin moo-gallery-utilities {
+  .ratio-3x2 {
+    --#{$prefix}aspect-ratio: #{map-get($aspect-ratios, "3x2")};
+  }
+
+  $utility: map-get($utilities, "column-count");
+  @each $breakpoint in map-keys($grid-breakpoints) {
+    @include media-breakpoint-up($breakpoint) {
+      @include generate-utility($utility, breakpoint-infix($breakpoint, $grid-breakpoints));
+    }
+  }
+}

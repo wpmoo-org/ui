@@ -1,0 +1,33 @@
+// Image Gallery justified rows. Bootstrap's flex utilities grow items only
+// by 0 or 1 (flex-grow-*), so they cannot fill a row while keeping each
+// photo's own aspect ratio. Every link carries --moo-gallery-ratio
+// (width / height) from the markup and grows by it, so the photos of a row
+// share one height; the row height is a Sass setting.
+.gallery-justified {
+  --moo-gallery-row-height: #{$moo-gallery-row-height};
+  display: flex;
+  flex-wrap: wrap;
+
+  @include media-breakpoint-up(md) {
+    --moo-gallery-row-height: #{$moo-gallery-row-height-md};
+  }
+
+  > * {
+    flex: var(--moo-gallery-ratio, 1) 1 calc(var(--moo-gallery-ratio, 1) * var(--moo-gallery-row-height));
+  }
+
+  // The closing item out-grows every photo, so the last row keeps its
+  // natural size instead of stretching across the width.
+  &::after {
+    flex-grow: 1e9;
+    content: "";
+  }
+}
+
+// Image Gallery lightbox stage. Bootstrap sizes a box by its aspect ratio
+// (.ratio-*) or by the whole viewport (.vh-100) only; the stage keeps one
+// height while photos of any shape change and stays inside short screens.
+// The module drops the class when the dialog fills the screen.
+.gallery-stage {
+  height: $moo-gallery-stage-height;
+}

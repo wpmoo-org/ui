@@ -86,6 +86,20 @@ class DialogTests(CatalogTestCase):
                 )
                 self.assertIn(f'class="modal-dialog {expected_class}"', output)
 
+    def test_dialog_fills_the_screen_below_a_breakpoint(self) -> None:
+        for breakpoint in ("sm", "md", "lg", "xl", "xxl"):
+            with self.subTest(breakpoint=breakpoint):
+                output = self.render_dialog_block(
+                    f'{{% call dialog("example", size="xl", fullscreen_down="{breakpoint}") %}}Content{{% endcall %}}'
+                )
+                self.assertIn(f'class="modal-dialog modal-xl modal-fullscreen-{breakpoint}-down"', output)
+        self.assertIn(
+            'class="modal-dialog"',
+            self.render_dialog_block('{% call dialog("example") %}Content{% endcall %}'),
+        )
+        with self.assertRaises(Exception):
+            self.render_dialog_block('{% call dialog("example", fullscreen_down="phone") %}Content{% endcall %}')
+
     def test_dialog_centered_and_scrollable_classes(self) -> None:
         output = self.render_dialog_block(
             '{% call dialog("example", centered=true, scrollable=true) %}Content{% endcall %}'

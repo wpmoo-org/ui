@@ -618,6 +618,7 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
             "slider.js",
             "sheet.js",
             "floating-panel.js",
+            "image-gallery.js",
             "password-requirements.js",
             "state.js",
             "moo-ui.js",
@@ -783,6 +784,7 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                     "    'DataTable',"
                     "    'Datepicker',"
                     "    'FloatingPanel',"
+                    "    'ImageGallery',"
                     "    'Slider'"
                     "  ];"
                     "  for (const key of lifecycleClasses) {"
