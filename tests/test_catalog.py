@@ -4340,6 +4340,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(copy, skills)
 
     def test_changelog_page_documents_latest_release_and_links_history(self) -> None:
+        """Check the patch release notes and navigation to previous releases."""
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -4369,6 +4370,18 @@ class CatalogContractTests(CatalogTestCase):
             rf'<span\b[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>\s*v{re.escape(package["version"])}\s*</span>',
         )
         self.assertIn("preview", active_release)
+        self.assertIn("Patch release", active_release)
+        for summary in (
+            "Chart tooltips show the value or radius",
+            "DataTable sorts numbers and accented words",
+            "Combobox respects IME composition",
+            "Context Menu hides an open menu on disposal",
+            "Date Picker respects range edges",
+            "collapsed Sidebar submenu flyouts",
+            "Page titles inherit the existing owner heading weight token",
+        ):
+            with self.subTest(summary=summary):
+                self.assertIn(summary, active_release)
         release_tags = StartTagParser()
         release_tags.feed(active_release)
         self.assertTrue(any(
@@ -4379,7 +4392,7 @@ class CatalogContractTests(CatalogTestCase):
         release_links = LinkParser()
         release_links.feed(active_release)
         hrefs = {link.get("href") for link in release_links.links}
-        self.assertEqual({"https://github.com/wpmoo-org/ui/pull/116"}, hrefs)
+        self.assertIn("https://github.com/wpmoo-org/ui/pull/116", hrefs)
 
         page_links = LinkParser()
         page_links.feed(changelog)
