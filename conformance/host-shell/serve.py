@@ -55,7 +55,7 @@ class HostShellHandler(BaseHTTPRequestHandler):
     def _send_relative(self, root: Path, relative: str) -> None:
         root_real = os.path.realpath(root)
         resolved = os.path.realpath(os.path.join(root_real, relative))
-        if resolved != root_real and not resolved.startswith(root_real + os.sep):
+        if not resolved.startswith(root_real + os.sep):
             self.send_error(404, "Not Found")
             return
         if not os.path.isfile(resolved):
