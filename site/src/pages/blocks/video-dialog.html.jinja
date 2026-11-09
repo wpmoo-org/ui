@@ -1,0 +1,16 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "blocks/video_dialog_example.html.jinja" import render_video_dialog_example %}
+{% from "includes/block-example.html.jinja" import render_block_example %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% block title %}Video Dialog — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header("Video Dialog", "A play control that opens a video in a dialog, composed from Button, Dialog and Bootstrap utilities.") }}
+  <div class="moo-component-examples">
+    {% set round %}{{ render_video_dialog_example("video-round") }}{% endset %}
+    {{ render_block_example("video-dialog", "Video Dialog", "A round play button in a translucent ring for wide hero and cover sections. The ring breathes only for visitors who allow motion; the frame loads its video when the dialog opens.", round, preview_class="moo-example__preview--shell") }}
+    {% set labelled %}{{ render_video_dialog_example("video-labelled", labelled=true) }}{% endset %}
+    {{ render_block_example("video-dialog-labelled", "With a visible label", "A compact pill with the play circle and the video title for narrow screens, where the round control would crowd the text.", labelled, preview_class="moo-example__preview--shell") }}
+  </div>
+{% endblock %}

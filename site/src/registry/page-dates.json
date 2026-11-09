@@ -1,0 +1,326 @@
+{
+  "./": {
+    "updated": "2026-11-09",
+    "hash": "sha256:7cbe0f9f150a00cc"
+  },
+  "blocks/": {
+    "updated": "2026-11-09",
+    "hash": "sha256:ebf9802ce720fa68"
+  },
+  "blocks/accordion-panels/": {
+    "updated": "2026-10-14",
+    "hash": "sha256:b1bf4b3c415b91d4"
+  },
+  "blocks/image-gallery/": {
+    "updated": "2026-11-09",
+    "hash": "sha256:0c1a9bf3862ddc5d"
+  },
+  "blocks/sidebar-floating/": {
+    "updated": "2026-07-30",
+    "hash": "sha256:2164c33da67efb2e"
+  },
+  "blocks/sidebar-inset/": {
+    "updated": "2026-07-30",
+    "hash": "sha256:78038bc8c311f7c2"
+  },
+  "blocks/video-dialog/": {
+    "updated": "2026-11-09",
+    "hash": "sha256:83afe166bb0cce1a"
+  },
+  "changelog/": {
+    "updated": "2026-11-09",
+    "hash": "sha256:ff409cc13d10ba86"
+  },
+  "charts/": {
+    "updated": "2026-10-20",
+    "hash": "sha256:bd43916060a2547f"
+  },
+  "components/": {
+    "updated": "2026-09-23",
+    "hash": "sha256:ff5b8b02a27eecef"
+  },
+  "components/accordion/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:93bc8e6d600d1d70"
+  },
+  "components/alert-dialog/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:07b1cef7568955ea"
+  },
+  "components/alert/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:b52ef430bc9741f9"
+  },
+  "components/avatar/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:2ddee9ea326074ae"
+  },
+  "components/badge/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:8c3b613a7fd8ab79"
+  },
+  "components/breadcrumb/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:f8b5316308234175"
+  },
+  "components/button-group/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:28967d27c5d447ac"
+  },
+  "components/button/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:e92c4b1c2ed6ee28"
+  },
+  "components/card/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:29a2555a2853d892"
+  },
+  "components/chart/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:4a0f5836dc63f8dc"
+  },
+  "components/checkbox/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:aeb9c0dbffb67682"
+  },
+  "components/close-button/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:6070a0fb653b178d"
+  },
+  "components/collapsible/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:bb65c082615621d7"
+  },
+  "components/combobox/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:940df62574eab454"
+  },
+  "components/context-menu/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:e3894413ac0c4010"
+  },
+  "components/datatable/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:6688913273ea10bf"
+  },
+  "components/datepicker/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:98ddddf0b1848408"
+  },
+  "components/dialog/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:1f375e349221b007"
+  },
+  "components/dropdown-menu/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:2173179091712959"
+  },
+  "components/empty/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:5f4c4cddba14b15d"
+  },
+  "components/field/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:ab2a4a684ac42a99"
+  },
+  "components/form/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:143cef792f0c4c11"
+  },
+  "components/input-group/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:e39ad4f49c370cf8"
+  },
+  "components/input/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:2ab789b3a92dea9d"
+  },
+  "components/item/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:53ffa768bec0af77"
+  },
+  "components/kbd/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:a5727bf307a41f68"
+  },
+  "components/menubar/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:234e3d27c0deb38b"
+  },
+  "components/navigation/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:aa4b8de1cb1e1729"
+  },
+  "components/pagination/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:d7edf59467e2c2ec"
+  },
+  "components/popover/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:e263bae6fe003bfc"
+  },
+  "components/progress/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:f77f8a81f43416ad"
+  },
+  "components/radio-group/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:2e77a940f7a86bb8"
+  },
+  "components/select/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:045486e4d40f11f5"
+  },
+  "components/separator/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:35641b7a94afe139"
+  },
+  "components/sheet/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:5de1c5ff69b0c956"
+  },
+  "components/sidebar/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:6311db9526c889a3"
+  },
+  "components/skeleton/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:dbde736f5548d90b"
+  },
+  "components/slider/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:a17bccda8f69b1cc"
+  },
+  "components/spinner/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:ada52b0fb0048d82"
+  },
+  "components/switch/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:490715796fba5d2e"
+  },
+  "components/table/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:32ba491aa2526385"
+  },
+  "components/tabs/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:9aa2b3c166ec648a"
+  },
+  "components/textarea/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:052ce78af5a6609c"
+  },
+  "components/toast/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:c75bf247f4e9672a"
+  },
+  "components/toc/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:1685ee122cacfd91"
+  },
+  "components/toggle-group/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:2d6b0e64c59830bb"
+  },
+  "components/tooltip/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:a1735b3801a09a1b"
+  },
+  "components/typography/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:e991ce632967682a"
+  },
+  "contributing/": {
+    "updated": "2026-07-30",
+    "hash": "sha256:d4a828b5f6dae491"
+  },
+  "examples/": {
+    "updated": "2026-09-23",
+    "hash": "sha256:15dc72dc5b0eaa18"
+  },
+  "examples/auth/forgot-password/": {
+    "updated": "2026-08-23",
+    "hash": "sha256:f7ad3ec04eedf07d"
+  },
+  "examples/auth/sign-in/": {
+    "updated": "2026-08-23",
+    "hash": "sha256:ad34c563d7899544"
+  },
+  "examples/auth/sign-up/": {
+    "updated": "2026-08-23",
+    "hash": "sha256:a24260f6ae238c73"
+  },
+  "examples/dashboard/overview/": {
+    "updated": "2026-08-23",
+    "hash": "sha256:1cbc557a335020c8"
+  },
+  "examples/dashboard/tasks/": {
+    "updated": "2026-10-01",
+    "hash": "sha256:c41fa511de810c69"
+  },
+  "examples/dashboard/users/": {
+    "updated": "2026-08-16",
+    "hash": "sha256:bbab2fa025512844"
+  },
+  "examples/marketing/faq/": {
+    "updated": "2026-09-01",
+    "hash": "sha256:9f420efdf8f904b8"
+  },
+  "examples/marketing/pricing/": {
+    "updated": "2026-08-23",
+    "hash": "sha256:ab7ab7cd35a37195"
+  },
+  "examples/settings/account/": {
+    "updated": "2026-08-29",
+    "hash": "sha256:5f8870059334dc4f"
+  },
+  "examples/settings/appearance/": {
+    "updated": "2026-08-23",
+    "hash": "sha256:3ebeeac6462b32f4"
+  },
+  "examples/settings/profile/": {
+    "updated": "2026-08-23",
+    "hash": "sha256:a02af8cbd99eea33"
+  },
+  "installation/": {
+    "updated": "2026-11-09",
+    "hash": "sha256:3c55a01551312319"
+  },
+  "introduction/": {
+    "updated": "2026-09-01",
+    "hash": "sha256:308b28252661d1dc"
+  },
+  "layout/": {
+    "updated": "2026-11-08",
+    "hash": "sha256:96563ac41b6d7c45"
+  },
+  "license/": {
+    "updated": "2026-09-26",
+    "hash": "sha256:3f0a12f6d6d68b34"
+  },
+  "skills/": {
+    "updated": "2026-11-09",
+    "hash": "sha256:e4e9d9c42c48c2b4"
+  },
+  "support/": {
+    "updated": "2026-11-09",
+    "hash": "sha256:8c4cdd833443d453"
+  },
+  "utils/": {
+    "updated": "2026-10-04",
+    "hash": "sha256:2f0e6d46b01b96f0"
+  },
+  "utils/border/": {
+    "updated": "2026-10-04",
+    "hash": "sha256:08c3f07a5e7139b4"
+  },
+  "utils/overlay-scrollbar/": {
+    "updated": "2026-10-29",
+    "hash": "sha256:1ac4de0b229341ab"
+  },
+  "utils/scroll-fade/": {
+    "updated": "2026-07-30",
+    "hash": "sha256:6d6b117eac8ede78"
+  }
+}

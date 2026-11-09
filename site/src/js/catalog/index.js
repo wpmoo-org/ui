@@ -22,6 +22,7 @@ const FEATURE_SELECTORS = {
   datatable: ".datatable",
   datepicker: "[data-datepicker], [data-datepicker-range], [data-calendar]",
   floatingPanel: "[data-floating-panel]",
+  imageGallery: "[data-image-gallery]",
   slider: "[data-slider]",
   tableOfContents: "[data-toc]",
   overlayScrollbar: '[data-overlay-scrollbar-demo], [data-moo-shell="catalog"]',
@@ -171,6 +172,13 @@ export function initCatalog(root = document) {
       });
       return () => instances.forEach((instance) => instance.dispose());
     },
+  );
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.imageGallery,
+    () => import("../../../../src/js/components/image-gallery.js"),
+    ({ initImageGalleries }) => initImageGalleries(root),
   );
   pushLazyFeature(
     disposers,

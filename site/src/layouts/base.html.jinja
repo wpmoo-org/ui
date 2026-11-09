@@ -23,6 +23,9 @@
     {% if page_meta.url %}
     <link rel="canonical" href="{{ page_meta.url }}">
     {% endif %}
+    {% for item in page_meta.get("structured_data", []) %}
+    <script type="application/ld+json">{{ item | tojson }}</script>
+    {% endfor %}
     <script type="importmap">
       {"imports": {
         "chart.js/auto": "{{ root_path or './' }}vendor/chart.js/auto/auto.js",

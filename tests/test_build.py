@@ -422,6 +422,21 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
             [{"id": "install", "label": "Use moo-ui.css First"}],
         )
 
+    def test_example_toc_items_prefer_a_heading_toc_label(self) -> None:
+        html = """
+        <div class="moo-component-examples">
+          <section class="moo-example" aria-labelledby="about">
+            <h2 id="about" data-toc-label="About">About Tabs in Moo UI</h2>
+          </section>
+          <h2 id="usage">Usage</h2>
+        </div>
+        """
+
+        self.assertEqual(
+            build.example_toc_items(html),
+            [{"id": "about", "label": "About"}, {"id": "usage", "label": "Usage"}],
+        )
+
     def test_build_writes_canonical_sitemap(self) -> None:
         result = self.run_build()
 
@@ -603,6 +618,7 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
             "slider.js",
             "sheet.js",
             "floating-panel.js",
+            "image-gallery.js",
             "password-requirements.js",
             "state.js",
             "moo-ui.js",
@@ -768,6 +784,7 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                     "    'DataTable',"
                     "    'Datepicker',"
                     "    'FloatingPanel',"
+                    "    'ImageGallery',"
                     "    'Slider'"
                     "  ];"
                     "  for (const key of lifecycleClasses) {"

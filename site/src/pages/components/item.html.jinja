@@ -1,0 +1,78 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/item.html.jinja" import item, item_group %}
+{% from "components/button.html.jinja" import button %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
+
+{% block content %}
+  {{ render_page_header("Item", "Show a row of media, a title, a description and optional actions, alone or in a group.") }}
+  <div class="moo-component-examples">
+    {% set check_icon %}{{ render_icon("badge-check", "inline-start") }}{% endset %}
+    {% set shield_icon %}{{ render_icon("shield-alert", "inline-start") }}{% endset %}
+    {% set inbox_icon %}{{ render_icon("inbox", "inline-start") }}{% endset %}
+    {% set book_icon %}{{ render_icon("book-open", "inline-start") }}{% endset %}
+    {% set home_icon %}{{ render_icon("house", "inline-start") }}{% endset %}
+    {% set review_action %}{{ button("Review", variant="outline", size="sm") }}{% endset %}
+
+    {% set basic %}
+      <div class="w-100">
+        {{ item("Security alert", description="New login detected from an unknown device.", media=shield_icon, action=review_action, variant="outline") }}
+      </div>
+    {% endset %}
+    {% set usage %}
+      <p><code>.item</code> lays out one row: optional media, a content column with <code>.item-title</code> and <code>.item-description</code>, and optional <code>.item-actions</code>. Group related rows in a <code>ul.item-group</code> with each item inside an <code>li</code>.</p>
+      <p>The default variant has no border or fill. Add <code>.item-outline</code> for a visible border or <code>.item-muted</code> for a quiet surface, and <code>.item-sm</code> for dense lists. Put a decorative icon inside <code>.item-media.item-media-icon</code>, which frames elements with <code>data-icon</code>, and mark it <code>aria-hidden="true"</code>.</p>
+      <p>Render the whole row as an <code>a.item</code> when it leads somewhere; the row then highlights on hover and shows the shared focus ring. A link item does not hold separate actions, because nested interactive elements cannot live inside a link. Use Field instead when the row contains a form control.</p>
+    {% endset %}
+    {{ render_component_intro(basic, usage, preview_class="moo-example__preview--medium") }}
+
+    {% set variants %}
+      <div class="d-flex flex-column gap-3 w-100">
+        {{ item("Default variant", description="Transparent background with no border.", media=inbox_icon) }}
+        {{ item("Outline variant", description="Outlined style with a visible border.", media=inbox_icon, variant="outline") }}
+        {{ item("Muted variant", description="Muted background for secondary content.", media=inbox_icon, variant="muted") }}
+      </div>
+    {% endset %}
+    {{ render_component_example("item", "Item", "variants", "Variants", "Default, outline and muted surfaces.", variants, preview_class="moo-example__preview--medium") }}
+
+    {% set sizes %}
+      <div class="d-flex flex-column gap-3 w-100">
+        {{ item("Default size", description="The standard size for most lists.", media=check_icon, variant="outline") }}
+        {{ item("Small size", description="A compact size for dense layouts.", media=check_icon, variant="outline", size="sm") }}
+      </div>
+    {% endset %}
+    {{ render_component_example("item", "Item", "sizes", "Sizes", "Use the small size where several rows share little space.", sizes, preview_class="moo-example__preview--medium") }}
+
+    {% set links %}
+      <div class="w-100">
+        {% call item_group() %}
+          {{ item("Dashboard", description="Overview of your account and activity.", media=home_icon, href="#", listitem=true) }}
+          {{ item("Documentation", description="Learn how to get started with the components.", media=book_icon, href="#", listitem=true) }}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_component_example("item", "Item", "links", "Link group", "Each row is a link; the whole row highlights on hover and keyboard focus.", links, preview_class="moo-example__preview--medium") }}
+
+    {% set arabic_action %}{{ button("مراجعة", variant="outline", size="sm") }}{% endset %}
+    {% set hebrew_action %}{{ button("בדיקה", variant="outline", size="sm") }}{% endset %}
+    {% set arabic %}
+      <div class="w-100" dir="rtl">{{ item("تنبيه أمني", description="تم رصد تسجيل دخول من جهاز غير معروف.", media=shield_icon, action=arabic_action, variant="outline") }}</div>
+    {% endset %}
+    {% set hebrew %}
+      <div class="w-100" dir="rtl">{{ item("התראת אבטחה", description="זוהתה כניסה ממכשיר לא מוכר.", media=shield_icon, action=hebrew_action, variant="outline") }}</div>
+    {% endset %}
+    {{ render_rtl_example("item", "Media, content and actions follow the native reading direction.", arabic, hebrew, basic) }}
+
+    {{ render_reference(
+      "Item is a Moo-owned static component. Bootstrap 5 replaced its media object with flex utilities; Item's row uses Bootstrap's spacing, border, radius and theme tokens, see",
+      "https://getbootstrap.com/docs/5.3/utilities/flex/#media-object",
+      "the Bootstrap flex media object example",
+      extra_references=[{
+        "lead": "Its visual structure is informed by",
+        "href": "https://ui.shadcn.com/docs/components/item",
+        "label": "the shadcn/ui Item reference"
+      }]
+    ) }}
+  </div>
+{% endblock %}

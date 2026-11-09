@@ -44,6 +44,7 @@ PACKAGE_DIST = ROOT / "dist"
 SITE_DIST = ROOT / "site-dist"
 SITE_PUBLIC = SITE / "public"
 LLMS_TXT = SITE_PUBLIC / "llms.txt"
+PAGE_DATES = SITE_REGISTRY / "page-dates.json"
 SITE_ROOT_ASSETS = tuple(
     SITE_PUBLIC / name
     for name in (
@@ -54,6 +55,7 @@ SITE_ROOT_ASSETS = tuple(
         "icon-512.png",
         "site.webmanifest",
         "_headers",
+        "sitemap.xsl",
     )
 )
 BOOTSTRAP = ROOT / "vendor/bootstrap"
@@ -68,6 +70,7 @@ CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
     "password-requirements.js",
     "floating-panel.js",
+    "image-gallery.js",
     "overlay-scrollbar.js",
     "combobox.js",
     "context-menu.js",
@@ -110,6 +113,7 @@ EVIDENCE_FILES = (
     "rc-3-evidence.json",
     "2026-10-07-table-of-contents-evidence.json",
     "2026-10-09-empty-evidence.json",
+    "2026-11-08-item-evidence.json",
 )
 ACCEPTED_COMPONENT_EVIDENCE_STATUSES = {
     "preview-passed",
@@ -845,7 +849,12 @@ def example_toc_items(value: object) -> list[dict[str, str]]:
             target_id = child.attrs.get("aria-labelledby")
             title_node = parser.by_id.get(target_id or "")
 
-        label = title_node.text_content() if title_node else ""
+        # A heading may carry a shorter outline label than its visible text.
+        label = (
+            (title_node.attrs.get("data-toc-label") or title_node.text_content())
+            if title_node
+            else ""
+        )
         if target_id and label and target_id not in seen:
             items.append({"id": target_id, "label": label})
             seen.add(target_id)
@@ -1195,6 +1204,50 @@ def build_site_pages(
     return pages
 
 
+def structured_data(
+    kind: str,
+    url: str,
+    title: str,
+    description: str,
+    label: str,
+    modified: str = "",
+) -> list[dict[str, object]]:
+    """Schema.org JSON-LD for the home page and component pages."""
+    home = canonical_url("index.html")
+    website = {"@type": "WebSite", "name": SITE_NAME, "url": home}
+    if kind == "doc" and url == home:
+        return [{"@context": "https://schema.org", **website, "description": description}]
+    if kind != "component" or not url or not label:
+        return []
+    article: dict[str, object] = {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": title,
+        "description": description,
+        "url": url,
+        "isPartOf": website,
+    }
+    if modified:
+        article["dateModified"] = modified
+    return [
+        article,
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": SITE_NAME, "item": home},
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Components",
+                    "item": canonical_url("components/index.html"),
+                },
+                {"@type": "ListItem", "position": 3, "name": label, "item": url},
+            ],
+        },
+    ]
+
+
 def page_metadata(
     page: Path,
     logical_relative: Path,
@@ -1203,7 +1256,8 @@ def page_metadata(
     utilities: list[dict[str, str]],
     blocks: list[dict[str, str]],
     layouts: list[dict[str, str]],
-) -> dict[str, str]:
+    guides: dict[str, dict[str, object]] | None = None,
+) -> dict[str, object]:
     """Build discovery and social metadata for one rendered catalog page."""
     path = logical_relative.as_posix()
     slug = logical_relative.stem
@@ -1257,7 +1311,13 @@ def page_metadata(
             slug = entry.get("slug", slug)
 
     template_meta = extract_template_metadata(page)
-    if kind == "component":
+    guide = (guides or {}).get(slug) if kind == "component" else None
+    if guide:
+        # A site guide carries search-facing wording; the Core registry
+        # keeps the short package description.
+        raw_title = str(guide["metaTitle"])
+        description = str(guide["metaDescription"])
+    elif kind == "component":
         raw_title = (entry or {}).get("label") or template_meta.get("page_title") or SITE_NAME
         description = _entry_description(entry) or template_meta.get("page_description")
     else:
@@ -1266,13 +1326,23 @@ def page_metadata(
     image = template_meta.get("page_image") or image
     image_alt = template_meta.get("page_image_alt") or f"{raw_title} page preview"
     title = raw_title if raw_title == SITE_NAME or raw_title.endswith("Moo UI") else f"{raw_title} — {SITE_NAME}"
+    url = "" if kind == "not-found" else canonical_url(canonical_path)
+    indexable = is_indexable_page(logical_relative)
 
     return {
+        "structured_data": structured_data(
+            kind if indexable else "",
+            url,
+            title,
+            description,
+            (entry or {}).get("label", ""),
+            sitemap_lastmod().get(url, ""),
+        ),
         "site_name": SITE_NAME,
         "title": title,
         "description": description,
-        "url": "" if kind == "not-found" else canonical_url(canonical_path),
-        "robots": "" if is_indexable_page(logical_relative) else "noindex, follow",
+        "url": url,
+        "robots": "" if indexable else "noindex, follow",
         "image": image,
         "image_alt": image_alt,
         "type": "website" if kind == "doc" else "article",
@@ -1904,6 +1974,28 @@ def load_catalog() -> list[dict[str, str]]:
         CORE_REGISTRY,
         "components.json",
     )
+
+
+def load_component_guides(labels: dict[str, str]) -> dict[str, dict[str, object]]:
+    """Load site-only usage guides; every slug must name a catalog component."""
+    path = SITE_REGISTRY / "component-guides.json"
+    if not path.exists():
+        return {}
+    guides = json.loads(path.read_text(encoding="utf-8"))
+    for slug, guide in guides.items():
+        if slug not in labels:
+            fail(f"component-guides.json: unknown component {slug!r}")
+        for field in ("metaTitle", "metaDescription", "summary", "whenToUse"):
+            if not guide.get(field):
+                fail(f"component-guides.json: {slug} needs {field}")
+        linked = list(guide.get("related", [])) + [
+            item["slug"] for item in guide.get("whenNotToUse", []) if item.get("slug")
+        ]
+        for target in linked:
+            if target not in labels:
+                fail(f"component-guides.json: {slug} links unknown component {target!r}")
+        guide["label"] = labels[slug]
+    return guides
 
 
 def load_utilities() -> list[dict[str, str]]:
@@ -2608,12 +2700,76 @@ def public_canonical_urls(layouts: list[dict[str, str]] | None = None) -> list[s
     return urls
 
 
+def sitemap_lastmod() -> dict[str, str]:
+    """Recorded content dates, keyed by canonical URL.
+
+    scripts/record-page-dates.py owns page-dates.json and moves a page's
+    date only when its rendered content changes; build or checkout times
+    would mark every page as changed and teach crawlers to ignore them.
+    """
+    if not PAGE_DATES.exists():
+        return {}
+    dates = json.loads(PAGE_DATES.read_text(encoding="utf-8"))
+    return {canonical_url(route): str(entry["updated"]) for route, entry in dates.items()}
+
+
+SITEMAP_GROUPS = (
+    ("", "Pages"),
+    ("components", "Components"),
+    ("blocks", "Blocks"),
+    ("utils", "Utilities"),
+    ("examples", "Examples"),
+    ("layouts", "Layouts"),
+)
+
+
+def sitemap_page_groups(
+    sections: list[dict[str, str]],
+    catalog: list[dict[str, str]],
+    utilities: list[dict[str, str]],
+    blocks: list[dict[str, str]],
+    layouts: list[dict[str, str]],
+    guides: dict[str, dict[str, object]],
+) -> list[dict[str, object]]:
+    """The public pages of sitemap.xml, grouped and labelled for people."""
+    lastmod = sitemap_lastmod()
+    grouped: dict[str, list[dict[str, str]]] = {key: [] for key, _ in SITEMAP_GROUPS}
+    for path in public_page_paths(layouts):
+        logical = Path(path)
+        metadata = page_metadata(
+            PAGES / f"{path}.jinja", logical, sections, catalog, utilities, blocks, layouts, guides
+        )
+        key = logical.parts[0] if len(logical.parts) > 1 else ""
+        if key not in grouped:
+            key = ""
+        title = _strip_site_suffix(str(metadata["title"])) or SITE_NAME
+        if metadata["kind"] == "component":
+            title = next(entry["label"] for entry in catalog if entry["slug"] == metadata["slug"])
+        url = str(metadata["url"])
+        grouped[key].append(
+            {
+                "title": title,
+                "description": str(metadata["description"]),
+                "href": pretty_url(path),
+                "url": url,
+                "lastmod": lastmod.get(url, ""),
+            }
+        )
+    return [
+        {"key": key or "pages", "label": label, "pages": sorted(grouped[key], key=lambda page: page["title"].lower())}
+        for key, label in SITEMAP_GROUPS
+        if grouped[key]
+    ]
+
+
 def write_sitemap(layouts: list[dict[str, str]] | None = None) -> None:
+    lastmod = sitemap_lastmod()
     urls = "\n".join(
         "\n".join(
             (
                 "  <url>",
                 f"    <loc>{escape(url, quote=True)}</loc>",
+                *((f"    <lastmod>{lastmod[url]}</lastmod>",) if url in lastmod else ()),
                 "  </url>",
             )
         )
@@ -2622,6 +2778,7 @@ def write_sitemap(layouts: list[dict[str, str]] | None = None) -> None:
     sitemap = "\n".join(
         (
             '<?xml version="1.0" encoding="UTF-8"?>',
+            '<?xml-stylesheet type="text/xsl" href="sitemap.xsl"?>',
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
             urls,
             "</urlset>",
@@ -2659,6 +2816,8 @@ def render_pages(
         catalog,
         product["certification"],
     )
+    component_labels = {component["slug"]: component["label"] for component in catalog}
+    component_guides = load_component_guides(component_labels)
     catalog = [
         {
             **component,
@@ -2673,6 +2832,9 @@ def render_pages(
         blocks,
         examples,
         layouts,
+    )
+    sitemap_groups = sitemap_page_groups(
+        sections, catalog, utilities, blocks, layouts, component_guides
     )
     version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
@@ -2707,6 +2869,7 @@ def render_pages(
             utilities,
             blocks,
             layouts,
+            component_guides,
         )
         rendered = environment.get_template(template_name).render(
             catalog=catalog,
@@ -2717,6 +2880,9 @@ def render_pages(
             layouts=layouts,
             product=product,
             component_ownership=component_ownership,
+            component_guides=component_guides,
+            component_labels=component_labels,
+            sitemap_groups=sitemap_groups,
             site_pages=site_pages,
             current_section=current_section,
             current_slug=metadata["slug"],

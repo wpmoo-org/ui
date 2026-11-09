@@ -1,0 +1,37 @@
+{# Item owns one media/title/description/actions row through .item. Media and
+   action are trusted public-component captures whose providers own their
+   semantics; scalar text, link targets and additional classes are escaped.
+   Inside item_group() each item renders as a list item. #}
+{% set item_variants = ["default", "outline", "muted"] %}
+{% set item_sizes = ["default", "sm"] %}
+
+{% macro item(title="", description="", media="", media_variant="icon", href="", action="", variant="default", size="default", listitem=false, extra_class="") -%}
+  {% if not title | trim and not description | trim %}{{ fail("Item title or description is required") }}{% endif %}
+  {% if variant not in item_variants %}{{ fail("Unknown item variant: " ~ variant) }}{% endif %}
+  {% if size not in item_sizes %}{{ fail("Unknown item size: " ~ size) }}{% endif %}
+  {% if media_variant not in ["icon", "default"] %}{{ fail("Unknown item media variant: " ~ media_variant) }}{% endif %}
+  {% if extra_class is not string or href is not string %}{{ fail("Item href and extra_class must be strings") }}{% endif %}
+  {% if href and action %}{{ fail("A link item cannot also hold an action") }}{% endif %}
+  {% set classes = "item" %}
+  {% if variant != "default" %}{% set classes = classes ~ " item-" ~ variant %}{% endif %}
+  {% if size == "sm" %}{% set classes = classes ~ " item-sm" %}{% endif %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ (extra_class | forceescape) %}{% endif %}
+  {% set tag = "a" if href else "div" %}
+  {% if listitem %}<li>{% endif %}
+  <{{ tag }} class="{{ classes }}"{% if href %} href="{{ href | forceescape }}"{% endif %}>
+    {% if media %}<div class="item-media{% if media_variant == "icon" %} item-media-icon{% endif %}" aria-hidden="true">{{ media }}</div>{% endif %}
+    <div class="item-content">
+      {% if title | trim %}<div class="item-title">{{ title | forceescape }}</div>{% endif %}
+      {% if description | trim %}<p class="item-description">{{ description | forceescape }}</p>{% endif %}
+    </div>
+    {% if action %}<div class="item-actions">{{ action }}</div>{% endif %}
+  </{{ tag }}>
+  {% if listitem %}</li>{% endif %}
+{%- endmacro %}
+
+{% macro item_group(extra_class="") -%}
+  {% if extra_class is not string %}{{ fail("Item group extra_class must be a string") }}{% endif %}
+  <ul class="item-group{% if extra_class %} {{ extra_class | forceescape }}{% endif %}">
+    {{ caller() | trim | safe }}
+  </ul>
+{%- endmacro %}

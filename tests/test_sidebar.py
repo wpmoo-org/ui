@@ -835,8 +835,9 @@ class SidebarTests(CatalogTestCase):
         # The live example is rendered in the isolated block preview frame;
         # the catalog page itself must not invent a second sidebar root.
         self.assertNotIn("components-sidebar-floating-demo", page)
-        # Sidebar documents one full application-shell example; RTL is not part of this component contract.
-        self.assertEqual(page.count('class="moo-example"'), 1)
+        # Count the isolated application-shell demo, not usage-guide sections.
+        frames = re.findall(r"<iframe\b[^>]*\bdata-moo-block-frame(?=[\s>])[^>]*>", page)
+        self.assertEqual(len(frames), 1)
 
     def test_sidebar_catalog_page_keeps_shell_example_before_reference_sections(self) -> None:
         result = self.run_build()

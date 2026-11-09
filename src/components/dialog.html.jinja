@@ -1,16 +1,20 @@
 {# Dialog is the Moo catalog name for Bootstrap's Modal component, matching
    the design reference's Dialog naming. Structure, sizing, and dismissal
    all ride Bootstrap's own .modal* classes and data-bs-* contract; nothing
-   here is a new Moo-owned selector. #}
+   here is a new Moo-owned selector. fullscreen_down fills the screen below a
+   breakpoint (Bootstrap's .modal-fullscreen-{breakpoint}-down) and keeps the
+   chosen size above it. #}
 
 {% from "components/close_button.html.jinja" import close_button %}
 
 {% set dialog_sizes = ["default", "sm", "lg", "xl", "fullscreen"] %}
 {% set dialog_directions = ["", "ltr", "rtl", "auto"] %}
+{% set dialog_fullscreen_breakpoints = ["", "sm", "md", "lg", "xl", "xxl"] %}
 
 {% macro dialog(
   id,
   size="default",
+  fullscreen_down="",
   centered=false,
   scrollable=false,
   static=false,
@@ -22,11 +26,13 @@
   {% if not id | trim %}{{ fail("Dialog id is required") }}{% endif %}
   {% if size not in dialog_sizes %}{{ fail("Unknown dialog size: " ~ size) }}{% endif %}
   {% if direction not in dialog_directions %}{{ fail("Unknown dialog direction: " ~ direction) }}{% endif %}
+  {% if fullscreen_down not in dialog_fullscreen_breakpoints %}{{ fail("Unknown dialog fullscreen_down breakpoint: " ~ fullscreen_down) }}{% endif %}
   {% set dialog_classes = "modal-dialog" %}
   {% if size == "sm" %}{% set dialog_classes = dialog_classes ~ " modal-sm" %}{% endif %}
   {% if size == "lg" %}{% set dialog_classes = dialog_classes ~ " modal-lg" %}{% endif %}
   {% if size == "xl" %}{% set dialog_classes = dialog_classes ~ " modal-xl" %}{% endif %}
   {% if size == "fullscreen" %}{% set dialog_classes = dialog_classes ~ " modal-fullscreen" %}{% endif %}
+  {% if fullscreen_down %}{% set dialog_classes = dialog_classes ~ " modal-fullscreen-" ~ fullscreen_down ~ "-down" %}{% endif %}
   {% if centered %}{% set dialog_classes = dialog_classes ~ " modal-dialog-centered" %}{% endif %}
   {% if scrollable %}{% set dialog_classes = dialog_classes ~ " modal-dialog-scrollable" %}{% endif %}
   <div

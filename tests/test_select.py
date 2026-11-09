@@ -8,7 +8,6 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/select.html.jinja"
-PAGE = ROOT / "site/src/pages/components/select.html.jinja"
 COMPONENTS_AGGREGATE = ROOT / "scss/_components.scss"
 SELECT_SCSS = ROOT / "scss/components/_select.scss"
 
@@ -133,14 +132,11 @@ class SelectTests(CatalogTestCase):
             (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
         )
         select_entry = next(item for item in registry if item["slug"] == "select")
-        source = PAGE.read_text(encoding="utf-8")
 
         self.assertEqual(select_entry["label"], "Native Select")
-        self.assertIn("{% block title %}Native Select — Moo UI{% endblock %}", source)
-        self.assertIn('"Native Select",', source)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/select.html")
+        self.assertIn("<title>Native Select:", page)
         self.assertRegex(page, r"<h1\b[^>]*>Native Select</h1>")
-        self.assertIn("Choose one value from native option menus", page)

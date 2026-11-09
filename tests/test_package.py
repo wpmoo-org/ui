@@ -36,7 +36,9 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/components/_dialog.scss",
     "scss/components/_dropdown.scss",
     "scss/components/_empty.scss",
+    "scss/components/_item.scss",
     "scss/components/_field.scss",
+    "scss/components/_gallery.scss",
     "scss/components/_input.scss",
     "scss/components/_input_group.scss",
     "scss/components/_kbd.scss",
@@ -90,6 +92,9 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/themes/_theme.scss",
     "scss/utilities/_background_color.scss",
     "scss/utilities/_border.scss",
+    "scss/utilities/_gallery.scss",
+    "scss/utilities/_motion.scss",
+    "scss/utilities/_motion_primitives.scss",
     "scss/utilities/_overlay_scrollbar.scss",
     "scss/utilities/_overlay_scrollbar_native.scss",
     "scss/utilities/_scroll_fade.scss",
@@ -109,6 +114,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/slider.js",
     "dist/js/sheet.js",
     "dist/js/floating-panel.js",
+    "dist/js/image-gallery.js",
     "dist/js/password-requirements.js",
     "dist/js/toc.js",
     "dist/js/overlay-scrollbar.js",
@@ -140,6 +146,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./slider.js": "./dist/js/slider.js",
     "./sheet.js": "./dist/js/sheet.js",
     "./floating-panel.js": "./dist/js/floating-panel.js",
+    "./image-gallery.js": "./dist/js/image-gallery.js",
     "./password-requirements.js": "./dist/js/password-requirements.js",
     "./toc.js": "./dist/js/toc.js",
     "./overlay-scrollbar.js": "./dist/js/overlay-scrollbar.js",
@@ -501,6 +508,7 @@ class PackageMetadataTests(unittest.TestCase):
                 "slider.js",
                 "sheet.js",
                 "floating-panel.js",
+                "image-gallery.js",
                 "password-requirements.js",
                 "toc.js",
                 "overlay-scrollbar.js",
@@ -726,6 +734,7 @@ import OverlayScrollbar from "@wpmoo/ui/overlay-scrollbar.js";
 import LegacyToc from "@wpmoo/ui/table-of-contents.js";
 import { initSheets } from "@wpmoo/ui/sheet.js";
 import FloatingPanel from "@wpmoo/ui/floating-panel.js";
+import ImageGallery, { initImageGalleries } from "@wpmoo/ui/image-gallery.js";
 import PasswordRequirements from "@wpmoo/ui/password-requirements.js";
 import MooUI, {
   loadChart as AggregateLoadChart,
@@ -740,6 +749,7 @@ import MooUI, {
   OverlayScrollbar as AggregateOverlayScrollbar,
   initSheets as AggregateInitSheets,
   FloatingPanel as AggregateFloatingPanel,
+  ImageGallery as AggregateImageGallery,
   PasswordRequirements as AggregatePasswordRequirements,
 } from "@wpmoo/ui/moo-ui.js";
 import MooUIMinified, {
@@ -791,6 +801,10 @@ if (
   typeof MinifiedAggregateFloatingPanel.getOrCreateInstance !== "function" ||
   MooUI.FloatingPanel !== AggregateFloatingPanel ||
   MooUIMinified.FloatingPanel !== MinifiedAggregateFloatingPanel ||
+  typeof ImageGallery.getOrCreateInstance !== "function" ||
+  typeof initImageGalleries !== "function" ||
+  MooUI.ImageGallery !== AggregateImageGallery ||
+  typeof AggregateImageGallery.getOrCreateInstance !== "function" ||
   typeof AggregateChart.getOrCreateInstance !== "function" ||
   typeof AggregateDatepicker.getOrCreateInstance !== "function" ||
   typeof MooCalendar !== "function" ||
@@ -1020,6 +1034,7 @@ for (const specifier of [
             "datatable.js",
             "sheet.js",
             "floating-panel.js",
+            "image-gallery.js",
             "password-requirements.js",
             "slider.js",
             "toc.js",

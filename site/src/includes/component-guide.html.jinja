@@ -1,0 +1,80 @@
+{% from "components/kbd.html.jinja" import kbd %}
+{% from "components/table.html.jinja" import table %}
+{% from "components/card.html.jinja" import card %}
+{% from "components/item.html.jinja" import item, item_group %}
+{% from "includes/component-icons.html.jinja" import component_icons %}
+
+{#- Usage guidance for a component page, read from the site registry
+    (site/src/registry/component-guides.json). The about part sits between
+    the first example and Usage; the details part (keyboard and related
+    components) closes the page before the component reference. Both render
+    nothing when the current component has no guide entry. -#}
+{% macro render_component_guide_about() %}
+  {% set guide = component_guides.get(current_slug) if component_guides is defined and current_page_kind is defined and current_page_kind == "component" else none %}
+  {% if guide %}
+    <section class="moo-example" aria-labelledby="{{ current_slug }}-guide-title" data-moo-component-guide>
+      <h2 class="h4" id="{{ current_slug }}-guide-title" data-toc-label="About">About {{ guide.label }} in Moo UI</h2>
+      <p>{{ guide.summary }}</p>
+
+      {% set use_icon %}{{ render_icon("circle-check", "inline-start") }}{% endset %}
+      <div class="row row-cols-1 row-cols-md-2 g-3 mt-1">
+        <div class="col">
+          {% call card(title="When to use it", size="sm", extra_class="h-100", header_class="ps-4 pb-3 border-bottom") %}
+            {% call item_group() %}
+              {% for text in guide.whenToUse %}
+                {{ item(description=text, media=use_icon, size="sm", listitem=true, extra_class="border-0") }}
+              {% endfor %}
+            {% endcall %}
+          {% endcall %}
+        </div>
+        {% if guide.get("whenNotToUse") %}
+        <div class="col">
+          {% call card(title="When to use something else", size="sm", extra_class="h-100", header_class="ps-4 pb-3 border-bottom") %}
+            {% call item_group() %}
+              {% for entry in guide.whenNotToUse %}
+                {% if entry.get("slug") in component_labels %}
+                  {% set alternative_icon %}{{ render_icon(component_icons.get(entry.slug, "component"), "inline-start") }}{% endset %}
+                  {{ item(component_labels[entry.slug], description=entry.text, media=alternative_icon, href=root_path ~ "components/" ~ entry.slug ~ "/", size="sm", listitem=true, extra_class="border-0") }}
+                {% else %}
+                  {{ item(description=entry.text, size="sm", listitem=true, extra_class="border-0") }}
+                {% endif %}
+              {% endfor %}
+            {% endcall %}
+          {% endcall %}
+        </div>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+{% endmacro %}
+
+{% macro render_component_guide_details() %}
+  {% set guide = component_guides.get(current_slug) if component_guides is defined and current_page_kind is defined and current_page_kind == "component" else none %}
+  {% if guide and (guide.get("keyboard") or guide.get("related")) %}
+    <section class="mt-5" data-moo-component-guide-details>
+      {% if guide.get("keyboard") %}
+      <h2 class="h3 pb-3 mb-3 border-bottom" id="{{ current_slug }}-keyboard-title">Keyboard interaction</h2>
+      {#- The table macro renders cells as markup, so escape registry text. -#}
+      {% set ns = namespace(rows=[]) %}
+      {% for entry in guide.keyboard %}
+        {% set keys %}{% for key in entry["keys"] %}{{ kbd(key) }}{% if not loop.last %} + {% endif %}{% endfor %}{% endset %}
+        {% set ns.rows = ns.rows + [[keys, entry.action | e]] %}
+      {% endfor %}
+      {{ table(["Key", "Action"], ns.rows) }}
+      {% endif %}
+
+      {% if guide.get("related") %}
+      <h2 class="h3 pb-3 mb-3 mt-5 border-bottom" id="{{ current_slug }}-related-title">Related components</h2>
+      {% call item_group() %}
+        {% for slug in guide.related %}
+          {% set entry = catalog | selectattr("slug", "equalto", slug) | first %}
+          {% if entry %}
+            {% set related_icon %}{{ render_icon(component_icons.get(entry.slug, "component"), "inline-start") }}{% endset %}
+            {{ item(entry.label, description=entry.description, media=related_icon, href=root_path ~ "components/" ~ entry.slug ~ "/", variant="outline", listitem=true) }}
+          {% endif %}
+        {% endfor %}
+      {% endcall %}
+      {% endif %}
+    </section>
+  {% endif %}
+{% endmacro %}

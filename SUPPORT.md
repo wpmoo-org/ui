@@ -4,6 +4,13 @@ Moo UI Core is an open-source Bootstrap component system. This document defines
 the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
+Moo UI `2.2.0` adds Item, Image Gallery and Video Dialog. The gallery's optional
+runtime uses Bootstrap Modal and Carousel, loads large images on demand and
+supports slideshow, full-screen and translated controls. Thumbnail links retain
+their native destination without JavaScript. The existing preview certification
+status remains unchanged; these additions do not claim a completed device or
+screen-reader certification matrix.
+
 Moo UI `2.1.1` includes the component and keyboard fixes in
 [PR #116](https://github.com/wpmoo-org/ui/pull/116). Page titles follow the
 existing owner heading weight token.
@@ -210,9 +217,9 @@ conformance pass for that host. The runner needs Python 3 and Playwright
 only; no Moo UI build tooling is involved.
 
 The archive is reproducible byte-for-byte from the repository source at any
-time. The Moo UI 2.1.1 source carries kit contract
+time. The Moo UI 2.2.0 source carries kit contract
 version 1.0; its development archive hashes to SHA-256
-`4e660dfd1a673a888b6a665eb0fb236a27700f5588455501f96d4ab06354af5c`.
+`65a3c9e5e3cea53dcf125a99896f96fcab67487792670540adeb14e1984913d7`.
 The [released Moo UI 1.1.0 source](https://github.com/wpmoo-org/ui/releases/tag/v1.1.0)
 archive hashes to SHA-256
 `e4ab6c256ce4e2e1a3a82a42fdfbbf90f5c5871c14d4853fce928546a8cafbac`.

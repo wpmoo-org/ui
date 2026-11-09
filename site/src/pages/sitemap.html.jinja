@@ -1,0 +1,47 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/typography.html.jinja" import typography %}
+{% from "components/table.html.jinja" import table %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
+
+{% block content %}
+  <div class="moo-doc-layout">
+    <article class="moo-doc-page">
+      {{ render_page_header(
+        "Sitemap",
+        "Every public page of the Moo UI catalog, grouped by section.",
+        id="sitemap",
+        actions=render_section_page_actions(current_slug, site_pages, root_path)
+      ) }}
+
+      {% set total = namespace(pages=0) %}
+      {% for group in sitemap_groups %}{% set total.pages = total.pages + group.pages | length %}{% endfor %}
+      <p>
+        This page lists all {{ total.pages }} public pages of the catalog with a short description and, where
+        a page records one, the date its content last changed. Search engines read the same list from the
+        machine-readable <a href="{{ root_path }}sitemap.xml">XML sitemap</a>, which follows the
+        <a href="https://www.sitemaps.org/protocol.html" target="_blank" rel="noopener noreferrer">sitemaps.org protocol</a>.
+      </p>
+
+      {% for group in sitemap_groups %}
+        <section class="moo-doc-section" aria-labelledby="sitemap-{{ group.key }}">
+          {{ typography(group.label ~ " (" ~ (group.pages | length) ~ ")", variant="section-title", id="sitemap-" ~ group.key) }}
+          {% set rows = namespace(items=[]) %}
+          {% for page in group.pages %}
+            {% set cell %}<a href="{{ root_path }}{{ '' if page.href == './' else page.href }}">{{ page.title }}</a><span class="d-block small text-body-secondary">{{ page.description }}</span>{% endset %}
+            {% set updated %}<span class="text-nowrap">{{ page.lastmod or "—" }}</span>{% endset %}
+            {% set rows.items = rows.items + [[cell, updated]] %}
+          {% endfor %}
+          {{ table(["Page", "Updated"], rows.items, align=["", "end"]) }}
+        </section>
+      {% endfor %}
+
+      {{ render_section_page_pagination(current_slug, site_pages, root_path) }}
+    </article>
+
+    {% set toc = namespace(items=[]) %}
+    {% for group in sitemap_groups %}{% set toc.items = toc.items + [{"id": "sitemap-" ~ group.key, "label": group.label}] %}{% endfor %}
+    {{ render_doc_toc(toc.items) }}
+  </div>
+{% endblock %}

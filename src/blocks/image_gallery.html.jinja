@@ -1,0 +1,207 @@
+{# Image Gallery: photo thumbnails in one of five layouts and one lightbox.
+   The thumbnails use Bootstrap's grid, ratio helper, object-fit and spacing
+   utilities; Moo adds only the 3x2 ratio, the columns-* utility (masonry),
+   the gallery-justified rows and the gallery-strip row, which scrolls
+   sideways (layout "strip"; strip_until keeps justified rows from that
+   breakpoint up, strip_bleed runs the strip to the screen edges).
+
+   The lightbox is a large Dialog in the page's colour mode that fills the
+   screen below the lg breakpoint: a header with the counter and ghost
+   full-screen and close buttons, a muted stage of one height
+   (gallery-stage) holding a Bootstrap Carousel that cross-fades (transition
+   "fade", Bootstrap's carousel-fade) or slides, and a footer with the
+   caption and credit beside Previous, play or pause and Next. While the
+   slideshow plays, a Progress bar along the stage's bottom edge shows the
+   time to the next photo without moving the layout.
+
+   Every thumbnail is a link to the large image, so the gallery works without
+   JavaScript. With Bootstrap the link opens the lightbox instead (Modal data
+   API, which also returns focus to the link on close); the public
+   image-gallery.js module then shows the clicked photo, keeps the counter and
+   caption current, wires the buttons, adds arrow keys and loads only the
+   current photo and its neighbours. The lightbox images carry their address
+   in data-gallery-src, so no large image is requested before the visitor
+   opens one.
+
+   images: list of mappings with
+     src, width, height, alt   the thumbnail and its intrinsic size (required;
+                               an empty alt names the link and the lightbox
+                               title "Photo 3 of 28", label "photo")
+     srcset, sizes             optional thumbnail candidates
+     href                      the large image (defaults to src)
+     large_srcset              optional large candidates for the lightbox
+     caption, credit           optional lightbox title (defaults to alt) and
+                               a muted line under it, such as place or author #}
+{% from "components/button.html.jinja" import button %}
+{% from "components/dialog.html.jinja" import dialog, dialog_body %}
+{% from "components/progress.html.jinja" import progress %}
+
+{% set image_gallery_layouts = ["grid", "justified", "masonry", "featured", "strip"] %}
+{% set image_gallery_ratios = ["1x1", "4x3", "3x2"] %}
+{% set image_gallery_breakpoints = ["xs", "sm", "md", "lg", "xl", "xxl"] %}
+{% set image_gallery_default_labels = {
+  "title": "Photos",
+  "strip": "Photos, scroll sideways",
+  "close": "Close",
+  "previous": "Previous",
+  "next": "Next",
+  "play": "Play slideshow",
+  "pause": "Pause slideshow",
+  "progress": "Time until the next photo",
+  "fullscreen": "Full screen",
+  "exit_fullscreen": "Exit full screen",
+  "counter": "{current} of {total}",
+  "photo": "Photo {current} of {total}",
+  "show_all": "Show all {total} photos"
+} %}
+
+{# The name of a photo without a description, such as "Photo 3 of 28". #}
+{% macro image_gallery_photo_name(template, index, total) -%}
+  {{- template | replace("{current}", (index + 1) | string) | replace("{total}", total | string) -}}
+{%- endmacro %}
+
+{# A thumbnail link takes its name from the image's alt text; a photo with
+   empty alt is named by its place in the album instead. #}
+{% macro image_gallery_thumbnail(image, index, lightbox_id, link_class, image_class, hidden=false, ratio_property=false, name="") -%}
+  <a class="{{ link_class }}{% if hidden %} d-none{% endif %}" href="{{ image.get("href") or image.src }}" data-bs-toggle="modal" data-bs-target="#{{ lightbox_id }}" data-gallery-index="{{ index }}"{% if name and not image.alt | trim %} aria-label="{{ name }}"{% endif %}{% if ratio_property %} style="--moo-gallery-ratio: {{ (image.width / image.height) | round(4) }}"{% endif %}>
+    <img class="{{ image_class }}" src="{{ image.src }}"{% if image.get("srcset") %} srcset="{{ image.srcset }}" sizes="{{ image.get("sizes") or "100vw" }}"{% endif %} width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt }}" loading="lazy" decoding="async">
+  </a>
+{%- endmacro %}
+
+{% macro image_gallery(
+  id,
+  images,
+  layout="grid",
+  ratio="4x3",
+  columns={"xs": 2, "md": 3},
+  gap=2,
+  limit=9,
+  strip_until="",
+  strip_bleed=false,
+  transition="fade",
+  labels={},
+  extra_class=""
+) -%}
+  {% if not id | trim %}{{ fail("Image gallery id is required") }}{% endif %}
+  {% if not images %}{{ fail("Image gallery requires at least one image") }}{% endif %}
+  {% if layout not in image_gallery_layouts %}{{ fail("Unknown image gallery layout: " ~ layout) }}{% endif %}
+  {% if ratio not in image_gallery_ratios %}{{ fail("Unknown image gallery ratio: " ~ ratio) }}{% endif %}
+  {% if gap not in [0, 1, 2, 3, 4, 5] %}{{ fail("Image gallery gap must be a spacer from 0 to 5") }}{% endif %}
+  {% if transition not in ["fade", "slide"] %}{{ fail("Image gallery transition must be fade or slide") }}{% endif %}
+  {% if strip_until not in ["", "sm", "md", "lg", "xl", "xxl"] %}{{ fail("Unknown image gallery strip_until breakpoint: " ~ strip_until) }}{% endif %}
+  {% if limit != "all" and (limit is not number or limit < 1) %}{{ fail("Image gallery limit must be a positive number or \"all\"") }}{% endif %}
+  {% for breakpoint, count in columns.items() %}
+    {% if breakpoint not in image_gallery_breakpoints %}{{ fail("Unknown image gallery breakpoint: " ~ breakpoint) }}{% endif %}
+    {% if count not in [1, 2, 3, 4] %}{{ fail("Image gallery columns must be 1 to 4") }}{% endif %}
+  {% endfor %}
+  {% for image in images %}
+    {% if not image.src or not image.width or not image.height %}{{ fail("Image gallery images need src, width and height") }}{% endif %}
+    {% if image.alt is not defined %}{{ fail("Image gallery images need alt text") }}{% endif %}
+  {% endfor %}
+  {% set text = image_gallery_default_labels.copy() %}
+  {% set _ = text.update(labels) %}
+  {% set total = images | length %}
+  {# A strip scrolls through every photo, so limit does not apply to it. #}
+  {% set shown = total if limit == "all" or layout == "strip" else [limit, total] | min %}
+  {% set lightbox_id = id ~ "-lightbox" %}
+  {% set classes = namespace(grid="", masonry="") %}
+  {% for breakpoint in image_gallery_breakpoints if breakpoint in columns %}
+    {% set infix = "" if breakpoint == "xs" else breakpoint ~ "-" %}
+    {% set classes.grid = classes.grid ~ " row-cols-" ~ infix ~ columns[breakpoint] %}
+    {% set classes.masonry = classes.masonry ~ " columns-" ~ infix ~ columns[breakpoint] %}
+  {% endfor %}
+  {% set tile_link = "ratio ratio-" ~ ratio ~ " d-block rounded overflow-hidden" %}
+  {% set tile_image = "object-fit-cover" %}
+  {% set natural_image = "d-block w-100 h-auto" %}
+
+  <div{% if extra_class | trim %} class="{{ extra_class | trim }}"{% endif %} id="{{ id }}" data-image-gallery>
+    {% if layout == "justified" %}
+      <div class="gallery-justified gap-{{ gap }}">
+        {% for image in images %}
+          {{ image_gallery_thumbnail(image, loop.index0, lightbox_id, "d-block rounded overflow-hidden", natural_image, hidden=loop.index > shown, ratio_property=true, name=image_gallery_photo_name(text.photo, loop.index0, total)) }}
+        {% endfor %}
+      </div>
+    {% elif layout == "strip" %}
+      {% set strip_classes = "gallery-justified gallery-strip-" ~ strip_until ~ "-down" if strip_until else "gallery-strip" %}
+      <div class="{{ strip_classes }}{% if strip_bleed %} gallery-strip-bleed{% endif %} scroll-smooth gap-{{ gap }}" role="region" tabindex="0" aria-label="{{ text.strip }}">
+        {% for image in images %}
+          {{ image_gallery_thumbnail(image, loop.index0, lightbox_id, "d-block rounded overflow-hidden", "d-block w-100 h-100 object-fit-cover", ratio_property=true, name=image_gallery_photo_name(text.photo, loop.index0, total)) }}
+        {% endfor %}
+      </div>
+    {% elif layout == "masonry" %}
+      <div class="{{ classes.masonry | trim }} column-gap-{{ gap }}">
+        {% for image in images %}
+          {{ image_gallery_thumbnail(image, loop.index0, lightbox_id, "d-inline-block w-100 mb-" ~ gap ~ " rounded overflow-hidden", natural_image, hidden=loop.index > shown, name=image_gallery_photo_name(text.photo, loop.index0, total)) }}
+        {% endfor %}
+      </div>
+    {% else %}
+      {% set rest = images[1:] if layout == "featured" else images %}
+      {% if layout == "featured" %}
+        <div class="mb-{{ gap }}">
+          {{ image_gallery_thumbnail(images[0], 0, lightbox_id, "ratio ratio-16x9 d-block rounded overflow-hidden", tile_image, name=image_gallery_photo_name(text.photo, 0, total)) }}
+        </div>
+      {% endif %}
+      {% if rest %}
+        <div class="row{{ classes.grid }} g-{{ gap }}">
+          {% for image in rest %}
+            {% set index = loop.index0 + (1 if layout == "featured" else 0) %}
+            <div class="col{% if index >= shown %} d-none{% endif %}">
+              {{ image_gallery_thumbnail(image, index, lightbox_id, tile_link, tile_image, name=image_gallery_photo_name(text.photo, index, total)) }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endif %}
+
+    {% if shown < total %}
+      <div class="mt-3">
+        {{ button(text.show_all | replace("{total}", total), variant="outline", dialog_target=lightbox_id) }}
+      </div>
+    {% endif %}
+
+    {% call dialog(lightbox_id, size="xl", fullscreen_down="lg", centered=true, aria_label=text.title) %}
+      <div class="d-flex align-items-center justify-content-between gap-3 border-bottom ps-3 ps-sm-4 pe-2 py-2">
+        <p class="m-0 small text-body-secondary" aria-live="polite" data-gallery-counter="{{ text.counter }}">{{ text.counter | replace("{current}", 1) | replace("{total}", total) }}</p>
+        <div class="d-flex align-items-center gap-1">
+          {{ button("", variant="ghost", size="icon-sm", icon_start="maximize-2", aria_label=text.fullscreen, id=lightbox_id ~ "-fullscreen") }}
+          {{ button("", variant="ghost", size="icon-sm", icon_start="minimize-2", aria_label=text.exit_fullscreen, id=lightbox_id ~ "-windowed", extra_class="d-none") }}
+          {{ button("", variant="ghost", size="icon-sm", icon_start="x", aria_label=text.close, dismiss="modal") }}
+        </div>
+      </div>
+      {% call dialog_body(extra_class="d-flex p-0 bg-body-tertiary") %}
+        <div class="carousel slide{% if transition == "fade" %} carousel-fade{% endif %} flex-grow-1 gallery-stage" id="{{ lightbox_id }}-carousel" data-bs-interval="false" data-bs-touch="true" data-gallery-stage>
+          <div class="carousel-inner h-100">
+            {% for image in images %}
+              <div class="carousel-item h-100{% if loop.first %} active{% endif %}" data-gallery-slide-title="{{ image.get("caption") or image.alt or image_gallery_photo_name(text.photo, loop.index0, total) }}"{% if image.get("credit") %} data-gallery-slide-credit="{{ image.credit }}"{% endif %}>
+                {# Each slide carries the stage colour, so a fading-in photo covers the
+                   previous one whatever their shapes. #}
+                <div class="h-100 d-flex align-items-center justify-content-center p-3 p-sm-4 bg-body-tertiary">
+                  <img class="mw-100 mh-100 w-auto h-auto rounded-2 border shadow-sm" data-gallery-src="{{ image.get("href") or image.src }}"{% if image.get("large_srcset") %} data-gallery-srcset="{{ image.large_srcset }}" sizes="(min-width: 1200px) 1140px, 100vw"{% endif %} width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt }}" decoding="async">
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        {# The slideshow time runs along the stage's bottom edge, over the
+           footer rule, so showing it moves nothing. #}
+        {% if total > 1 %}
+          {{ progress(0, aria_label=text.progress, extra_class="gallery-progress position-absolute bottom-0 start-0 z-2 w-100 rounded-0 bg-transparent d-none") }}
+        {% endif %}
+      {% endcall %}
+      <div class="d-flex flex-wrap align-items-center gap-3 border-top px-3 px-sm-4 py-3">
+        <div class="me-auto">
+          <p class="m-0 fw-medium" data-gallery-caption>{{ images[0].get("caption") or images[0].alt or image_gallery_photo_name(text.photo, 0, total) }}</p>
+          <p class="m-0 small text-body-secondary{% if not images[0].get("credit") %} d-none{% endif %}" data-gallery-credit>{{ images[0].get("credit", "") }}</p>
+        </div>
+        {% if total > 1 %}
+          <div class="d-flex align-items-center gap-2">
+            {{ button(text.previous, variant="outline", icon_start="chevron-left", id=lightbox_id ~ "-previous") }}
+            {{ button("", variant="outline", size="icon", icon_start="play", aria_label=text.play, id=lightbox_id ~ "-play") }}
+            {{ button("", variant="outline", size="icon", icon_start="pause", aria_label=text.pause, id=lightbox_id ~ "-pause", extra_class="d-none") }}
+            {{ button(text.next, variant="outline", icon_end="chevron-right", id=lightbox_id ~ "-next") }}
+          </div>
+        {% endif %}
+      </div>
+    {% endcall %}
+  </div>
+{%- endmacro %}

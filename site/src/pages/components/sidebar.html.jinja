@@ -6,8 +6,7 @@
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
-
-{% block title %}Sidebar — Moo UI{% endblock %}
+{% from "includes/component-guide.html.jinja" import render_component_guide_about with context %}
 
 {% block content %}
   {{ render_page_header(
@@ -16,6 +15,8 @@
   ) }}
 
   <div class="moo-component-examples">
+    {{ render_component_guide_about() }}
+
     <h2 id="usage" class="h4 mb-3">Usage</h2>
     <p class="mb-4">
       Use the <code>app</code> layout when a route owns an application shell.

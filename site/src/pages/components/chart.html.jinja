@@ -2,8 +2,7 @@
 {% from "includes/chart-template.html.jinja" import chart_content_example, render_chart_contract_sections, render_chart_intro_preview, render_chart_usage with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
-
-{% block title %}Chart — Moo UI{% endblock %}
+{% from "includes/component-guide.html.jinja" import render_component_guide_about with context %}
 
 {% block content %}
   {{ render_page_header(
@@ -26,6 +25,8 @@
       preview_class="moo-example__preview--medium",
       category_label="Chart"
     ) }}
+    {{ render_component_guide_about() }}
+
     <section class="moo-example" aria-labelledby="usage">
       <h2 class="h4" id="usage">Usage</h2>
       <div class="moo-component-usage">{{ usage | safe }}</div>

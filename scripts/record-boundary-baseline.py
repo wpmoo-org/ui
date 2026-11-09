@@ -26,6 +26,7 @@ CORE_OUTPUTS = {
     "dist/js/slider.js",
     "dist/js/sheet.js",
     "dist/js/floating-panel.js",
+    "dist/js/image-gallery.js",
     "dist/js/password-requirements.js",
     "dist/js/toc.js",
     "dist/js/overlay-scrollbar.js",

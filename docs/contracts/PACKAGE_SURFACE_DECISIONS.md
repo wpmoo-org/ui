@@ -3,6 +3,25 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 2.2.0 Item and Media Blocks
+
+Item adds the `.item` namespace for linked or static media/content/action rows.
+Image Gallery adds the optional `@wpmoo/ui/image-gallery.js` entrypoint with
+the default `ImageGallery` class and named `initImageGalleries` helper.
+The aggregate ESM also exports the `ImageGallery` class.
+Importing the module does not scan the document. Bootstrap Modal and Carousel
+retain plugin ownership; hosts initialize the gallery explicitly and keep native
+thumbnail links as the no-JavaScript fallback.
+
+Gallery styles cover justified rows, responsive strips, the lightbox stage and
+slideshow progress. The full stylesheet adds the 3x2 ratio and column utilities.
+Video Dialog composes Button and Dialog, with the reduced-motion-aware
+`animate-breathe` utility. Dialog's optional `fullscreen_down` adds native
+Bootstrap responsive full-screen classes without changing its default output.
+Jinja recipes, catalog guides, artwork and sitemap output remain outside npm.
+Existing exports and peer ranges are preserved. These additions require a minor
+release; certification remains preview.
+
 ## 2.1.1 Page Title Weight and Component Fixes
 
 The page-title Typography role follows `--moo-heading-font-weight` on its

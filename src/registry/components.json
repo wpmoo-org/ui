@@ -24,6 +24,12 @@
     "description": "Explain an empty collection with a quiet dashed boundary and an optional next action."
   },
   {
+    "slug": "item",
+    "label": "Item",
+    "status": "ready",
+    "description": "Show a row of media, a title, a description and optional actions, alone or in a group."
+  },
+  {
     "slug": "typography",
     "label": "Typography",
     "status": "ready",

@@ -83,5 +83,5 @@ The catalog serves its native ESM file and unchanged license separately under
 WPMoo-generated visual assets, including image assets under `site/static/images/`,
 are original WPMoo work and are not licensed under MIT unless explicitly
 stated. See the
-[repository visual asset license](https://github.com/wpmoo-org/ui/blob/v2.1.1/ASSET_LICENSE.md).
+[repository visual asset license](https://github.com/wpmoo-org/ui/blob/v2.2.0/ASSET_LICENSE.md).
 These assets and their license file are not included in the npm package.

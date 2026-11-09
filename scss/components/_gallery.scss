@@ -1,0 +1,96 @@
+// Image Gallery justified rows. Bootstrap's flex utilities grow items only
+// by 0 or 1 (flex-grow-*), so they cannot fill a row while keeping each
+// photo's own aspect ratio. Every link carries --moo-gallery-ratio
+// (width / height) from the markup and grows by it, so the photos of a row
+// share one height; the row height is a Sass setting.
+.gallery-justified {
+  --moo-gallery-row-height: #{$moo-gallery-row-height};
+  display: flex;
+  flex-wrap: wrap;
+
+  @include media-breakpoint-up(md) {
+    --moo-gallery-row-height: #{$moo-gallery-row-height-md};
+  }
+
+  > * {
+    flex: var(--moo-gallery-ratio, 1) 1 calc(var(--moo-gallery-ratio, 1) * var(--moo-gallery-row-height));
+    aspect-ratio: var(--moo-gallery-ratio, 1);
+  }
+
+  // The closing item out-grows every photo, so the last row keeps its
+  // natural size instead of stretching across the width.
+  &::after {
+    flex-grow: 1e9;
+    content: "";
+  }
+}
+
+// Image Gallery lightbox stage. Bootstrap sizes a box by its aspect ratio
+// (.ratio-*) or by the whole viewport (.vh-100) only; the stage keeps one
+// height while photos of any shape change and stays inside short screens.
+// The module drops the class when the dialog fills the screen.
+.gallery-stage {
+  height: $moo-gallery-stage-height;
+}
+
+// Image Gallery strip: one row of photos at their own shape and one height,
+// scrolled sideways with a gentle snap. A photo never takes more than 85% of
+// the strip, so the next one always peeks in as the cue to swipe (a wider
+// photo is cropped). With .gallery-strip-bleed the strip runs to the screen
+// edges through the content gutter. .gallery-strip-{breakpoint}-down turns
+// justified rows into a strip below that breakpoint only.
+$moo-gallery-strip-gutter: if($moo-gallery-strip-bleed, $moo-gallery-strip-bleed, $container-padding-x * .5);
+
+@mixin moo-gallery-strip {
+  --moo-gallery-strip-height: #{$moo-gallery-strip-height};
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  // The strip takes its width from its container, never from the row of
+  // photos, so a grid or flex parent cannot grow to the strip's length.
+  contain: inline-size;
+
+  > * {
+    flex: none;
+    width: calc(var(--moo-gallery-ratio, 1) * var(--moo-gallery-strip-height));
+    max-width: 85%;
+    height: var(--moo-gallery-strip-height);
+    scroll-snap-align: start;
+  }
+
+  &::after {
+    content: none;
+  }
+
+  &.gallery-strip-bleed {
+    margin-inline: calc(-1 * var(--moo-gallery-strip-bleed, #{$moo-gallery-strip-gutter}));
+    padding-inline: var(--moo-gallery-strip-bleed, #{$moo-gallery-strip-gutter});
+    scroll-padding-inline: var(--moo-gallery-strip-bleed, #{$moo-gallery-strip-gutter});
+  }
+}
+
+.gallery-strip {
+  display: flex;
+  @include moo-gallery-strip;
+}
+
+@each $breakpoint in map-keys($grid-breakpoints) {
+  @if $breakpoint != "xs" {
+    @include media-breakpoint-down($breakpoint) {
+      .gallery-strip-#{$breakpoint}-down {
+        @include moo-gallery-strip;
+      }
+    }
+  }
+}
+
+// Image Gallery slideshow line. Bootstrap sizes Progress through
+// --bs-progress-height; sites set the line's height and opacity with the
+// Sass settings or per page with --moo-gallery-progress-height and
+// --moo-gallery-progress-opacity.
+$moo-gallery-progress-size: if($moo-gallery-progress-height, $moo-gallery-progress-height, $progress-height);
+
+.gallery-progress {
+  --bs-progress-height: var(--moo-gallery-progress-height, #{$moo-gallery-progress-size});
+  opacity: var(--moo-gallery-progress-opacity, #{$moo-gallery-progress-opacity});
+}

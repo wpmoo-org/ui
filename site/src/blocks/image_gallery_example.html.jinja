@@ -1,0 +1,28 @@
+{% from "blocks/image_gallery.html.jinja" import image_gallery %}
+
+{# Drawn landscapes in mixed orientations stand in for a school or event
+   album. Each photo ships a 640px thumbnail and a 1600px large image, both
+   served by the catalog itself. #}
+{% set gallery_photos = [
+  ("dawn-hills", 1600, 1067, "Hills at dawn"),
+  ("lake-evening", 1067, 1600, "Evening light over the lake"),
+  ("green-valley", 1600, 1200, "A green valley in summer"),
+  ("dunes", 1600, 900, "Dunes in the afternoon"),
+  ("winter-ridge", 1600, 1600, "A ridge in winter"),
+  ("forest-path", 1200, 1600, "Through the forest"),
+  ("harbour-blue", 1600, 1067, "Blue hour at the harbour"),
+  ("autumn-field", 1067, 1600, "Autumn fields"),
+  ("night-sky", 1600, 686, "Night over the hills"),
+  ("meadow", 1600, 1200, "Meadow in spring"),
+  ("red-cliffs", 1200, 1600, "Red cliffs"),
+  ("misty-lake", 1600, 1600, "Morning mist on the lake")
+] %}
+
+{% macro render_image_gallery_example(id, root_path, count=12, layout="grid", ratio="4x3", columns={"xs": 2, "md": 3}, gap=2, limit="all", strip_until="", strip_bleed=false, transition="fade") -%}
+  {% set images = [] %}
+  {% for name, width, height, alt in gallery_photos[:count] %}
+    {% set base = root_path ~ "assets/images/gallery/" ~ name %}
+    {% set _ = images.append({"src": base ~ "-640.webp", "href": base ~ "-1600.webp", "width": width, "height": height, "alt": alt, "credit": "Drawn for the Moo UI catalog"}) %}
+  {% endfor %}
+  {{ image_gallery(id, images, layout=layout, ratio=ratio, columns=columns, gap=gap, limit=limit, strip_until=strip_until, strip_bleed=strip_bleed, transition=transition, extra_class="w-100") }}
+{%- endmacro %}

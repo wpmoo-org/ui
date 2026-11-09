@@ -73,3 +73,10 @@ d8c3e7abe100e981c1127b799bdb78bde2eb7cff:tests/fixtures/boundary-baseline.json:g
 9c6bc696481a93087f0e4f7e5fecc20c79a16e60:tests/fixtures/boundary-baseline.json:generic-api-key:758
 9c6bc696481a93087f0e4f7e5fecc20c79a16e60:tests/fixtures/boundary-baseline.json:generic-api-key:847
 9c6bc696481a93087f0e4f7e5fecc20c79a16e60:tests/fixtures/boundary-baseline.json:generic-api-key:885
+
+# 7a44eea: separately approved, byte-verified 2.2.0 release artifact hashes.
+7a44eea4f2d1acf6c0a1d362f55f2447bc0c9931:tests/fixtures/boundary-baseline.json:generic-api-key:19
+7a44eea4f2d1acf6c0a1d362f55f2447bc0c9931:tests/fixtures/boundary-baseline.json:generic-api-key:812
+7a44eea4f2d1acf6c0a1d362f55f2447bc0c9931:tests/fixtures/boundary-baseline.json:generic-api-key:833
+7a44eea4f2d1acf6c0a1d362f55f2447bc0c9931:tests/fixtures/boundary-baseline.json:generic-api-key:930
+7a44eea4f2d1acf6c0a1d362f55f2447bc0c9931:tests/fixtures/boundary-baseline.json:generic-api-key:969

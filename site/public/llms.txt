@@ -2,7 +2,7 @@
 
 > Bootstrap markup. shadcn feel.
 
-Moo UI 2.1.1 is the patch release for a Bootstrap 5.3-native component system with a restrained,
+Moo UI 2.2.0 is the minor release for a Bootstrap 5.3-native component system with a restrained,
 shadcn-inspired visual language for server-rendered and Bootstrap-native apps.
 It is CSS-first, not JavaScript-free: Bootstrap owns native plugin behavior,
 while Moo UI adds optional, explicit ESM only for documented gaps.
@@ -14,13 +14,18 @@ implementation.
 
 ## Version And Support
 
-- package release target: `@wpmoo/ui@2.1.1`
+- package release target: `@wpmoo/ui@2.2.0`
 - Bootstrap peer range: `>=5.3.0 <5.4`
 - Tested Bootstrap versions in the manifest: `5.3.0`, `5.3.3`, `5.3.8`
 - License: MIT for source code
 - Certification manifest status: `preview`
 - Certified components in the current manifest: none
 - Support policy: https://github.com/wpmoo-org/ui/blob/main/SUPPORT.md
+
+The 2.2.0 release adds Item, Image Gallery and Video Dialog, component usage
+guides, structured metadata and content-derived sitemap dates. Image Gallery
+offers grid, justified, masonry, featured and strip layouts with an optional
+Bootstrap lightbox, slideshow, full-screen controls and translated labels.
 
 The 2.1.1 release improves Chart, DataTable, Combobox, Context Menu, Date Picker,
 and Sidebar behavior. Page titles follow the existing owner heading weight token.
@@ -53,6 +58,7 @@ not independent or accredited certification.
 - `@wpmoo/ui/slider.js`: optional Slider ESM lifecycle (native range input, no third-party runtime)
 - `@wpmoo/ui/sheet.js`: explicit `initSheets(root)` for server-marked Sheets; uses Bootstrap Offcanvas, no import-time scan
 - `@wpmoo/ui/floating-panel.js`: explicit FloatingPanel lifecycle for non-modal floating cards, local dismissal persistence and reopening; no import-time scan
+- `@wpmoo/ui/image-gallery.js`: explicit ImageGallery lifecycle and `initImageGalleries(root)` for the Image Gallery block lightbox (Bootstrap Modal and Carousel); loads large photos only on open, no import-time scan
 - `@wpmoo/ui/password-requirements.js`: dependency-free PasswordRequirements lifecycle, confirmation and submit feedback; optional host analysis, no built-in strength rating or import-time scan
 - `@wpmoo/ui/state.js`: classic placement-dependent browser state bootstrap (not ESM)
 - `@wpmoo/ui/release-manifest.json`: release metadata with SHA-256 hashes for adapter-facing CSS and state bootstrap bytes
@@ -70,7 +76,7 @@ entrypoints; undocumented internal partial paths are not separate public APIs.
 
 ## Installation Facts
 
-- Version-pinned CDN full stylesheet after publication: `https://unpkg.com/@wpmoo/ui@2.1.1/dist/assets/css/moo-ui.css`
+- Version-pinned CDN full stylesheet after publication: `https://unpkg.com/@wpmoo/ui@2.2.0/dist/assets/css/moo-ui.css`
 
 Full replacement:
 
@@ -100,7 +106,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"; // only when plugins are use
 Optional Moo UI ESM is imported only for documented gaps and must be initialized
 explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 `sidebar.js`, `chart.js`, `datepicker.js`, `slider.js`, `sheet.js`,
-`overlay-scrollbar.js`, `floating-panel.js`, `password-requirements.js`, or the aggregate
+`overlay-scrollbar.js`, `floating-panel.js`, `image-gallery.js`, `password-requirements.js`, or the aggregate
 `moo-ui.js` does not scan the document.
 
 ## Runtime Ownership
@@ -167,6 +173,7 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 - [Form](https://ui.wpmoo.org/components/form/)
 - [Input](https://ui.wpmoo.org/components/input/)
 - [Input Group](https://ui.wpmoo.org/components/input-group/)
+- [Item](https://ui.wpmoo.org/components/item/)
 - [Kbd](https://ui.wpmoo.org/components/kbd/)
 - [Menubar](https://ui.wpmoo.org/components/menubar/)
 - [Native Select](https://ui.wpmoo.org/components/select/)

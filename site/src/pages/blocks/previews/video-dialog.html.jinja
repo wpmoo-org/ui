@@ -1,0 +1,17 @@
+{% extends "layouts/block-preview.html.jinja" %}
+{% from "blocks/video_dialog_example.html.jinja" import render_video_dialog_example %}
+
+{% block title %}Video Dialog Preview — Moo UI{% endblock %}
+
+{% block content %}
+  <div class="container py-4">
+    <div class="row justify-content-center g-4">
+      <div class="col-12">
+        {{ render_video_dialog_example("video-preview") }}
+      </div>
+      <div class="col-12">
+        {{ render_video_dialog_example("video-preview-labelled", labelled=true) }}
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -2787,14 +2787,22 @@ class CatalogContractTests(CatalogTestCase):
         ]
         self.assert_page_actions_region(block_header)
         self.assert_page_actions_region(block)
-        self.assertIn('aria-label="Previous page: Accordion Panels"', block)
+        self.assertIn('aria-label="Previous page: Image Gallery"', block)
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
 
-        last_block = self.read_output("blocks/sidebar-inset.html")
+        gallery_block = self.read_output("blocks/image-gallery.html")
+        self.assertIn('aria-label="Previous page: Accordion Panels"', gallery_block)
+        self.assertIn('aria-label="Next page: Sidebar (Floating)"', gallery_block)
+
+        inset_block = self.read_output("blocks/sidebar-inset.html")
+        self.assertIn('aria-label="Next page: Video Dialog"', inset_block)
+
+        last_block = self.read_output("blocks/video-dialog.html")
+        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', last_block)
         self.assertIn('aria-label="Next page: Charts"', last_block)
 
         charts = self.read_output("charts.html")
-        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', charts)
+        self.assertIn('aria-label="Previous page: Video Dialog"', charts)
         self.assertIn('aria-label="Next page: Utilities"', charts)
 
         utilities = self.read_output("utils/index.html")
@@ -4340,7 +4348,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(copy, skills)
 
     def test_changelog_page_documents_latest_release_and_links_history(self) -> None:
-        """Check the patch release notes and navigation to previous releases."""
+        """Check current release identity, feature links and history navigation."""
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -4370,29 +4378,25 @@ class CatalogContractTests(CatalogTestCase):
             rf'<span\b[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>\s*v{re.escape(package["version"])}\s*</span>',
         )
         self.assertIn("preview", active_release)
-        self.assertIn("Patch release", active_release)
-        for summary in (
-            "Chart tooltips show the value or radius",
-            "DataTable sorts numbers and accented words",
-            "Combobox respects IME composition",
-            "Context Menu hides an open menu on disposal",
-            "Date Picker respects range edges",
-            "collapsed Sidebar submenu flyouts",
-            "Page titles inherit the existing owner heading weight token",
-        ):
-            with self.subTest(summary=summary):
-                self.assertIn(summary, active_release)
+        self.assertIn("Minor release", active_release)
         release_tags = StartTagParser()
         release_tags.feed(active_release)
         self.assertTrue(any(
-            tag["__tag"] == "h3" and tag.get("id") == f"{release_id}-fixed"
+            tag["__tag"] == "h3" and tag.get("id") == f"{release_id}-added"
             for tag in release_tags.tags
         ))
 
         release_links = LinkParser()
         release_links.feed(active_release)
         hrefs = {link.get("href") for link in release_links.links}
-        self.assertIn("https://github.com/wpmoo-org/ui/pull/116", hrefs)
+        for feature_path in (
+            "../blocks/image-gallery/",
+            "../blocks/video-dialog/",
+            "../components/item/",
+            "../sitemap/",
+        ):
+            with self.subTest(feature_path=feature_path):
+                self.assertIn(feature_path, hrefs)
 
         page_links = LinkParser()
         page_links.feed(changelog)

@@ -5,9 +5,11 @@
   /* Utilities */
   @import "../utilities/border";
   @include moo-text-alignment-utilities;
+  @include moo-gallery-utilities;
   @import "../utilities/scroll_fade";
   @include moo-overlay-scrollbar;
   @import "../utilities/scroll_smooth";
+  @import "../utilities/motion";
   /* Application layout */
   @import "../layouts/app";
   @import "../layouts/page_grid";

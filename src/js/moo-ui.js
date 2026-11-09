@@ -11,6 +11,7 @@ import TableOfContents from "./components/toc.js";
 import OverlayScrollbar from "./components/overlay-scrollbar.js";
 import { initSheets } from "./components/sheet.js";
 import FloatingPanel from "./components/floating-panel.js";
+import ImageGallery from "./components/image-gallery.js";
 import PasswordRequirements from "./password-requirements.js";
 
 async function loadChart() {
@@ -21,6 +22,7 @@ async function loadChart() {
 const MooUI = {
   PasswordRequirements,
   FloatingPanel,
+  ImageGallery,
   loadChart,
   Combobox,
   ContextMenu,
@@ -38,6 +40,7 @@ const MooUI = {
 export {
   PasswordRequirements,
   FloatingPanel,
+  ImageGallery,
   loadChart,
   Combobox,
   ContextMenu,

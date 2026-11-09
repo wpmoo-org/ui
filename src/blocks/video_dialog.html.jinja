@@ -1,0 +1,43 @@
+{# Video Dialog: a play trigger that opens a 16:9 video in a Dialog. It is
+   composed from Button classes, the Dialog recipe and Bootstrap utilities;
+   the only Moo-owned class is the animate-breathe motion utility.
+
+   The frame carries the video address in data-video-src and no src, so
+   nothing is fetched before the visitor asks for it. The host sets the src
+   when the dialog is shown (shown.bs.modal) and removes it when the dialog
+   hides, which also stops playback. #}
+{% from "components/dialog.html.jinja" import dialog, dialog_body, dialog_header %}
+
+{# Lucide "play" (ISC), filled so the triangle reads at a glance. #}
+{% macro video_play_icon(size) -%}
+  <svg viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" fill="currentColor" stroke="none" aria-hidden="true" focusable="false"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>
+{%- endmacro %}
+
+{# Round trigger for wide layouts, or with a visible label a compact pill
+   for narrow ones. icon_class colours the triangle (a text-* utility). #}
+{% macro video_play(dialog_id, aria_label="", label="", icon_class="text-primary", extra_class="") -%}
+  {% if not dialog_id | trim %}{{ fail("Video play requires dialog_id") }}{% endif %}
+  {% if not label | trim and not aria_label | trim %}{{ fail("Video play without a visible label requires aria_label") }}{% endif %}
+  {% if label | trim %}
+    <button type="button" class="btn rounded-pill d-inline-flex align-items-center gap-3 p-0 pe-4 border-0 bg-white bg-opacity-25 text-white fw-semibold{% if extra_class | trim %} {{ extra_class | trim }}{% endif %}" data-bs-toggle="modal" data-bs-target="#{{ dialog_id }}"{% if aria_label | trim %} aria-label="{{ aria_label | trim }}"{% endif %}>
+      <span class="d-inline-flex rounded-circle bg-white p-3 shadow animate-breathe {{ icon_class }}">{{ video_play_icon("1.25em") }}</span>
+      {{ label | trim }}
+    </button>
+  {% else %}
+    <div class="d-inline-flex rounded-circle p-3 bg-white bg-opacity-25 animate-breathe{% if extra_class | trim %} {{ extra_class | trim }}{% endif %}">
+      <button type="button" class="btn btn-light btn-lg rounded-circle p-4 shadow {{ icon_class }}" data-bs-toggle="modal" data-bs-target="#{{ dialog_id }}" aria-label="{{ aria_label | trim }}">{{ video_play_icon("2em") }}</button>
+    </div>
+  {% endif %}
+{%- endmacro %}
+
+{% macro video_dialog(id, title, src, dismiss_aria_label="Close") -%}
+  {% if not src | trim %}{{ fail("Video dialog requires src") }}{% endif %}
+  {% call dialog(id, size="xl", centered=true) %}
+    {{ dialog_header(id, title, dismiss_aria_label=dismiss_aria_label) }}
+    {% call dialog_body(extra_class="p-0") %}
+      <div class="ratio ratio-16x9">
+        <iframe class="border-0" title="{{ title }}" data-video-src="{{ src | trim }}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </div>
+    {% endcall %}
+  {% endcall %}
+{%- endmacro %}

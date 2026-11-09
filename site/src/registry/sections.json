@@ -58,5 +58,11 @@
     "label": "License",
     "href": "license/",
     "icon": "scale"
+  },
+  {
+    "slug": "sitemap",
+    "label": "Sitemap",
+    "href": "sitemap/",
+    "icon": "list-tree"
   }
 ]
