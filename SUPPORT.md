@@ -212,7 +212,7 @@ only; no Moo UI build tooling is involved.
 The archive is reproducible byte-for-byte from the repository source at any
 time. The Moo UI 2.1.1 source carries kit contract
 version 1.0; its development archive hashes to SHA-256
-`ca44e1f4254dea2fb9493862894b9a3e574fecf832106be2f2c07582a65f428b`.
+`4e660dfd1a673a888b6a665eb0fb236a27700f5588455501f96d4ab06354af5c`.
 The [released Moo UI 1.1.0 source](https://github.com/wpmoo-org/ui/releases/tag/v1.1.0)
 archive hashes to SHA-256
 `e4ab6c256ce4e2e1a3a82a42fdfbbf90f5c5871c14d4853fce928546a8cafbac`.

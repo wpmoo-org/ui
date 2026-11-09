@@ -11,12 +11,14 @@ from __future__ import annotations
 
 import json
 import re
+import runpy
 import subprocess
 import sys
 import tempfile
 import unittest
 import urllib.request
 from pathlib import Path
+from unittest.mock import patch
 
 from tests.helpers import ROOT
 from tests.helpers.browser_harness import skip_if_browser_launch_is_sandboxed
@@ -45,6 +47,20 @@ def imported_modules(source: str) -> set:
             source,
         )
     }
+
+
+class HostShellPathTests(unittest.TestCase):
+    def test_fixture_paths_outside_or_equal_to_root_never_reach_file_check(self) -> None:
+        handler_class = runpy.run_path(str(SERVE))["HostShellHandler"]
+        handler = handler_class.__new__(handler_class)
+        root = SERVE.parent.parent / "fixtures"
+        for relative in (".", str(root), "../host-shell/index.html", str(SERVE)):
+            with self.subTest(relative=relative):
+                with patch.object(handler, "send_error") as error:
+                    with patch("os.path.isfile", return_value=False) as is_file:
+                        handler._send_relative(root, relative)
+                error.assert_called_once_with(404, "Not Found")
+                is_file.assert_not_called()
 
 
 class HostShellTests(unittest.TestCase):
