@@ -28,7 +28,7 @@ class SecretScanExceptionTests(unittest.TestCase):
             f'baea6810b57a2ad6fddd24cc53283af9baa46bc7:tests/fixtures/boundary-baseline.json:generic-api-key:{line}'
             for line in (18, 737, 757, 846, 884)
         }
-        # Byte-verified 2.1.0 release artifact hashes.
+        # Byte-verified release artifact hashes, individually approved.
         expected |= {
             f'{commit}:tests/fixtures/boundary-baseline.json:generic-api-key:{line}'
             for commit, lines in {
@@ -37,6 +37,7 @@ class SecretScanExceptionTests(unittest.TestCase):
                 'af5c8dcfed2fbeb108c16ac6134c1318bf779685': (18, 738, 758, 847, 885),
                 'd8c3e7abe100e981c1127b799bdb78bde2eb7cff': (18, 738, 758, 847, 885),
                 '9c6bc696481a93087f0e4f7e5fecc20c79a16e60': (18, 738, 758, 847, 885),
+                '7a44eea4f2d1acf6c0a1d362f55f2447bc0c9931': (19, 812, 833, 930, 969),
             }.items()
             for line in lines
         }
