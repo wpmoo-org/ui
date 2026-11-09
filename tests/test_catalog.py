@@ -4371,22 +4371,15 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("preview", active_release)
         release_tags = StartTagParser()
         release_tags.feed(active_release)
-        for group in ("added",):
-            with self.subTest(group=group):
-                self.assertTrue(any(
-                    tag["__tag"] == "h3" and tag.get("id") == f"{release_id}-{group}"
-                    for tag in release_tags.tags
-                ))
+        self.assertTrue(any(
+            tag["__tag"] == "h3" and tag.get("id") == f"{release_id}-fixed"
+            for tag in release_tags.tags
+        ))
 
         release_links = LinkParser()
         release_links.feed(active_release)
         hrefs = {link.get("href") for link in release_links.links}
-        self.assertEqual({
-            "../components/field/#password-feedback-preview",
-        }, hrefs)
-        field_tags = StartTagParser()
-        field_tags.feed(self.read_output("components/field.html"))
-        self.assertTrue(any(tag.get("id") == "password-feedback-preview" for tag in field_tags.tags))
+        self.assertEqual({"https://github.com/wpmoo-org/ui/pull/116"}, hrefs)
 
         page_links = LinkParser()
         page_links.feed(changelog)
