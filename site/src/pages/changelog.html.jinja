@@ -23,43 +23,25 @@
         <header class="d-flex flex-column gap-3">
           <div class="d-flex flex-wrap align-items-center gap-3 small text-body-secondary">
             {{ badge("v" ~ product.version, variant="dark") }}
-            <span>Minor release</span>
+            <span>Patch release</span>
           </div>
           {{ typography("Moo UI " ~ product.version, variant="section-title", id=release_id, extra_class="mb-0") }}
           <p class="text-body-secondary mb-0">
-            Host-translated password feedback, heading weight per theme owner,
-            and document scrolling for website shells.
+            Component behavior fixes and consistent page-title heading weight.
           </p>
         </header>
 
-        <section aria-labelledby="{{ release_id }}-added">
-          {{ typography("Added", variant="subsection-title", id=release_id ~ "-added", extra_class="mb-3") }}
+        <section aria-labelledby="{{ release_id }}-fixed">
+          {{ typography("Fixed", variant="subsection-title", id=release_id ~ "-fixed", extra_class="mb-3") }}
           <ul class="mb-0 ps-4">
-            <li>
-              <a href="{{ site_href("components/field.html", root_path) }}#password-feedback-preview">Password requirements</a>
-              accepts an optional <code>options.messages</code> map for host-translated
-              rule, summary and analysis feedback.
-            </li>
-            <li>
-              Set <code>--moo-heading-font-weight</code> on a resolved theme owner.
-              Its default is 600 and can be set in Sass with <code>$moo-heading-font-weight</code>.
-            </li>
-            <li>
-              Website shells can use <code>data-shell-mode="document"</code> with
-              <code>navigation="none"</code>. The document scrolls and the footer
-              follows the content, meeting the viewport bottom on short pages.
-            </li>
-            <li>
-              The Layout catalog shows the Document shell with a live preview,
-              a standalone example and copyable markup.
-            </li>
+            <li>Chart tooltips show the value or radius for the affected chart types.</li>
+            <li>DataTable sorts numbers and accented words consistently and keeps selection when Escape closes an overlay.</li>
+            <li>Combobox respects IME composition and restores options after selection. Context Menu hides an open menu on disposal.</li>
+            <li>Date Picker respects range edges and restores the original form default on reset.</li>
+            <li>Keyboard users can enter, navigate, and leave collapsed Sidebar submenu flyouts.</li>
+            <li>Page titles inherit the existing owner heading weight token. The default remains 600.</li>
           </ul>
         </section>
-
-        <p class="small text-body-secondary mb-0">
-          Additive to the public 2.0.0 package API. Component certification
-          remains in preview.
-        </p>
       {% endcall %}
     </article>
 
