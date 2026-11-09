@@ -206,7 +206,7 @@ class CertificationContractTests(unittest.TestCase):
         inventory_slugs = {component["slug"] for component in inventory["components"]}
         registry_slugs = {component["slug"] for component in registry}
 
-        self.assertEqual(len(inventory["components"]), 47)
+        self.assertEqual(len(inventory["components"]), 48)
         self.assertEqual(inventory_slugs, registry_slugs)
         self.assertEqual(
             {component["slug"] for component in inventory["plannedComponents"]},
@@ -235,7 +235,7 @@ class CertificationContractTests(unittest.TestCase):
             for evidence_path in component["evidence"]:
                 self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
 
-        self.assertEqual(tier_counts, {0: 24, 1: 6, 2: 5, 3: 12})
+        self.assertEqual(tier_counts, {0: 25, 1: 6, 2: 5, 3: 12})
 
     def test_pilot_evidence_keeps_release_claims_honest(self) -> None:
         pilot = self._read_json("src/certification/pilot-evidence.json")
@@ -1259,7 +1259,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(imported.returncode, 0, imported.stderr)
         expected_exports = set(aggregate["namedExports"])
         if package["version"] != freeze["freezeVersion"]:
-            expected_exports.update({"TableOfContents", "OverlayScrollbar", "FloatingPanel", "PasswordRequirements"})
+            expected_exports.update({"TableOfContents", "OverlayScrollbar", "FloatingPanel", "PasswordRequirements", "ImageGallery"})
         self.assertEqual(expected_exports, set(json.loads(imported.stdout)))
 
     def test_rc5_freeze_test_docstring_matches_enforced_equality(self) -> None:

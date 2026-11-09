@@ -36,7 +36,7 @@
     {{ dialog_header(id, title, dismiss_aria_label=dismiss_aria_label) }}
     {% call dialog_body(extra_class="p-0") %}
       <div class="ratio ratio-16x9">
-        <iframe class="border-0" title="{{ title }}" data-video-src="{{ src | trim }}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <iframe class="border-0" title="{{ title }}" data-video-src="{{ src | trim }}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin"></iframe>
       </div>
     {% endcall %}
   {% endcall %}

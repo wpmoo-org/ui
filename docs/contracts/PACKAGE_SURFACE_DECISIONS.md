@@ -7,7 +7,8 @@ than one component page.
 
 Item adds the `.item` namespace for linked or static media/content/action rows.
 Image Gallery adds the optional `@wpmoo/ui/image-gallery.js` entrypoint with
-`ImageGallery` and `initImageGalleries`, also exported from the aggregate ESM.
+the default `ImageGallery` class and named `initImageGalleries` helper.
+The aggregate ESM also exports the `ImageGallery` class.
 Importing the module does not scan the document. Bootstrap Modal and Carousel
 retain plugin ownership; hosts initialize the gallery explicitly and keep native
 thumbnail links as the no-JavaScript fallback.
