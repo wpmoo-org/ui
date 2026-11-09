@@ -91,7 +91,7 @@ class ImageGalleryTests(CatalogTestCase):
         self.assertIn('aria-label="Photos"', lightbox)
         self.assertIn("modal-dialog modal-xl modal-fullscreen-lg-down modal-dialog-centered", lightbox)
         self.assertIn(
-            '<div class="carousel slide flex-grow-1 gallery-stage" id="album-lightbox-carousel" '
+            '<div class="carousel slide carousel-fade flex-grow-1 gallery-stage" id="album-lightbox-carousel" '
             'data-bs-interval="false" data-bs-touch="true" data-gallery-stage>',
             lightbox,
         )
@@ -112,7 +112,18 @@ class ImageGalleryTests(CatalogTestCase):
         for control in ("previous", "play", "pause", "next", "fullscreen", "windowed"):
             self.assertIn(f'id="album-lightbox-{control}"', lightbox)
         self.assertIn('data-bs-dismiss="modal"', lightbox)
-        self.assertIn('class="progress rounded-0 d-none" role="progressbar" aria-label="Time until the next photo"', lightbox)
+        # The slideshow line rides on the stage's bottom edge above the slides.
+        stage = lightbox[lightbox.index('class="modal-body'):lightbox.index('border-top')]
+        self.assertIn(
+            'class="progress gallery-progress position-absolute bottom-0 start-0 z-2 w-100 rounded-0 '
+            'bg-transparent d-none" role="progressbar" aria-label="Time until the next photo"',
+            stage,
+        )
+        # Every slide carries the stage colour, so a cross-fade covers the previous photo.
+        self.assertEqual(
+            lightbox.count('class="h-100 d-flex align-items-center justify-content-center p-3 p-sm-4 bg-body-tertiary"'),
+            3,
+        )
         single = self.render(images=IMAGES[:1])
         self.assertNotIn('id="album-lightbox-play"', single)
         self.assertNotIn('class="progress', single)
@@ -129,7 +140,7 @@ class ImageGalleryTests(CatalogTestCase):
 
     def test_every_label_is_translatable(self) -> None:
         labels = {
-            "title": "Fotos", "close": "Schließen", "previous": "Zurück",
+            "title": "Fotos", "strip": "Fotos, seitlich scrollen", "close": "Schließen", "previous": "Zurück",
             "next": "Weiter", "play": "Diashow starten", "pause": "Diashow anhalten",
             "progress": "Zeit bis zum nächsten Foto",
             "fullscreen": "Vollbild", "exit_fullscreen": "Vollbild beenden",
@@ -143,10 +154,33 @@ class ImageGalleryTests(CatalogTestCase):
             self.assertIn(f'aria-label="{name}"', output)
         self.assertIn('data-gallery-counter="{current} von {total}"', output)
 
+    def test_transition_cross_fades_by_default_or_slides(self) -> None:
+        self.assertIn('class="carousel slide carousel-fade flex-grow-1', self.render())
+        self.assertIn('class="carousel slide flex-grow-1', self.render(transition="slide"))
+
+    def test_strip_scrolls_every_photo_in_one_named_region(self) -> None:
+        images = [dict(IMAGES[0], alt=f"Photo {n}") for n in range(12)]
+        output = self.render(images=images, layout="strip", gap=3)
+        self.assertIn(
+            '<div class="gallery-strip scroll-smooth gap-3" role="region" tabindex="0" '
+            'aria-label="Photos, scroll sideways">',
+            output,
+        )
+        part = self.thumbnails_part(output)
+        self.assertEqual(part.count('class="d-block rounded overflow-hidden" href='), 12)
+        self.assertEqual(part.count('style="--moo-gallery-ratio: 1.4995"'), 12)
+        self.assertEqual(part.count('<img class="d-block w-100 h-100 object-fit-cover"'), 12)
+        # A strip scrolls through every photo, so limit does not apply.
+        self.assertNotIn("d-none", part)
+        self.assertNotIn("Show all", output)
+        responsive = self.render(layout="strip", strip_until="md", strip_bleed=True)
+        self.assertIn('class="gallery-justified gallery-strip-md-down gallery-strip-bleed scroll-smooth gap-2"', responsive)
+
     def test_invalid_options_fail_at_render_time(self) -> None:
         for options in (
             {"layout": "carousel"}, {"ratio": "16x9"}, {"gap": 6}, {"limit": 0},
             {"limit": "some"}, {"columns": {"xs": 5}}, {"columns": {"phone": 2}},
+            {"transition": "zoom"}, {"layout": "strip", "strip_until": "phone"},
         ):
             with self.subTest(options=options), self.assertRaises(Exception):
                 self.render(**options)
@@ -169,6 +203,15 @@ class ImageGalleryTests(CatalogTestCase):
         self.assertIn("$moo-gallery-row-height: 6rem !default;", settings)
         self.assertIn("$moo-gallery-row-height-md: 8rem !default;", settings)
         self.assertIn('$moo-gallery-stage-height: unquote("min(62svh, 38rem)") !default;', settings)
+        for knob in (
+            "$moo-gallery-strip-height: 13rem !default;",
+            "$moo-gallery-strip-bleed: null !default;",
+            "$moo-gallery-progress-height: null !default;",
+            "$moo-gallery-progress-opacity: .08 !default;",
+        ):
+            self.assertIn(knob, settings)
+        self.assertIn("scroll-snap-type: x proximity;", component)
+        self.assertIn("max-width: 85%;", component)
         self.assertIn("height: $moo-gallery-stage-height;", component)
 
     def test_compiled_css_ships_the_gallery_helpers(self) -> None:
@@ -180,8 +223,12 @@ class ImageGalleryTests(CatalogTestCase):
         self.assertIn(".columns-md-3{column-count:3!important", compact)
         self.assertIn(".gallery-justified::after{flex-grow:1e9;", compact)
         self.assertIn(".gallery-stage{height:min(62svh,38rem)", compact)
+        self.assertIn(".gallery-strip>*{flex:none;width:calc(var(--moo-gallery-ratio,1)*var(--moo-gallery-strip-height));max-width:85%;", compact)
+        self.assertIn("@media(max-width:767.98px){.gallery-strip-md-down{--moo-gallery-strip-height:13rem;", compact)
+        self.assertIn(".gallery-strip.gallery-strip-bleed{margin-inline:calc(-1*var(--moo-gallery-strip-bleed,0.75rem));", compact)
+        self.assertIn(".gallery-progress{--bs-progress-height:var(--moo-gallery-progress-height,0.25rem);opacity:var(--moo-gallery-progress-opacity,0.08);}", compact)
         core = re.sub(r"\s+", "", (ROOT / "dist/assets/css/moo.css").read_text(encoding="utf-8"))
-        for selector in (".ratio-3x2{", ".columns-lg-4{", ".gallery-justified{", ".gallery-stage{"):
+        for selector in (".ratio-3x2{", ".columns-lg-4{", ".gallery-justified{", ".gallery-stage{", ".gallery-strip{", ".gallery-progress{"):
             self.assertIn(selector, core)
 
     def test_module_import_is_side_effect_free(self) -> None:

@@ -133,6 +133,13 @@ class ImageGalleryBrowserTests(CatalogTestCase):
                                 " / track.getBoundingClientRect().width")
                             self.assertGreater(filled, 0.3)
                             self.assertLess(filled, 0.7)
+                            # The line stays above the cross-fading slides for the whole photo.
+                            self.assertTrue(progress.evaluate(
+                                """track => {
+                                  const bar = track.querySelector('.progress-bar').getBoundingClientRect();
+                                  const hit = document.elementFromPoint(bar.right - 2, bar.top + bar.height / 2);
+                                  return hit === track || track.contains(hit);
+                                }"""))
                             expect(counter).to_have_text("4 of 5", timeout=4000)
                             page.locator("#album-lightbox-pause").click()
                             expect(page.locator("#album-lightbox-play")).to_be_visible()
@@ -173,6 +180,83 @@ class ImageGalleryBrowserTests(CatalogTestCase):
                             expect(page.locator("#album-lightbox-fullscreen")).to_be_hidden()
                             stage = dialog.locator("[data-gallery-stage]").bounding_box()
                             self.assertGreater(stage["height"], 500)
+                        finally:
+                            context.close()
+            finally:
+                browser.close()
+
+    def test_strip_scrolls_below_its_breakpoint_and_rows_above(self) -> None:
+        build = self.run_build()
+        self.assertEqual(build.returncode, 0, build.stderr)
+        images = [
+            {"src": f"/thumb/{name}.webp", "width": SIZES[name][0], "height": SIZES[name][1], "alt": name}
+            for name in PHOTOS
+        ]
+        page_html = create_environment().from_string('''
+            {% from "blocks/image_gallery.html.jinja" import image_gallery %}
+            <!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">
+            <link rel="stylesheet" href="/moo-ui.css"></head><body>
+            <main class="moo-ui container py-4" data-bs-theme="light">
+              {{ image_gallery("strip", images, layout="strip", strip_until="md", strip_bleed=true) }}
+            </main></body></html>''').render(images=images)
+        assets = {"/moo-ui.css": ((ROOT / "dist/assets/css/moo-ui.css").read_bytes(), "text/css")}
+        for name in PHOTOS:
+            assets[f"/thumb/{name}.webp"] = (
+                (ROOT / f"site/static/images/gallery/{name}-640.webp").read_bytes(), "image/webp")
+
+        with sync_playwright() as playwright:
+            browser = launch_certification_browser(playwright)
+            try:
+                for width in (390, 1280):
+                    with self.subTest(width=width):
+                        context = browser.new_context(viewport={"width": width, "height": 844})
+                        try:
+                            page = context.new_page()
+
+                            def serve(route):
+                                path = urlparse(route.request.url).path
+                                if path == "/probe":
+                                    route.fulfill(body=page_html, content_type="text/html")
+                                else:
+                                    body, kind = assets[path]
+                                    route.fulfill(body=body, content_type=kind)
+
+                            page.route("http://strip.invalid/**", serve)
+                            page.goto("http://strip.invalid/probe")
+                            region = page.get_by_role("region", name="Photos, scroll sideways")
+                            geometry = region.evaluate("""strip => ({
+                              overflow: getComputedStyle(strip).overflowX,
+                              snap: getComputedStyle(strip).scrollSnapType,
+                              scrolls: strip.scrollWidth > strip.clientWidth,
+                              width: strip.clientWidth,
+                              stripLeft: strip.getBoundingClientRect().left,
+                              items: [...strip.children].map(item => {
+                                const box = item.getBoundingClientRect();
+                                const image = item.querySelector('img').getBoundingClientRect();
+                                return [box.width, box.height, image.height];
+                              }),
+                            })""")
+                            heights = {round(item[1]) for item in geometry["items"]}
+                            if width == 390:
+                                self.assertEqual(geometry["overflow"], "auto")
+                                # proximity is the default strictness and serializes as "x".
+                                self.assertIn(geometry["snap"], {"x", "x proximity"})
+                                self.assertTrue(geometry["scrolls"])
+                                self.assertEqual(heights, {208})
+                                for box_width, box_height, image_height in geometry["items"]:
+                                    self.assertLessEqual(box_width, geometry["width"] * 0.85 + 1)
+                                    self.assertAlmostEqual(image_height, box_height, delta=1)
+                                # Full bleed: the strip reaches the screen edge.
+                                self.assertAlmostEqual(geometry["stripLeft"], 0, delta=1)
+                                region.focus()
+                                page.keyboard.press("ArrowRight")
+                                page.wait_for_function(
+                                    "document.querySelector('[role=region]').scrollLeft > 0")
+                            else:
+                                self.assertEqual(geometry["overflow"], "visible")
+                                self.assertFalse(geometry["scrolls"])
+                                for _, box_height, image_height in geometry["items"]:
+                                    self.assertAlmostEqual(image_height, box_height, delta=1)
                         finally:
                             context.close()
             finally:

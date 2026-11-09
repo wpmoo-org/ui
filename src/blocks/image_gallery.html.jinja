@@ -1,13 +1,18 @@
-{# Image Gallery: photo thumbnails in one of four layouts and one lightbox.
+{# Image Gallery: photo thumbnails in one of five layouts and one lightbox.
    The thumbnails use Bootstrap's grid, ratio helper, object-fit and spacing
-   utilities; Moo adds only the 3x2 ratio, the columns-* utility (masonry) and
-   the gallery-justified row layout. The lightbox is a large Dialog in the
-   page's colour mode that fills the screen below the lg breakpoint: a header
-   with the counter and ghost full-screen and close buttons, a muted stage of
-   one height (gallery-stage) holding a Bootstrap Carousel, and a footer with
-   the caption and credit beside Previous, play or pause and Next. While the
-   slideshow plays, a Progress bar above the footer shows the time to the
-   next photo.
+   utilities; Moo adds only the 3x2 ratio, the columns-* utility (masonry),
+   the gallery-justified rows and the gallery-strip row, which scrolls
+   sideways (layout "strip"; strip_until keeps justified rows from that
+   breakpoint up, strip_bleed runs the strip to the screen edges).
+
+   The lightbox is a large Dialog in the page's colour mode that fills the
+   screen below the lg breakpoint: a header with the counter and ghost
+   full-screen and close buttons, a muted stage of one height
+   (gallery-stage) holding a Bootstrap Carousel that cross-fades (transition
+   "fade", Bootstrap's carousel-fade) or slides, and a footer with the
+   caption and credit beside Previous, play or pause and Next. While the
+   slideshow plays, a Progress bar along the stage's bottom edge shows the
+   time to the next photo without moving the layout.
 
    Every thumbnail is a link to the large image, so the gallery works without
    JavaScript. With Bootstrap the link opens the lightbox instead (Modal data
@@ -29,11 +34,12 @@
 {% from "components/dialog.html.jinja" import dialog, dialog_body %}
 {% from "components/progress.html.jinja" import progress %}
 
-{% set image_gallery_layouts = ["grid", "justified", "masonry", "featured"] %}
+{% set image_gallery_layouts = ["grid", "justified", "masonry", "featured", "strip"] %}
 {% set image_gallery_ratios = ["1x1", "4x3", "3x2"] %}
 {% set image_gallery_breakpoints = ["xs", "sm", "md", "lg", "xl", "xxl"] %}
 {% set image_gallery_default_labels = {
   "title": "Photos",
+  "strip": "Photos, scroll sideways",
   "close": "Close",
   "previous": "Previous",
   "next": "Next",
@@ -60,6 +66,9 @@
   columns={"xs": 2, "md": 3},
   gap=2,
   limit=9,
+  strip_until="",
+  strip_bleed=false,
+  transition="fade",
   labels={},
   extra_class=""
 ) -%}
@@ -68,6 +77,8 @@
   {% if layout not in image_gallery_layouts %}{{ fail("Unknown image gallery layout: " ~ layout) }}{% endif %}
   {% if ratio not in image_gallery_ratios %}{{ fail("Unknown image gallery ratio: " ~ ratio) }}{% endif %}
   {% if gap not in [0, 1, 2, 3, 4, 5] %}{{ fail("Image gallery gap must be a spacer from 0 to 5") }}{% endif %}
+  {% if transition not in ["fade", "slide"] %}{{ fail("Image gallery transition must be fade or slide") }}{% endif %}
+  {% if strip_until not in ["", "sm", "md", "lg", "xl", "xxl"] %}{{ fail("Unknown image gallery strip_until breakpoint: " ~ strip_until) }}{% endif %}
   {% if limit != "all" and (limit is not number or limit < 1) %}{{ fail("Image gallery limit must be a positive number or \"all\"") }}{% endif %}
   {% for breakpoint, count in columns.items() %}
     {% if breakpoint not in image_gallery_breakpoints %}{{ fail("Unknown image gallery breakpoint: " ~ breakpoint) }}{% endif %}
@@ -80,7 +91,8 @@
   {% set text = image_gallery_default_labels.copy() %}
   {% set _ = text.update(labels) %}
   {% set total = images | length %}
-  {% set shown = total if limit == "all" else [limit, total] | min %}
+  {# A strip scrolls through every photo, so limit does not apply to it. #}
+  {% set shown = total if limit == "all" or layout == "strip" else [limit, total] | min %}
   {% set lightbox_id = id ~ "-lightbox" %}
   {% set classes = namespace(grid="", masonry="") %}
   {% for breakpoint in image_gallery_breakpoints if breakpoint in columns %}
@@ -97,6 +109,13 @@
       <div class="gallery-justified gap-{{ gap }}">
         {% for image in images %}
           {{ image_gallery_thumbnail(image, loop.index0, lightbox_id, "d-block rounded overflow-hidden", natural_image, hidden=loop.index > shown, ratio_property=true) }}
+        {% endfor %}
+      </div>
+    {% elif layout == "strip" %}
+      {% set strip_classes = "gallery-justified gallery-strip-" ~ strip_until ~ "-down" if strip_until else "gallery-strip" %}
+      <div class="{{ strip_classes }}{% if strip_bleed %} gallery-strip-bleed{% endif %} scroll-smooth gap-{{ gap }}" role="region" tabindex="0" aria-label="{{ text.strip }}">
+        {% for image in images %}
+          {{ image_gallery_thumbnail(image, loop.index0, lightbox_id, "d-block rounded overflow-hidden", "d-block w-100 h-100 object-fit-cover", ratio_property=true) }}
         {% endfor %}
       </div>
     {% elif layout == "masonry" %}
@@ -140,21 +159,25 @@
         </div>
       </div>
       {% call dialog_body(extra_class="d-flex p-0 bg-body-tertiary") %}
-        <div class="carousel slide flex-grow-1 gallery-stage" id="{{ lightbox_id }}-carousel" data-bs-interval="false" data-bs-touch="true" data-gallery-stage>
+        <div class="carousel slide{% if transition == "fade" %} carousel-fade{% endif %} flex-grow-1 gallery-stage" id="{{ lightbox_id }}-carousel" data-bs-interval="false" data-bs-touch="true" data-gallery-stage>
           <div class="carousel-inner h-100">
             {% for image in images %}
               <div class="carousel-item h-100{% if loop.first %} active{% endif %}" data-gallery-slide-title="{{ image.get("caption") or image.alt }}"{% if image.get("credit") %} data-gallery-slide-credit="{{ image.credit }}"{% endif %}>
-                <div class="h-100 d-flex align-items-center justify-content-center p-3 p-sm-4">
+                {# Each slide carries the stage colour, so a fading-in photo covers the
+                   previous one whatever their shapes. #}
+                <div class="h-100 d-flex align-items-center justify-content-center p-3 p-sm-4 bg-body-tertiary">
                   <img class="mw-100 mh-100 w-auto h-auto rounded-2 border shadow-sm" data-gallery-src="{{ image.get("href") or image.src }}"{% if image.get("large_srcset") %} data-gallery-srcset="{{ image.large_srcset }}" sizes="(min-width: 1200px) 1140px, 100vw"{% endif %} width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt }}" decoding="async">
                 </div>
               </div>
             {% endfor %}
           </div>
         </div>
+        {# The slideshow time runs along the stage's bottom edge, over the
+           footer rule, so showing it moves nothing. #}
+        {% if total > 1 %}
+          {{ progress(0, aria_label=text.progress, extra_class="gallery-progress position-absolute bottom-0 start-0 z-2 w-100 rounded-0 bg-transparent d-none") }}
+        {% endif %}
       {% endcall %}
-      {% if total > 1 %}
-        {{ progress(0, aria_label=text.progress, extra_class="rounded-0 d-none") }}
-      {% endif %}
       <div class="d-flex flex-wrap align-items-center gap-3 border-top px-3 px-sm-4 py-3">
         <div class="me-auto">
           <p class="m-0 fw-medium" data-gallery-caption>{{ images[0].get("caption") or images[0].alt }}</p>

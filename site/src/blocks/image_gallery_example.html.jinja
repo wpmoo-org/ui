@@ -18,11 +18,11 @@
   ("misty-lake", 1600, 1600, "Morning mist on the lake")
 ] %}
 
-{% macro render_image_gallery_example(id, root_path, count=12, layout="grid", ratio="4x3", columns={"xs": 2, "md": 3}, gap=2, limit="all") -%}
+{% macro render_image_gallery_example(id, root_path, count=12, layout="grid", ratio="4x3", columns={"xs": 2, "md": 3}, gap=2, limit="all", strip_until="", strip_bleed=false, transition="fade") -%}
   {% set images = [] %}
   {% for name, width, height, alt in gallery_photos[:count] %}
     {% set base = root_path ~ "assets/images/gallery/" ~ name %}
     {% set _ = images.append({"src": base ~ "-640.webp", "href": base ~ "-1600.webp", "width": width, "height": height, "alt": alt, "credit": "Drawn for the Moo UI catalog"}) %}
   {% endfor %}
-  {{ image_gallery(id, images, layout=layout, ratio=ratio, columns=columns, gap=gap, limit=limit, extra_class="w-100") }}
+  {{ image_gallery(id, images, layout=layout, ratio=ratio, columns=columns, gap=gap, limit=limit, strip_until=strip_until, strip_bleed=strip_bleed, transition=transition, extra_class="w-100") }}
 {%- endmacro %}

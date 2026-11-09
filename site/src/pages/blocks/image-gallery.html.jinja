@@ -6,16 +6,18 @@
 {% block title %}Image Gallery — Moo UI{% endblock %}
 
 {% block content %}
-  {{ render_page_header("Image Gallery", "Photo thumbnails in a grid, justified rows, masonry columns or a featured layout, with a lightbox composed from Dialog, Button and Bootstrap Carousel.") }}
+  {{ render_page_header("Image Gallery", "Photo thumbnails in a grid, justified rows, masonry columns, a featured layout or a sideways strip, with a lightbox composed from Dialog, Button and Bootstrap Carousel.") }}
   <div class="moo-component-examples">
     {% set grid %}{{ render_image_gallery_example("gallery-grid", root_path, count=6) }}{% endset %}
     {{ render_block_example("image-gallery", "Image Gallery", "Equal tiles cropped to one ratio (1x1, 4x3 or 3x2) with columns per breakpoint. Each thumbnail links to the large image and opens the lightbox at that photo; arrow keys, swipe, Previous and Next or the slideshow move through the album, and a full-screen switch enlarges it.", grid) }}
     {% set justified %}{{ render_image_gallery_example("gallery-justified", root_path, layout="justified") }}{% endset %}
     {{ render_block_example("image-gallery-justified", "Justified rows", "Rows of one height that keep every photo uncropped, in reading order. The last row keeps its natural size.", justified) }}
-    {% set masonry %}{{ render_image_gallery_example("gallery-masonry", root_path, count=9, layout="masonry") }}{% endset %}
-    {{ render_block_example("image-gallery-masonry", "Masonry", "Uncropped photos in columns. The columns fill top to bottom; the lightbox still follows the list order.", masonry) }}
+    {% set masonry %}{{ render_image_gallery_example("gallery-masonry", root_path, count=9, layout="masonry", transition="slide") }}{% endset %}
+    {{ render_block_example("image-gallery-masonry", "Masonry", "Uncropped photos in columns. The columns fill top to bottom; the lightbox still follows the list order. This lightbox slides between photos; the default transition cross-fades.", masonry) }}
     {% set featured %}{{ render_image_gallery_example("gallery-featured", root_path, count=7, layout="featured", ratio="1x1", columns={"xs": 3}) }}{% endset %}
     {{ render_block_example("image-gallery-featured", "Featured", "The first photo large across the full width, the rest as tiles.", featured) }}
+    {% set strip %}{{ render_image_gallery_example("gallery-strip", root_path, layout="strip", strip_until="md") }}{% endset %}
+    {{ render_block_example("image-gallery-strip", "Strip", "One row of photos at their own shape that scrolls sideways with a gentle snap, here below the md breakpoint only with justified rows above. The next photo always peeks in; the row is one focusable region, so the arrow keys scroll it too. strip_bleed runs it to the screen edges.", strip) }}
     {% set limited %}{{ render_image_gallery_example("gallery-limited", root_path, ratio="3x2", limit=6) }}{% endset %}
     {{ render_block_example("image-gallery-limit", "With a limit", "Large albums show the first photos and a button that opens the lightbox with all of them. The default limit is nine; \"all\" shows every thumbnail.", limited) }}
   </div>
