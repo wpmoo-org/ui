@@ -99,6 +99,7 @@ class ConsentTests(CatalogTestCase):
             "revision": {**CONFIG, "revision": ""},
             "required": {**CONFIG, "categories": [{"id": "statistics", "label": "S", "required": True,
                                                     "services": [{"id": "a", "name": "A"}]}]},
+            "duplicate id": {**CONFIG, "categories": CONFIG["categories"] + [CONFIG["categories"][1]]},
             "storage type": {**CONFIG, "categories": [{"id": "statistics", "label": "S", "services": [
                 {"id": "a", "name": "A", "storage": [{"name": "x", "type": "indexeddb"}]}]}]},
         }
@@ -107,11 +108,16 @@ class ConsentTests(CatalogTestCase):
                 self.render("{{ consent_card('consent', config) }}", config=config)
 
     def test_trigger_and_placeholder_use_plain_buttons(self) -> None:
-        trigger = self.render("{{ consent_trigger('consent') }}")
-        self.assertIn('type="button" data-consent-open="consent" aria-haspopup="dialog"', trigger)
+        def attributes(tag: str) -> dict[str, str]:
+            return dict(re.findall(r'([\w-]+)="([^"]*)"', tag))
+
+        trigger = attributes(re.search(r"<button [^>]*>", self.render("{{ consent_trigger('consent') }}")).group(0))
+        self.assertEqual((trigger["type"], trigger["data-consent-open"], trigger["aria-haspopup"]),
+                         ("button", "consent", "dialog"))
         placeholder = self.render("{{ consent_placeholder('video', 'external_media', 'Video', 'Loads from Example.') }}")
         self.assertIn('data-consent-placeholder="external_media"', placeholder)
-        self.assertIn('id="video-load" type="button" data-consent-grant="external_media"', placeholder)
+        load = attributes(re.search(r'<button [^>]*id="video-load"[^>]*>', placeholder).group(0))
+        self.assertEqual((load["type"], load["data-consent-grant"]), ("button", "external_media"))
         remember = re.search(r'<input [^>]*id="video-remember"[^>]*>', placeholder).group(0)
         self.assertIn("data-consent-remember", remember)
         self.assertNotIn("checked", remember)

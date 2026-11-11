@@ -166,8 +166,11 @@ class ConsentBrowserTests(CatalogTestCase):
         expect(statistics).not_to_be_checked()
         self.assertFalse(page.evaluate("window.consent.granted('statistics')"))
 
-        # Accept all grants every optional category in place.
+        # Accept all grants every optional category in place; a failing site
+        # callback does not stop the save.
+        page.evaluate("window.consent.whenGranted('external_media', () => { throw new Error('site bug'); })")
         page.locator("#consent-accept").click()
+        self.assertEqual(page.evaluate("window.events.filter(([name]) => name === 'change').at(-1)[1].source"), "accept-all")
         expect(page.locator("img[data-consent-category]")).to_be_visible()
         expect(page.locator("[data-consent-placeholder]")).to_be_hidden()
         self.assertEqual(record()["c"], {"statistics": 1, "external_media": 1})

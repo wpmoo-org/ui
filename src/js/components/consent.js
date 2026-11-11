@@ -138,7 +138,7 @@ export default class ConsentManager {
   /** Runs callback now if granted, otherwise on grant. Returns an unsubscribe function. */
   whenGranted(id, callback) {
     if (this.granted(id)) {
-      callback(this);
+      this._run(callback);
       return () => {};
     }
     if (!this._waiting.has(id)) this._waiting.set(id, new Set());
@@ -177,7 +177,7 @@ export default class ConsentManager {
     for (const id of granted) {
       const waiting = this._waiting.get(id);
       this._waiting.delete(id);
-      waiting?.forEach((callback) => callback(this));
+      waiting?.forEach((callback) => this._run(callback));
     }
     this._emit("change", { choices: this.choices, previous, granted, revoked, source });
     if (revoked.length) {
@@ -210,15 +210,8 @@ export default class ConsentManager {
   }
 
   /** Activates gated elements under root whose category is granted. */
-  activate(root = this._document, only = null) {
-    for (const element of root.querySelectorAll("[data-consent-category]")) {
-      const id = element.getAttribute("data-consent-category");
-      if (only ? id === only : this.granted(id)) this._activateElement(element);
-    }
-    for (const placeholder of root.querySelectorAll("[data-consent-placeholder]")) {
-      const id = placeholder.getAttribute("data-consent-placeholder");
-      if (only ? id === only : this.granted(id)) placeholder.hidden = true;
-    }
+  activate(root = this._document) {
+    this._activateWhere(root, (id) => this.granted(id));
   }
 
   dispose() {
@@ -228,6 +221,26 @@ export default class ConsentManager {
     this._waiting.clear();
     instances.delete(this._element);
     documents.delete(this._document);
+  }
+
+  // A failing site callback must not stop the rest of a save, such as the
+  // cleanup and reload after a withdrawal; the error is still reported.
+  _run(callback) {
+    try {
+      callback(this);
+    } catch (error) {
+      if (typeof this._window.reportError === "function") this._window.reportError(error);
+      else this._window.console?.error(error);
+    }
+  }
+
+  _activateWhere(root, allowed) {
+    for (const element of root.querySelectorAll("[data-consent-category]")) {
+      if (allowed(element.getAttribute("data-consent-category"))) this._activateElement(element);
+    }
+    for (const placeholder of root.querySelectorAll("[data-consent-placeholder]")) {
+      if (allowed(placeholder.getAttribute("data-consent-placeholder"))) placeholder.hidden = true;
+    }
   }
 
   _listen(target, type, handler) {
@@ -349,7 +362,8 @@ export default class ConsentManager {
     if (placeholder?.querySelector("[data-consent-remember]")?.checked || !scope) {
       this.grant(id);
     } else {
-      this.activate(scope, id);
+      // The visitor asked to load this one embed now; nothing is stored.
+      this._activateWhere(scope, (category) => category === id);
     }
   }
 

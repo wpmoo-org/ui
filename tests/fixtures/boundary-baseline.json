@@ -22,7 +22,7 @@
       "sha256": "9ec7b2a805ab83ebbfb09ad59dd4b150b35eb609f4f5beae5a671de58356b87c"
     },
     "dist/js/consent.js": {
-      "sha256": "95a1da35f4344caf219fa4d310b18b5fd13ef88a475ce551ca0ce457a72c8d6a"
+      "sha256": "7def177917e5a3f3986f0f9380161530627e4cf044f0854c30f6fdc61f3a9ebc"
     },
     "dist/js/context-menu.js": {
       "sha256": "15daf8095511098ac56c45f156163d6ee459ff2b6d1670315cb0ba1a483a178e"
@@ -43,10 +43,10 @@
       "sha256": "261509f94e6a2ddbb980dcd257cc8768c70b371ed621d50e95f265c2c9ec8828"
     },
     "dist/js/moo-ui.js": {
-      "sha256": "14bd8487f8c0b49bcbe03c19092c822d531254f64023e1b7433504233f460cd0"
+      "sha256": "c1607f8302cb46a8e21ff2746f0162b8b4992a2266234c35101622287c2ccad0"
     },
     "dist/js/moo-ui.min.js": {
-      "sha256": "35e063221062f3348aebd14bd02eda98976ff1844054647154b4de3a29136cec"
+      "sha256": "133553f391a6307b4218eb3d913db80d54784d756160b923cb32c282290d846c"
     },
     "dist/js/overlay-scrollbar.js": {
       "sha256": "1871b997382f05213e14fe328a9e8c3b440f699f93d8118398fc4913a8c345aa"
@@ -713,28 +713,28 @@
   ],
   "siteOutputs": {
     "site-dist/404.html": {
-      "sha256": "8fe80f85c4cb844fe651e4c968a47deefcddb53cf5b26deb2b5c758822770e21"
+      "sha256": "a7bea862a6691f4feb36236d37400dc2f5b03017b96178896dafd87937a262bb"
     },
     "site-dist/_headers": {
       "sha256": "4ad01de85ea0743e7bc4422e8bed9446d2eaf2ada173febf33a1ba640b50b8f0"
     },
     "site-dist/acceptance/rc2/index.html": {
-      "sha256": "382890ec84d0b608dee7e8da832f6a99e34415aab903fe1922def1b84b5f5c21"
+      "sha256": "8857b46affe12421857028091ca8ce5e3ca836f7da473ef8ff838d5c902bd86f"
     },
     "site-dist/acceptance/rc3/index.html": {
-      "sha256": "6645009e7d9bbdf71a933e54007ce5753283b4d2db5e2e49262d301d340c5e1f"
+      "sha256": "8a463cddfd53bb80ac39360000dd308724078e9bcf01edfa82b019bb4bf28a7f"
     },
     "site-dist/acceptance/rc4/index.html": {
-      "sha256": "7360d3dab691efd6ec6ed19e631f36d41ce383101e2af2a27bebd87e9267d34d"
+      "sha256": "17a7dee3a76282946134e558191b1792b385bc29134f0511eebaa451d7abbd27"
     },
     "site-dist/acceptance/rc5/index.html": {
-      "sha256": "adbd601ee15c52aff19c5c14d68f6ef6122d960a92173604294b68720c25aa65"
+      "sha256": "9363ff7be4eccd44d6225862e5bb5642c720e1e03d21e6f540d4ed11b5f75221"
     },
     "site-dist/acceptance/rc6/index.html": {
-      "sha256": "7035042af3c613eb69158e9977c2ba23f7506fb11ffd28d8b675bb21239fbf5a"
+      "sha256": "151aa2ad4a025a0472909b527efe4f3a6a3e3c21bb870db4b8e6337eb8a6ffb8"
     },
     "site-dist/acceptance/rc7/index.html": {
-      "sha256": "e11ca3864ca5924ebc1aaa0f928d13b74a9823ce3a5343ecd0285949d4101848"
+      "sha256": "c3f3f63250e64a9bde56bd81a257ca5aec7416f87f0d5f1604838d620ca23d09"
     },
     "site-dist/apple-touch-icon.png": {
       "sha256": "0369a32660a4679bbc8a2da846d38041ecffcea1266e07c7c688936b7f41713e"
@@ -1181,7 +1181,7 @@
       "sha256": "cfb6747563aee16049a71adff6f51c42eeafd9795db785f0dc537b423b234679"
     },
     "site-dist/assets/js/catalog/index.js": {
-      "sha256": "1558b80112fa2252d037876963c128b38b5f9295690756295ee2bec92db60985"
+      "sha256": "42992479548bec8bce7c1a1638cd38bb6d8e6d21cbf4d0f5db543869bbca0863"
     },
     "site-dist/assets/js/catalog/overlay-scrollbar.js": {
       "sha256": "217041b0421aefa126a1c4d28daa262563b293ecfc6ba99f264671ac39fca3d8"
@@ -1223,7 +1223,7 @@
       "sha256": "9ec7b2a805ab83ebbfb09ad59dd4b150b35eb609f4f5beae5a671de58356b87c"
     },
     "site-dist/assets/js/components/consent.js": {
-      "sha256": "95a1da35f4344caf219fa4d310b18b5fd13ef88a475ce551ca0ce457a72c8d6a"
+      "sha256": "7def177917e5a3f3986f0f9380161530627e4cf044f0854c30f6fdc61f3a9ebc"
     },
     "site-dist/assets/js/components/context-menu.js": {
       "sha256": "15daf8095511098ac56c45f156163d6ee459ff2b6d1670315cb0ba1a483a178e"
@@ -1244,10 +1244,10 @@
       "sha256": "261509f94e6a2ddbb980dcd257cc8768c70b371ed621d50e95f265c2c9ec8828"
     },
     "site-dist/assets/js/components/moo-ui.js": {
-      "sha256": "14bd8487f8c0b49bcbe03c19092c822d531254f64023e1b7433504233f460cd0"
+      "sha256": "c1607f8302cb46a8e21ff2746f0162b8b4992a2266234c35101622287c2ccad0"
     },
     "site-dist/assets/js/components/moo-ui.min.js": {
-      "sha256": "35e063221062f3348aebd14bd02eda98976ff1844054647154b4de3a29136cec"
+      "sha256": "133553f391a6307b4218eb3d913db80d54784d756160b923cb32c282290d846c"
     },
     "site-dist/assets/js/components/overlay-scrollbar.js": {
       "sha256": "1871b997382f05213e14fe328a9e8c3b440f699f93d8118398fc4913a8c345aa"
@@ -1277,232 +1277,232 @@
       "sha256": "7b7e9ca121536a8a8b5d0b596d1ceb14384b8bae195160e05e50e97a5da35b8c"
     },
     "site-dist/blocks/accordion-panels/index.html": {
-      "sha256": "96d752f0b33966297f989ed4627dec9e521767a7cad10710a2a39fd56dd00507"
+      "sha256": "1e736b56788e726c67e8e3a8bbe9978d24d257236a3649b93469e93a1b85bb90"
     },
     "site-dist/blocks/consent/index.html": {
-      "sha256": "de2bc93cd719cb3fa2ebca4f118b6c02b91cdb77c254b36593c6fc3597518537"
+      "sha256": "d5ad1a92622fe4a9e861c2e6929b36735b950986ad7bce067b2e2044bd85419b"
     },
     "site-dist/blocks/image-gallery/index.html": {
-      "sha256": "7def546e5ec9e31b4a7a9e32b611e7eca9c1e1747a41ee37049e1cef9d626c2e"
+      "sha256": "e525258c717521f60a94e3ca8b55e71ddc8c8d9b12ee749e5b02d7df0f6ee578"
     },
     "site-dist/blocks/index.html": {
-      "sha256": "8f930a8ac69c5e1da999cb8d9f97e45ad038c81224f30aec34241d6010fe5f1b"
+      "sha256": "a093e8be736b74b5c61dcc1d42e323f6b3aeaac251ddacfcfb950ec7c3c842be"
     },
     "site-dist/blocks/previews/accordion-panels-rtl/index.html": {
-      "sha256": "266a73a4e6494b13c0f42d0cccfbd1d5c2923c4defa435c0c2006dd4b0929d84"
+      "sha256": "f5e533a59af48d358537828b3cbbafaf4bc87efe9b4dcdf340a29e0bb3e3f085"
     },
     "site-dist/blocks/previews/accordion-panels/index.html": {
-      "sha256": "5115dcf7bb419ed0400b3fbfc34405abc98c856d107dabe2e0d4c6fe6abac8fc"
+      "sha256": "0ce0faf60085be417f256cb54076f21b0136a3e704a6b5ac8821fcc34ee66575"
     },
     "site-dist/blocks/previews/consent-rtl/index.html": {
-      "sha256": "788dfb195b0e5b79027920ad1a08cc418730e1475c5cb1aea59264a184d0ceca"
+      "sha256": "40e609195fe65db8e1fc350257d329bac70f149a44e157381704b53a1a7599a4"
     },
     "site-dist/blocks/previews/consent/index.html": {
-      "sha256": "6525abad5df24701522506dad8ed93b2ca3e4949ee7f3ce6632cbeab04ee4346"
+      "sha256": "25473cc047c26b5d98e905f88506b4c8695bb73cf661a58a26fdb6a9213f87b6"
     },
     "site-dist/blocks/previews/datatable-release-review-responsive/index.html": {
-      "sha256": "91ab3606a6322d8f5a345b4906a597d9c189fa6339a9f30257e3dc327ab18e77"
+      "sha256": "8b75c0bce3864e80e1f563fe6bc7993f4a09cafd8051e2d80510b5cfa24d258f"
     },
     "site-dist/blocks/previews/datatable-release-review-toggle/index.html": {
-      "sha256": "44ca2ffaa86055a98b55bd2d5ddf3f8febf19e44e1e03a5b7ece1467ef771dc1"
+      "sha256": "fb3e72539d45781fb66f954baa4287353cc7f004d25ddc0fb15b40e4e286428e"
     },
     "site-dist/blocks/previews/datatable-release-review/index.html": {
-      "sha256": "53bee85a767bbc38edbffc8e900852e8b5d8547943a81bbcc1e340e5786f8b20"
+      "sha256": "cf8a02850e237cfe7e52c29102fc5d96b365981766a12784b2478e4681f933f2"
     },
     "site-dist/blocks/previews/datatable-tasks/index.html": {
-      "sha256": "bf3e12b39166bc2fd3857bebdd0d5035bf995c7d9b29643e7ef65f1924fdaa13"
+      "sha256": "747541ff3ceecd8512ff57a4652b0574a925a710724dee85a36551f0bb318db7"
     },
     "site-dist/blocks/previews/image-gallery-rtl/index.html": {
-      "sha256": "78a41e96113e3ef6f66de9161fbda4dc129623f6f58badb79e1d87afd4a8dd0c"
+      "sha256": "3bd3562ea1e5c090e71397c9daaf9c9ff712924ec9f29cacdd7b04fe6ceddfd2"
     },
     "site-dist/blocks/previews/image-gallery/index.html": {
-      "sha256": "14d8c8c11ed64be5208b81958f9b6dbfe6d381e8efdb31cd932d1dbd9a152b49"
+      "sha256": "c4434946948e8628799336767e008840fef0e76bf65380ea3787300f7937ec38"
     },
     "site-dist/blocks/previews/overlay-scrollbar/index.html": {
-      "sha256": "58dea1b3e13ae53f37c02960927e12abfe4e96d5961b408228298c6ba846c584"
+      "sha256": "07edb3769b05104ec66831e59f0dff3623d9550502f58f339edbaf39eb1a1afb"
     },
     "site-dist/blocks/previews/sidebar-floating/index.html": {
-      "sha256": "fd92a38623dde287712e0f4596a3e51287c8522029994fd14648fb525557115f"
+      "sha256": "072625329822cb33ba4ced1e8ed17cb496d86380555af0ca3ebc1e1ebce22f6c"
     },
     "site-dist/blocks/previews/sidebar-inset/index.html": {
-      "sha256": "232255129ee2955cac3757b8bdbb6a0f99661653ac2edb6c2efddf9b5d79578d"
+      "sha256": "59e084fc7062063fe99511e47be6e74f9b76aec3cf08c099cd88ae0793f47d19"
     },
     "site-dist/blocks/previews/toc/index.html": {
-      "sha256": "94376853de2f08d989e7e7b07c7491a21f6411a0c7d7dac80ea0e3aab5bbeade"
+      "sha256": "8212062042e348ec5c479ad5b256a8e8e74348e3036e7b977df8711b357f3c65"
     },
     "site-dist/blocks/previews/video-dialog-rtl/index.html": {
-      "sha256": "984c4c0c56b5e0ed1f1d592dea8c2446b5eb2001f00f0bc309116d9123a94c3c"
+      "sha256": "bb99d341edb03c2c8a58eb8802a7f7650aff4694cdfa89ca84251eebf74c4174"
     },
     "site-dist/blocks/previews/video-dialog/index.html": {
-      "sha256": "cac8896e884139eadae885653ef38e784aaaaca41456ff9711397e3f50ee017e"
+      "sha256": "1d5ec250838e330c3597d1624c805c6aca082e53f69711154bbd725b8e96b343"
     },
     "site-dist/blocks/sidebar-floating/index.html": {
-      "sha256": "8f2651ca36b5cf54d903cd56146f1028350db617a9bab15210d69cb150584a98"
+      "sha256": "00e02ccfd707318bfb8a93cc727828e611a38d44fe0035ba1047b235ac6168ab"
     },
     "site-dist/blocks/sidebar-inset/index.html": {
-      "sha256": "3f85341189cf1e60c6df7af35d933665e1e22e88922ed5171cbb995da6b003ab"
+      "sha256": "b715db5c8e29abef32999399789868245bf800e7fa347e181c72f815ee4617f7"
     },
     "site-dist/blocks/video-dialog/index.html": {
-      "sha256": "89b41390a025485a46a1a437ddbf238ccf2a59da64f6c09afb6b60a7bb2cbe6e"
+      "sha256": "d19364c21c1eeeabe46bdf37e2a2ab407ee8bd58fb8dc34da8dd8ae43581ec0f"
     },
     "site-dist/changelog/index.html": {
-      "sha256": "6b4acafd3604663e1a2ea5177211524b1367fa1e891eec6ac14b00b767e57305"
+      "sha256": "854d2e57197d53ce98830785e79763f15a6ddcb179318f8e97874e9fee64ae1b"
     },
     "site-dist/charts/index.html": {
-      "sha256": "3c4ac5747d8d238d9c654a3ef8eed5e9403d5675c650da2cad94b810d4423abf"
+      "sha256": "2bf7d360d4374869d46122db1ed36da377befdaf60f89490f475bdad430dfac1"
     },
     "site-dist/components/accordion/index.html": {
-      "sha256": "cca5f3ad679ce7b24a504e7d7250178744c7af22a20f4d19ab7ef9d6b73d5df0"
+      "sha256": "2fa717d4dad4972a033712160bee622a258ec1ac5b1e4206e1818108b56002eb"
     },
     "site-dist/components/alert-dialog/index.html": {
-      "sha256": "9595573df4cca299d145ecebdcb837a900bf449f81d3622ac9dd0ba652d62d6b"
+      "sha256": "5d7c5839b6a5f0b8f5a39ef166a57f1554e3469ddcf895e0732dccb2397a6a5e"
     },
     "site-dist/components/alert/index.html": {
-      "sha256": "d166692415ea4c874eed7cdd74753fd318a4e346e2d2979852db5b4c6d9c6a35"
+      "sha256": "7ea1e6486d48080f9160dc7cd97084e9f3377485bca9eff675d114297665c281"
     },
     "site-dist/components/avatar/index.html": {
-      "sha256": "dd5df0d5aea636041083fdcea53e71c79cf31a061a6e478c0be4a50546230180"
+      "sha256": "9bf24e4685aef5f9393677d302433a49e57f99bd2dd6440bafaa6fa23bd1db1e"
     },
     "site-dist/components/badge/index.html": {
-      "sha256": "db74eb7b0f0733e11eac383c59d89968d0682b419d9e6353ea015263d7f6b951"
+      "sha256": "2827eae8dcf397642566afb685c92a5a90c5b22ee45cbc8cafc550256b8961f7"
     },
     "site-dist/components/breadcrumb/index.html": {
-      "sha256": "1f3d6cfb7c104bd67a4b231c132edb09caa7ddc7688c2521e38ac2e822749ffc"
+      "sha256": "69154df29d3604ed46de8b5256dbfac0091004734889368834cf18984c1a9438"
     },
     "site-dist/components/button-group/index.html": {
-      "sha256": "5a2e2cd27698259c73824f9575b4708adfd6cd8efd6a45cd4fc8d5a63c6661a9"
+      "sha256": "091559447f04b89ee60a95ef1ad4e30b805a013892d27eb4f1e15f3376d3d4d0"
     },
     "site-dist/components/button/index.html": {
-      "sha256": "b39bfbdd1b0c9c6c3c52b1fb10e93289e54429fff0020d6135e7d589a0ed57dd"
+      "sha256": "220667f665cd6dde51d32a9c69920fa08224c5fa45a3993f2e541903049c875c"
     },
     "site-dist/components/card/index.html": {
-      "sha256": "0d652b83c2c2279d7eb32b21de2446887137376044b8888bb4e2edad833e0b91"
+      "sha256": "da344bd4d866998f4abd260d4f37f754cb60cc6de71d95e30944098260e1a964"
     },
     "site-dist/components/chart/index.html": {
-      "sha256": "b715ceddb1945604e62a5cbce1d39e93641e76fe238d82457bad99b7d0c8d122"
+      "sha256": "b07c13cbaf05aa1c7de3fb13da40ce35299b47525fed27dddc807a29b58cf253"
     },
     "site-dist/components/checkbox/index.html": {
-      "sha256": "0ba03da9d0645372d9d0533c58ec772e1942c296cfa917f0f96d7dd140f98cc2"
+      "sha256": "8885d048ca1077c4ffc8ab40879bec45f71e94ea69b065803f0ae43f0f58b326"
     },
     "site-dist/components/close-button/index.html": {
-      "sha256": "994cd6da6d54882e96a813f9ab6f1d2140689d1cffe1d342bd8ccd72371e9ac8"
+      "sha256": "4bb4aac9d1698db97cb90cca596cfada6d71e7e349e55065c25cca6b6c1539ce"
     },
     "site-dist/components/collapsible/index.html": {
-      "sha256": "f664413af8e499524248824261a9d8a8feb2106629327efc71efc060a9cd83f3"
+      "sha256": "b89371b7005ac791c02ffcd08091a7b96bd773eb965eaa1531266822c7affe65"
     },
     "site-dist/components/combobox/index.html": {
-      "sha256": "c6da1871d09e20f668f938cbe1204d9d6cf7aa5267ce093b3719f528caed7685"
+      "sha256": "d53b06f5a64ea655c49e02e2a1948d6bec0c9e1b3a6fbff38eddef955e2bc06b"
     },
     "site-dist/components/context-menu/index.html": {
-      "sha256": "16c9c9117a0f4d8397d06c0f0342bc5d12b6ea04bfada6cb55bab900afb40c2f"
+      "sha256": "45b1be2173771f9d5492a02d42210062d99240620fb8bbd95d4fd3815c93ab21"
     },
     "site-dist/components/datatable/index.html": {
-      "sha256": "a274e4feef27fd1f70b86218ea8adec6c5300119b410892a6d3d80f5b78674c2"
+      "sha256": "cb3817b18e3c74357bd9dcf34f1e2aa234da41239b8463d00ebac5845dc3fe0b"
     },
     "site-dist/components/datepicker/index.html": {
-      "sha256": "600a8c8409a462c0b15f815fed96ed777e416040b945bde1625b441fb926d2ea"
+      "sha256": "945a764064bcbe4fe9f4e116c4b4d86d6a78fd432f37a2781adeb7bf72f73dac"
     },
     "site-dist/components/dialog/index.html": {
-      "sha256": "dcd319045f47f899e0bd4e48b0eb4ce470d5adb1cbbc7d846974c8913a78753b"
+      "sha256": "4c34048084da5144c529e815816af6bcd9de580c40bef242e46a8bccca244778"
     },
     "site-dist/components/dropdown-menu/index.html": {
-      "sha256": "7b3d41e9ae59cc7747c0c6462da20ae7f4f8919846286f20cec5d6cf09755411"
+      "sha256": "2b0b0386061af9f9d9f9ba67abb22323559e281b34ea44f6921f80a68b077002"
     },
     "site-dist/components/empty/index.html": {
-      "sha256": "a7be7f0282b6fb0c4d6cb6f6a1a98f5f79cb9fa95d6e8425e9fd33d3fe7cc9d1"
+      "sha256": "edb3c0b3f6e040eea2ea7116c55e28b2eb6f981e4723e6356b4be53604a25858"
     },
     "site-dist/components/field/index.html": {
-      "sha256": "bebf27ad0d0fdd6c9a2859d780ef5f3c02ddeff4b0eea9be04509af19a466bf6"
+      "sha256": "70dc44045955ecdabc633f69caf54135e09931066450a4e2edf90f4fc536b4f9"
     },
     "site-dist/components/form/index.html": {
-      "sha256": "69f86b1dc8113a6e8b8cc0260926bb5ef34eea0816a5ca0cf8c331811ffd7f4a"
+      "sha256": "f2d40edaccadbab5137efca7c22f15296ad3776a89eabe6bf6c691733172088a"
     },
     "site-dist/components/index.html": {
-      "sha256": "8f83f911b4a24d179acbfc5d1b8c2fad61c25b8f0207eb74d2ce350d7ee00486"
+      "sha256": "bdb614b6e27d12b1c2c07f413be8a3740a2c396d515e9b1be8ba022f97618d50"
     },
     "site-dist/components/input-group/index.html": {
-      "sha256": "4effdf99228c85eb244030915185928c3925e9e841ec19db4dd602c45853e917"
+      "sha256": "0d8c44a44ece491245ed043605bb456b8c604affdf4f252400ef63fb99d93556"
     },
     "site-dist/components/input/index.html": {
-      "sha256": "69f934851c3936c0146630aa94628bda5105b607cec88c20f884bae0faa0f65e"
+      "sha256": "a28c677d46e3cffbb497e293967457f9e4ef5655486dd0030358f1b5f6b5ea06"
     },
     "site-dist/components/item/index.html": {
-      "sha256": "4aee8ef38ad590217ad8c79e830c58226daef2a5052ceea9227b98c0ddda74af"
+      "sha256": "2c74b8e6f964b251a86855b197444df46f21df728d91b99ba8cf88ea44a6a071"
     },
     "site-dist/components/kbd/index.html": {
-      "sha256": "ce6b21996bf8b3174b295c0c649f62124c7714cfdade0b5c9a6d4fa5d8624a20"
+      "sha256": "0290bb388805cc7cd7716ccda13be9e5a96cd091a66f8e4ae41230a8bcb82f9c"
     },
     "site-dist/components/menubar/index.html": {
-      "sha256": "157325ef863ddfec45b26ea1dc96147f3a993a9d828e949bed6932c43180311b"
+      "sha256": "f1714a9208f84b82d4555398806d497e57ffaa9b3001279f9aa5cd3cd931d737"
     },
     "site-dist/components/navigation/index.html": {
-      "sha256": "57ee937baefdd3545722a7dc96aafa185bc82f69d3814b7b946a293927972ced"
+      "sha256": "7a080fc09d159f1d9931eb01a31f0e9a1873f1955b8c9445aee7484b0f3741e1"
     },
     "site-dist/components/pagination/index.html": {
-      "sha256": "47483b3b93860d07c0e85352197687d685af97c8452cc14a1d631b5d7653075d"
+      "sha256": "21ba636f2fa0b1b29ed933399deea62d5ea69f9f0d48f1965a3dcb98a5602e4b"
     },
     "site-dist/components/popover/index.html": {
-      "sha256": "4273e23c3cd6a6c0f24269a95ddbd44a63e31fc1ce4fa9b380371a749c60598e"
+      "sha256": "bf01085a6f1e2e228ec099a4a6ceb36b2a15a90566943a2275fc2e6a0796417e"
     },
     "site-dist/components/progress/index.html": {
-      "sha256": "4b0cddb454e855e2729b816985333f7e76ef71dec3128cee1bc5d4a3dd1320fb"
+      "sha256": "f211317a502fbebe20f1fab5fc48c67b22acb448d240e23cd68ee08ac72e7139"
     },
     "site-dist/components/radio-group/index.html": {
-      "sha256": "334b0f728c4b92d144d2ed85bf03b523270b1a347e2ed85c0c336497f5f0eace"
+      "sha256": "c0bddee487dd7d54b98c93e5fa8ab57b0bee40ed4f70639cb006991f123f9d3d"
     },
     "site-dist/components/select/index.html": {
-      "sha256": "c9a5d2e1b8c66a5cae5528826292d04493f0e4547ebf8afa6a3ff03dbb1a32c6"
+      "sha256": "9127c2e3017382616d9ef1cd964d95deb7453dcbd9b14b1692bcde53d3c1effb"
     },
     "site-dist/components/separator/index.html": {
-      "sha256": "6ceb569c1a255814df7c4b4668a1f3b5349e9d339b8b51faa90108f0049c5fb0"
+      "sha256": "eb45f61a8f64c5f452f54d3fc1c755b97262ce18a2312456b524be260f873b3b"
     },
     "site-dist/components/sheet/index.html": {
-      "sha256": "ae1af820dd839613145b6d647ef72919c0d34aca9ec4c426e6d32764b796f74b"
+      "sha256": "2b445f8578ff8ea5bd6c5f61cb3f7d5e0624eac564126947bbf8d122f638d827"
     },
     "site-dist/components/sidebar/index.html": {
-      "sha256": "2183f6657c9b5ef6dde21254f909cfbbd3b6ad342de086652db1349ec345e545"
+      "sha256": "6e88ea44fb6c3a7234a0073a8a8d8368e5c1272d762a06ef674b22c70e43cb6f"
     },
     "site-dist/components/skeleton/index.html": {
-      "sha256": "5874bc5775ff8b91129ec5c051aa33ed1c6dd34c7f41546d6f3191f09c70659a"
+      "sha256": "076c894873c034f03b8599ed02e4cb23fda47b9f2f5405be31c2bb4d71d94edd"
     },
     "site-dist/components/slider/index.html": {
-      "sha256": "a0f77416d9635c5f3c2f3772576ff0895fb1f93a6b5bddb6cfc9a83aa3f2c35a"
+      "sha256": "14c7437aac61918ab3d1fecdbfe6e3d7218afc64f1882517b52f39ec98837773"
     },
     "site-dist/components/spinner/index.html": {
-      "sha256": "dfc17ebfee1a9dc5b42777addb1d3d87274fef2e5f685f886aa5e7a2a4a2ebc5"
+      "sha256": "78db97a5471287b5f0d9d4810c10a279350711d05a7076cbc29bc61005c7812c"
     },
     "site-dist/components/switch/index.html": {
-      "sha256": "0400512456152a187d0950c30aad5b1da4202e8d66d3fb82e81192f1738b28b1"
+      "sha256": "14639f49a4fae7a747a6505e60c2af9245526dba727127c880395c908f1c3cba"
     },
     "site-dist/components/table-of-contents/index.html": {
-      "sha256": "c8a463a8821cd7fa1c1ee83913d512353f615a19aa42a43ee0f5394860f24721"
+      "sha256": "f1dba1c57db24538e4a1c51a5418634b6feab1fcc8daff07c2719cf7f326d760"
     },
     "site-dist/components/table/index.html": {
-      "sha256": "d87b5725d5bbf14c498bf0744f6b1b75819772321be5b27254b7b014418bc69d"
+      "sha256": "228f3df0c322025a2aa1af2f3186a0fb14e609ad59b01d05cad33193402f93a2"
     },
     "site-dist/components/tabs/index.html": {
-      "sha256": "28d38ff1868cdfc94d640f3219453ac734cc54832b5a60b61c717df98d04f714"
+      "sha256": "3a16956aa8ae29d78e59147482be7c445b6fd17e81fad324e19b1bbc4d1403a4"
     },
     "site-dist/components/textarea/index.html": {
-      "sha256": "bed4db918bc63fa4bfe4aad05d1fa35adcd0618e9532850dac3569da9798cf4a"
+      "sha256": "daf67a9f64aacc1779c6032c3cdf04f55644cc91550829f50f2b9ab483d9744d"
     },
     "site-dist/components/toast/index.html": {
-      "sha256": "77853db4dd150d05b660ba3c56fdb83b464e798c3673c62cbf255c362991e7ce"
+      "sha256": "133c496c5495c811f2df651e5f1a36bcca7a5386f5b57282496b33e8ddca094c"
     },
     "site-dist/components/toc/index.html": {
-      "sha256": "c8a463a8821cd7fa1c1ee83913d512353f615a19aa42a43ee0f5394860f24721"
+      "sha256": "f1dba1c57db24538e4a1c51a5418634b6feab1fcc8daff07c2719cf7f326d760"
     },
     "site-dist/components/toggle-group/index.html": {
-      "sha256": "afb6977e2cdfcb6d0098cf32cf2145f61104b211b99a4358424d7205b00432b4"
+      "sha256": "9828a7e59788cc2e1e422c715c14e7b8698a2f58fd91905132b105826bd5b8f1"
     },
     "site-dist/components/tooltip/index.html": {
-      "sha256": "3f18e79d4a7bb7c44291a775779f5e7fd4b53f7fcb4c87a6a6f5e442fb95a449"
+      "sha256": "38bb763b57ef8772b285197c7efe575532634ccbd7ac9500fb8c356faad76180"
     },
     "site-dist/components/typography/index.html": {
-      "sha256": "8d767b72ecb4d079e78426fdac8c340cc9fae8bc207f3ca2c6aa969e54233f77"
+      "sha256": "2a879fb9ce4e0d8744514719eb9d28c98df80c257f6df1dbc2b0b7905dd5d7cc"
     },
     "site-dist/contributing/index.html": {
-      "sha256": "68645aef4c928c2f8abfb44762fee797b4bfb239862d5059b73de7adee3e0418"
+      "sha256": "94484a24434df1387f1bf19ddf0fceca1ec3c997942a03f591c7c9a75e6ffa46"
     },
     "site-dist/dist/assets/css/moo-ui.css": {
       "sha256": "74ace06833227d1579e40f92dd5c13c0b804416b06f62354a37e53bff26eb0eb"
@@ -1526,7 +1526,7 @@
       "sha256": "9ec7b2a805ab83ebbfb09ad59dd4b150b35eb609f4f5beae5a671de58356b87c"
     },
     "site-dist/dist/js/consent.js": {
-      "sha256": "95a1da35f4344caf219fa4d310b18b5fd13ef88a475ce551ca0ce457a72c8d6a"
+      "sha256": "7def177917e5a3f3986f0f9380161530627e4cf044f0854c30f6fdc61f3a9ebc"
     },
     "site-dist/dist/js/context-menu.js": {
       "sha256": "15daf8095511098ac56c45f156163d6ee459ff2b6d1670315cb0ba1a483a178e"
@@ -1547,10 +1547,10 @@
       "sha256": "261509f94e6a2ddbb980dcd257cc8768c70b371ed621d50e95f265c2c9ec8828"
     },
     "site-dist/dist/js/moo-ui.js": {
-      "sha256": "14bd8487f8c0b49bcbe03c19092c822d531254f64023e1b7433504233f460cd0"
+      "sha256": "c1607f8302cb46a8e21ff2746f0162b8b4992a2266234c35101622287c2ccad0"
     },
     "site-dist/dist/js/moo-ui.min.js": {
-      "sha256": "35e063221062f3348aebd14bd02eda98976ff1844054647154b4de3a29136cec"
+      "sha256": "133553f391a6307b4218eb3d913db80d54784d756160b923cb32c282290d846c"
     },
     "site-dist/dist/js/overlay-scrollbar.js": {
       "sha256": "1871b997382f05213e14fe328a9e8c3b440f699f93d8118398fc4913a8c345aa"
@@ -1580,40 +1580,40 @@
       "sha256": "8c18fdb44f2773a188abd56684af8bbe6fd1709ea1e3357dfabaf70800268541"
     },
     "site-dist/examples/auth/forgot-password/index.html": {
-      "sha256": "7c9cd61d8bed2b09f0c8c3a0da125dbdd0f04151da687d5a2862fad431b9c9c7"
+      "sha256": "4429cca184ce1e88158cb7e11d813bb0c344693a2896834c24583cea3294882b"
     },
     "site-dist/examples/auth/sign-in/index.html": {
-      "sha256": "ff22e55cfd853de690913e28ce12a233f4d335832cc6aa9f9a863959506f9b77"
+      "sha256": "af2e00316b79d26926ba571cbd132977124ec83b233c00a3b0efc1cbca054f97"
     },
     "site-dist/examples/auth/sign-up/index.html": {
-      "sha256": "fb6214c29bcd3a7f1ced225b02a37c281a8c81c93bee8321452532f07e9614c4"
+      "sha256": "84911813558bed04b5ff1b8d3a56d2dab4285edb17b2fd183af04243e8e3ceb3"
     },
     "site-dist/examples/dashboard/overview/index.html": {
-      "sha256": "782a9966ffbe2c710530d66845339bba3700fc93f711ecb6fcb94cb31838b1ee"
+      "sha256": "4155aadc50877ee6e0d4bef067b6b7b0d90aa2bdaeb39e40ac06d860452106c1"
     },
     "site-dist/examples/dashboard/tasks/index.html": {
-      "sha256": "3fd22b2aea560a9b7d421801ec3516f9868eaa60bcf9c952dea6e4304528a8ca"
+      "sha256": "6f61dfc9e64da0aa36dd031a8d153ed11656469db412220d592bae33ff04b622"
     },
     "site-dist/examples/dashboard/users/index.html": {
-      "sha256": "cbabf33067caace9b33d4e026c4deeaba3f7a598e75999b10e13f85a64e58107"
+      "sha256": "14bbdc0af248da3c69cbf49eca87282a0133758f07b9937676c19a4ffd9ce3cf"
     },
     "site-dist/examples/index.html": {
-      "sha256": "4ee5a4053d5bfd9f4968c96f28a0eaa52a8f1e859bad7e1ad20bd7a154805222"
+      "sha256": "d1a1049b0d1cf3d1f416972b854d02d4e569cd6ffc983516ea93b347c58f9575"
     },
     "site-dist/examples/marketing/faq/index.html": {
-      "sha256": "ea0f91b6b67d4baf262eb6b0c97ede7ced990944c6b4237dcc1866d680d9b0f1"
+      "sha256": "3ef6efa424d17d604b6178be4a8f6b7461236d8438e3d2f5af3c8e3f527d66a9"
     },
     "site-dist/examples/marketing/pricing/index.html": {
-      "sha256": "63f557ab341ef07b0787108d9bb947e4bf26e8198575d1c92101a49b1db7d068"
+      "sha256": "ea57b24344d966b02c1e5adcf7f778c1378ea01a704a07bfaf96d2aa371b98bc"
     },
     "site-dist/examples/settings/account/index.html": {
-      "sha256": "a2d59b62709da56e0a2d41537ba104986e773424dd9c9fab2b8b64b183b587ad"
+      "sha256": "e6af1b62762d3b9a833501d99a3e093c0ac3b4ccac7450dbc796ab2e6564ba10"
     },
     "site-dist/examples/settings/appearance/index.html": {
-      "sha256": "d4d947c0a6aa41e41016da36788858e4c39f1dbf85589b919dcb0710eb3c0f39"
+      "sha256": "043f03e5bf6397eff9b9e9a09e6c198dc6208cd3f3522dab5b02ac974dd91bc9"
     },
     "site-dist/examples/settings/profile/index.html": {
-      "sha256": "a1b828952e65bdf4c4ac260790dfcd850c741c68f7c09f4cd54c78d175fb352d"
+      "sha256": "74e648c457531587800528e5dfdc97d1125616fb71ab70eabd091fd9947ebc67"
     },
     "site-dist/favicon.ico": {
       "sha256": "cb05ca1ff03f045852a46a2be53f931a76618323c8de2ed26bb03dd4b07c9893"
@@ -1628,13 +1628,13 @@
       "sha256": "0f9e72886c967ba2a2e83bc68be51ce14a0967d641ec1f176ff850a1d9b91dec"
     },
     "site-dist/index.html": {
-      "sha256": "6c2234e6ffd6fac8831653b324e7f2a995455fa302b7bbcb8ac7d95a187d02ca"
+      "sha256": "ad4c720dec5220699d3f86a094b9ceb2966a5e251a07c864f4f04df4e366e2ba"
     },
     "site-dist/installation/index.html": {
-      "sha256": "ea0d6ff1048132883921b761ebfa7d75ed0572a6fc384fbc887c641908052b13"
+      "sha256": "95867e3ba5bf254b6f90400dc56bf778e5cd5f8b97d6ac36f4c935efef329dcd"
     },
     "site-dist/introduction/index.html": {
-      "sha256": "f8be2187a18e0559fdff94e86a41f72528ed77f3938e1d9f8895352713a628a9"
+      "sha256": "d6ec22fd2eb38a9df69c1d6ed1cec49aa80f437d3b6314334e0f0cc60414f89a"
     },
     "site-dist/js/chart.js": {
       "sha256": "1372a027d447958febf5faf9a3903e2f5d4b6e01c9df7dda983b7e399c4c1b53"
@@ -1646,7 +1646,7 @@
       "sha256": "9ec7b2a805ab83ebbfb09ad59dd4b150b35eb609f4f5beae5a671de58356b87c"
     },
     "site-dist/js/consent.js": {
-      "sha256": "95a1da35f4344caf219fa4d310b18b5fd13ef88a475ce551ca0ce457a72c8d6a"
+      "sha256": "7def177917e5a3f3986f0f9380161530627e4cf044f0854c30f6fdc61f3a9ebc"
     },
     "site-dist/js/context-menu.js": {
       "sha256": "15daf8095511098ac56c45f156163d6ee459ff2b6d1670315cb0ba1a483a178e"
@@ -1667,10 +1667,10 @@
       "sha256": "261509f94e6a2ddbb980dcd257cc8768c70b371ed621d50e95f265c2c9ec8828"
     },
     "site-dist/js/moo-ui.js": {
-      "sha256": "14bd8487f8c0b49bcbe03c19092c822d531254f64023e1b7433504233f460cd0"
+      "sha256": "c1607f8302cb46a8e21ff2746f0162b8b4992a2266234c35101622287c2ccad0"
     },
     "site-dist/js/moo-ui.min.js": {
-      "sha256": "35e063221062f3348aebd14bd02eda98976ff1844054647154b4de3a29136cec"
+      "sha256": "133553f391a6307b4218eb3d913db80d54784d756160b923cb32c282290d846c"
     },
     "site-dist/js/overlay-scrollbar.js": {
       "sha256": "1871b997382f05213e14fe328a9e8c3b440f699f93d8118398fc4913a8c345aa"
@@ -1694,25 +1694,25 @@
       "sha256": "1d2a40d14e96de2cd45b544c96493f75bbee5b40d51ce1e0331877bce3076c95"
     },
     "site-dist/layout/index.html": {
-      "sha256": "ad67a6a3d7b60caa6a97f09d9934e75c9e84e83c8584631cf3f24c5bec7ba17d"
+      "sha256": "55a28ddd5f5b4fad11878312b06ed93004984579324efc5b33621efb69206427"
     },
     "site-dist/layouts/previews/app-document/index.html": {
-      "sha256": "6cc937173dd0608f65af2e019dec39fa9c53af9bf7a506df2b73bd26154fe99a"
+      "sha256": "f5639184a197f7cdb802ba555c4232686264de30412a3b0c3999deb8c5159455"
     },
     "site-dist/layouts/previews/app-none/index.html": {
-      "sha256": "17a157ac55e016b37677be0c6879118118976147aabea6ff242ed4920b35ebdb"
+      "sha256": "f52fef8ce50027b529fcd70c69f8fb6dc230d031fcb48d0289c30bb5fded36a5"
     },
     "site-dist/layouts/previews/app-sidebar/index.html": {
-      "sha256": "3daa0fccc82560807cbb476ede311f506e6503b90023caa573b08209def97c99"
+      "sha256": "85fb44cd69db333414aee837ac8719c6f6a5961e6ea98c1d710be7be070a9538"
     },
     "site-dist/layouts/previews/page/index.html": {
-      "sha256": "d1f711555d5b0194f424d0bb79166359a56614f0bf5030737049295d4029bc9c"
+      "sha256": "a46d9796b8ea43f9be88e3a77c1b7bba46bbff4bc859292556ffb07f75ebdc20"
     },
     "site-dist/license/index.html": {
-      "sha256": "7eec3f0fed8134c170ec2e17f776d48f0ec63706ca2bfc05987cbb5f491094e1"
+      "sha256": "e006a3fa4c4d427f834020e011467ed579fcf6972cca353732010e60cee974ca"
     },
     "site-dist/llms.txt": {
-      "sha256": "af94a58700e7018ec9c5ef4e74ae4a243cfdc3c4c8f340cd0a676131c7aa47d7"
+      "sha256": "548206f70eca9e63b2e3fdcbd0905caaabce64b892f610f5966979c273401d13"
     },
     "site-dist/robots.txt": {
       "sha256": "bf13521a8ca29a68a5ba125d21c65b84b1679a0aae915a9fd08794d1dc6d9fbf"
@@ -1727,13 +1727,13 @@
       "sha256": "46579a53de0833d26c4078ef9d5a49cce573e13ee3b3d3c64368f64f50cd2e2b"
     },
     "site-dist/sitemap/index.html": {
-      "sha256": "03f72828e1489a8f55fa619ece6c1152e9427af83eb2b5d1d3d7a94338258007"
+      "sha256": "88728f005e40d666ed3ea089e9fd2d1efc3fc280d475380a5b684bdf17bbd73a"
     },
     "site-dist/skills/index.html": {
-      "sha256": "4e197398d90c1ddb79aa5f949e44bc5626ea271e14b19da5dd78783f5e27c164"
+      "sha256": "afd2caf925b80d658bde7c603737e7a6100e0d00f7edc9c1a22f4f2c28d42cf5"
     },
     "site-dist/support/index.html": {
-      "sha256": "51dc57057ef33a3e901810f3f1ad08ac56c01baa0c0158ec305449661132a1b1"
+      "sha256": "91950c59b91546aa5aa72ff747977e1c422339347a73ab070a5a2677e317768c"
     },
     "site-dist/tests/fixtures/certification/accordion.html": {
       "sha256": "44b3319ff9e4ff52ae742d4bd31a5adeeaa790317f1ef2e856fa9c687d582896"
@@ -1907,16 +1907,16 @@
       "sha256": "999180358adbe189113f7c9338478056701683cafd6a6dd609b45637d3d534d6"
     },
     "site-dist/utils/border/index.html": {
-      "sha256": "7fe7f85aadb8366a18ab6e99d0c487fe6ed0b1acaff80c739c30b8fe900b4fa2"
+      "sha256": "6dcaa7bdd088faea9863ee528d93746eb92f3c2a80ac52aee9f57188d1d09588"
     },
     "site-dist/utils/index.html": {
-      "sha256": "37d61770da9a292241d1a5bd73c5bf79c048c45a43a577ca7f9852f0977ad522"
+      "sha256": "a6cb9c55ca5006817bfc06537c9058ad5eb42faf78a434aacf84ca2451e123b5"
     },
     "site-dist/utils/overlay-scrollbar/index.html": {
-      "sha256": "b62783e92a637cfb629332342f104a573dae8b04cb1fcf371f04572dc69630f3"
+      "sha256": "85414a7955e1dee2740f78d5e61a14ce44ef3d61058fc7c1212a1ebf3cdf78bf"
     },
     "site-dist/utils/scroll-fade/index.html": {
-      "sha256": "c9c4b5f706838da1f8c1cf98ccbd5fdd64c8a03fc7a08df33df23dd53de045f7"
+      "sha256": "9a9375c3744a09d49835d43987312402a221c97ef13b69336a7a83a083b7f22d"
     },
     "site-dist/vendor/@kurkle/color/LICENSE.md": {
       "sha256": "89ba0032731489153d552db918b727feb05128cf9eca20092875a9ad14147671"

@@ -57,8 +57,11 @@
 {% macro _consent_check(config) -%}
   {% if config is not mapping %}{{ fail("Consent requires a config mapping") }}{% endif %}
   {% if not config.revision | default("", true) | string | trim %}{{ fail("Consent config requires a revision") }}{% endif %}
+  {% set seen = namespace(ids=[]) %}
   {% for category in config.categories | default([]) %}
     {% if not category.id | default("", true) | trim %}{{ fail("Consent category id is required") }}{% endif %}
+    {% if category.id in seen.ids %}{{ fail("Consent category ids must be unique: " ~ category.id) }}{% endif %}
+    {% set seen.ids = seen.ids + [category.id] %}
     {% if not category.label | default("", true) | trim %}{{ fail("Consent category label is required") }}{% endif %}
     {% if category.required | default(false) and category.id != "functional" %}{{ fail("Only the functional consent category may be required") }}{% endif %}
     {% for service in category.services | default([]) %}

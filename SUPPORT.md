@@ -5,8 +5,9 @@ the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
 Moo UI `2.3.0` adds the Consent block. Its optional runtime stores the visitor's
-choice in a first-party cookie, contacts no other host and keeps optional
-categories off until they are granted. It is a building block, not legal
+choice in a first-party cookie and makes no request of its own. Scripts, frames
+and images it activates after a grant, or after a placeholder's one-time load,
+may contact the hosts they name. Optional categories stay off until granted. It is a building block, not legal
 advice or a certified consent management platform; the existing preview
 certification status remains unchanged.
 
