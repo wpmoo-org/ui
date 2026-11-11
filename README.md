@@ -223,11 +223,16 @@ document.addEventListener("moo:consent:change", (event) => console.log(event.det
 
 Without the module the card stays hidden and nothing optional loads. The
 choice is stored in a first-party cookie with the configuration revision and
-a time stamp; `consentRevision(categories, reask)` computes that revision.
-Adding or removing a category or service asks again; for a material change
-to a service's provider, purpose or storage, raise `reask`. Withdrawal removes
-declared first-party cookies on the root path and storage keys; cookies set on
-another path or by another host cannot be removed by the page.
+a time stamp. The runtime only compares the stored revision with
+`config.revision`; it never recomputes it. The host must recompute the
+revision with `consentRevision(categories, reask)`, or the same rule on the
+server, and supply it whenever a category or service is added or removed or
+`reask` changes, otherwise earlier grants stay valid for the new service. For
+a material change to a service's provider, purpose or storage, raise `reask`.
+Withdrawal removes declared first-party cookies on the root path, including
+`__Secure-` and `__Host-` cookies on HTTPS, and declared storage keys. The
+page cannot remove `HttpOnly` cookies, cookies on another path or cookies of
+another host; the server that sets them must clear them.
 See the [Consent block](https://ui.wpmoo.org/blocks/consent/) for markup.
 
 For an opt-in document overlay scrollbar, load the stylesheet first and pass

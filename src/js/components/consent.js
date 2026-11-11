@@ -304,11 +304,13 @@ export default class ConsentManager {
     const parts = host.split(".");
     const domains = [""];
     for (let index = 0; index < parts.length - 1; index += 1) domains.push(`; Domain=${parts.slice(index).join(".")}`);
+    const secure = this._window.location.protocol === "https:" ? "; Secure" : "";
     const cookieNames = this._document.cookie.split("; ").map((part) => part.split("=")[0]).filter(Boolean);
     for (const item of category?.storage || []) {
       if (item.type === "cookie") {
         for (const name of cookieNames.filter((candidate) => matches(item.name, candidate))) {
-          for (const domain of domains) this._document.cookie = `${name}=; Path=/; Max-Age=0${domain}`;
+          // __Secure- and __Host- cookies can only be removed with Secure.
+          for (const domain of domains) this._document.cookie = `${name}=; Path=/; Max-Age=0${domain}${secure}`;
         }
       } else {
         try {
