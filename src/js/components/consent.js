@@ -21,6 +21,18 @@ const RECORD_VERSION = 1;
 const DAY_SECONDS = 86400;
 const FOCUSABLE = "button, a[href], input:not([type='hidden']), select, textarea, [tabindex]:not([tabindex='-1'])";
 
+// Gated sources come from page markup, but a script or frame address must
+// still be a web address: javascript:, data: and other schemes are refused.
+function webSource(value, base) {
+  if (!value) return "";
+  try {
+    const url = new URL(value, base);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
 function matches(pattern, name) {
   return pattern.endsWith("*") ? name.startsWith(pattern.slice(0, -1)) : name === pattern;
 }
@@ -298,7 +310,9 @@ export default class ConsentManager {
 
   _activateElement(element) {
     if (element.hasAttribute("data-consent-active")) return;
-    const src = element.getAttribute("data-consent-src");
+    const declared = element.getAttribute("data-consent-src");
+    const src = webSource(declared, this._document.baseURI);
+    if (declared && !src) return;
     if (element.localName === "script") {
       const script = this._document.createElement("script");
       for (const { name, value } of element.attributes) {

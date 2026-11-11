@@ -22,6 +22,7 @@ PAGE = '''
       <div>
         {{ consent_placeholder("video", "external_media", "Video", "Loads from Example.") }}
         <img alt="" data-consent-category="external_media" data-consent-src="/photo.svg" hidden>
+        <iframe id="unsafe-frame" title="Unsafe" data-consent-category="external_media" data-consent-src="javascript:window.unsafeRan=1" hidden></iframe>
       </div>
     </div>
     <script type="text/plain" data-consent-category="statistics">window.statisticsLoaded = (window.statisticsLoaded || 0) + 1;</script>
@@ -170,4 +171,7 @@ class ConsentBrowserTests(CatalogTestCase):
         expect(page.locator("img[data-consent-category]")).to_be_visible()
         expect(page.locator("[data-consent-placeholder]")).to_be_hidden()
         self.assertEqual(record()["c"], {"statistics": 1, "external_media": 1})
+        # Only web addresses are activated; a javascript: source stays inert.
+        self.assertIsNone(page.locator("#unsafe-frame").get_attribute("src"))
+        self.assertIsNone(page.evaluate("window.unsafeRan ?? null"))
         self.assertEqual(foreign, [])
