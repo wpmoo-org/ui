@@ -126,6 +126,8 @@ class ConsentTests(CatalogTestCase):
 
     def test_policy_table_renders_one_table_per_shown_category(self) -> None:
         output = self.render("{{ consent_policy_table(config) }}")
+        # One full-width root, so a centring host does not centre each section on its own.
+        self.assertTrue(output.startswith('<div class="w-100"> <section class="mb-4" data-consent-policy='))
         self.assertEqual(re.findall(r'data-consent-policy="([a-z_]+)"', output),
                          ["functional", "statistics", "external_media"])
         self.assertEqual(output.count("<table"), 3)

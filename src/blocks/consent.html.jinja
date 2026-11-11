@@ -199,6 +199,7 @@
 {% macro consent_policy_table(config, labels={}, heading_level=3) -%}
   {{ _consent_check(config) }}
   {% set heading = "h" ~ heading_level %}
+  <div class="w-100">
   {% for category in config.categories | default([]) | selectattr("services") %}
     <section class="mb-4" data-consent-policy="{{ category.id }}">
       <{{ heading }}>{{ category.label }}{% if category.required | default(false) %} {{ badge(_consent_text(labels, "always_active"), variant="secondary") }}{% endif %}</{{ heading }}>
@@ -212,4 +213,5 @@
       {{ table([_consent_text(labels, "service"), _consent_text(labels, "provider"), _consent_text(labels, "purpose"), _consent_text(labels, "storage")], rows, row_header=true, small=true) }}
     </section>
   {% endfor %}
+  </div>
 {%- endmacro %}
