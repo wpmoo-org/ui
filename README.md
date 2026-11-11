@@ -210,6 +210,22 @@ runs the slideshow and full-screen buttons, adds arrow keys and loads only the
 current photo and its neighbours. See the
 [Image Gallery block](https://ui.wpmoo.org/blocks/image-gallery/) for markup.
 
+For the Consent block, bind the card once per document. Gated scripts,
+frames and images carry `data-consent-category` and `data-consent-src` and
+are activated only after their category is granted:
+
+```js
+import { initConsent } from "@wpmoo/ui/consent.js";
+const consent = initConsent(document);
+consent?.whenGranted("statistics", () => loadStatistics());
+document.addEventListener("moo:consent:change", (event) => console.log(event.detail.choices));
+```
+
+Without the module the card stays hidden and nothing optional loads. The
+choice is stored in a first-party cookie with the configuration revision and
+a time stamp; `consentRevision(categories, reask)` computes that revision.
+See the [Consent block](https://ui.wpmoo.org/blocks/consent/) for markup.
+
 For an opt-in document overlay scrollbar, load the stylesheet first and pass
 the resolved page theme owner explicitly:
 

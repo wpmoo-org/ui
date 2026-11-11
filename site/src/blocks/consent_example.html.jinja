@@ -1,0 +1,63 @@
+{% from "blocks/consent.html.jinja" import consent_card, consent_placeholder, consent_policy_table, consent_trigger %}
+
+{# A sample site configuration. "marketing" has no service, so neither the
+   card nor the policy table shows it. The revision is the SHA-256 rule from
+   consent.js over functional/site, statistics/matomo and
+   external_media/video. #}
+{% set consent_example_config = {
+  "revision": "7b2ac531ea92",
+  "cookie": {"name": "moo_consent_catalog", "days": 365},
+  "links": [
+    {"label": "Cookie policy", "href": "#cookie-policy"},
+    {"label": "Privacy policy", "href": "#privacy"},
+    {"label": "Legal notice", "href": "#legal-notice"}
+  ],
+  "categories": [
+    {"id": "functional", "required": true, "label": "Functional",
+     "description": "Needed for the site to work: the session, security against forged requests, the chosen language and colour mode.",
+     "services": [
+       {"id": "site", "name": "Site session", "provider": "This website", "purpose": "Sign-in, form security, language and theme",
+        "storage": [
+          {"name": "session_id", "type": "cookie", "lifetime": "7 days"},
+          {"name": "frontend_lang", "type": "cookie", "lifetime": "Session"},
+          {"name": "moo_consent_catalog", "type": "cookie", "lifetime": "12 months"},
+          {"name": "moo-website:1", "type": "local", "lifetime": "Until removed"}]}]},
+    {"id": "statistics", "label": "Statistics",
+     "description": "Anonymous counts of visits and pages, measured on our own server, so we know which content helps.",
+     "services": [
+       {"id": "matomo", "name": "Matomo", "provider": "This website (self-hosted)", "purpose": "Visit and page statistics",
+        "storage": [
+          {"name": "_pk_id.*", "type": "cookie", "lifetime": "13 months"},
+          {"name": "_pk_ses.*", "type": "cookie", "lifetime": "30 minutes"}]}]},
+    {"id": "external_media", "label": "External media",
+     "description": "Videos and maps from other providers. They load from the provider's servers, which then receive your IP address.",
+     "services": [
+       {"id": "video", "name": "Video platform", "provider": "Example Video Ltd.", "purpose": "Play embedded videos",
+        "privacy_url": "#video-privacy",
+        "storage": [{"name": "Provider cookies", "type": "cookie", "lifetime": "Up to 6 months"}]}]},
+    {"id": "marketing", "label": "Marketing", "services": []}
+  ]
+} %}
+
+{% macro render_consent_card_example(id="consent") -%}
+  {{ consent_card(id, consent_example_config) }}
+{%- endmacro %}
+
+{% macro render_consent_trigger_example(target="consent") -%}
+  {{ consent_trigger(target) }}
+{%- endmacro %}
+
+{# The placeholder and the gated image share one data-consent-embed
+   element; the image stands in for a video frame. #}
+{% macro render_consent_placeholder_example(id, image_src) -%}
+  <div class="ratio ratio-16x9 bg-body-secondary rounded overflow-hidden" data-consent-embed>
+    <div>
+      {{ consent_placeholder(id, "external_media", "Video platform", "This video loads from Example Video Ltd., which receives your IP address.", privacy_url="#video-privacy") }}
+      <img class="object-fit-cover w-100 h-100" alt="Introduction video" data-consent-category="external_media" data-consent-src="{{ image_src }}" hidden>
+    </div>
+  </div>
+{%- endmacro %}
+
+{% macro render_consent_policy_example() -%}
+  {{ consent_policy_table(consent_example_config) }}
+{%- endmacro %}

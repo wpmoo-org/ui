@@ -35,6 +35,7 @@
       "./sheet.js",
       "./floating-panel.js",
       "./image-gallery.js",
+      "./consent.js",
       "./chart.js",
       "./chart.min.js",
       "./datepicker.js",

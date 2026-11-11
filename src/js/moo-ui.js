@@ -12,6 +12,7 @@ import OverlayScrollbar from "./components/overlay-scrollbar.js";
 import { initSheets } from "./components/sheet.js";
 import FloatingPanel from "./components/floating-panel.js";
 import ImageGallery from "./components/image-gallery.js";
+import ConsentManager from "./components/consent.js";
 import PasswordRequirements from "./password-requirements.js";
 
 async function loadChart() {
@@ -23,6 +24,7 @@ const MooUI = {
   PasswordRequirements,
   FloatingPanel,
   ImageGallery,
+  ConsentManager,
   loadChart,
   Combobox,
   ContextMenu,
@@ -41,6 +43,7 @@ export {
   PasswordRequirements,
   FloatingPanel,
   ImageGallery,
+  ConsentManager,
   loadChart,
   Combobox,
   ContextMenu,

@@ -1,0 +1,27 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "blocks/consent_example.html.jinja" import render_consent_card_example, render_consent_placeholder_example, render_consent_policy_example, render_consent_trigger_example %}
+{% from "includes/block-example.html.jinja" import render_block_example %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% block title %}Consent — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header("Consent", "A first-visit consent card with categories and services, a settings trigger, an embed placeholder and a policy table, composed from Card, Accordion, Switch, Button and Table.") }}
+  <div class="moo-component-examples">
+    {% set card_source %}{{ render_consent_card_example() }}{% endset %}
+    {{ render_block_example(
+      "consent",
+      "Consent card",
+      "Shown bottom-right until the visitor answers, without covering the page. Functional is always active; every other category with at least one service starts off. Accept all, Decline and Save choices carry equal weight. The choice is stored in a first-party cookie with a revision and a time stamp and is asked again when a category or service changes.",
+      card_source,
+      preview_class="moo-example__preview--shell",
+      frame_src=site_href("blocks/previews/consent.html", root_path)
+    ) }}
+    {% set trigger %}{{ render_consent_trigger_example() }}{% endset %}
+    {{ render_block_example("consent-trigger", "Settings trigger", "A link-styled button for the footer that reopens the card with the stored choices. Focus stays in the card until it is closed and then returns to the trigger.", trigger, preview_class="moo-example__preview--shell", frame_src=site_href("blocks/previews/consent.html", root_path)) }}
+    {% set placeholder %}{{ render_consent_placeholder_example("consent-video", root_path ~ "assets/images/gallery/dawn-hills-1600.webp") }}{% endset %}
+    {{ render_block_example("consent-placeholder", "Embed placeholder", "Stands in for a video, map or post until its category is granted. Load content activates this embed once; with Always allow ticked it grants the category for the whole site. Try it in the preview above.", placeholder, preview_class="moo-example__preview--shell", frame_src=site_href("blocks/previews/consent.html", root_path)) }}
+    {% set policy %}{{ render_consent_policy_example() }}{% endset %}
+    {{ render_block_example("consent-policy", "Policy table", "The same configuration as a table for the cookie policy page, one table per shown category.", policy) }}
+  </div>
+{% endblock %}

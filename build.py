@@ -71,6 +71,7 @@ CORE_JS_MODULES = (
     "password-requirements.js",
     "floating-panel.js",
     "image-gallery.js",
+    "consent.js",
     "overlay-scrollbar.js",
     "combobox.js",
     "context-menu.js",

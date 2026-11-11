@@ -23,6 +23,7 @@ const FEATURE_SELECTORS = {
   datepicker: "[data-datepicker], [data-datepicker-range], [data-calendar]",
   floatingPanel: "[data-floating-panel]",
   imageGallery: "[data-image-gallery]",
+  consent: "[data-consent]",
   slider: "[data-slider]",
   tableOfContents: "[data-toc]",
   overlayScrollbar: '[data-overlay-scrollbar-demo], [data-moo-shell="catalog"]',
@@ -171,6 +172,16 @@ export function initCatalog(root = document) {
         instances.push(MooCalendar.getOrCreateInstance(element));
       });
       return () => instances.forEach((instance) => instance.dispose());
+    },
+  );
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.consent,
+    () => import("../../../../src/js/components/consent.js"),
+    ({ initConsent }) => {
+      const manager = initConsent(root);
+      return () => manager?.dispose();
     },
   );
   pushLazyFeature(

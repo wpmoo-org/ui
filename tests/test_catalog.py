@@ -2790,8 +2790,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('aria-label="Previous page: Image Gallery"', block)
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
 
+        consent_block = self.read_output("blocks/consent.html")
+        self.assertIn('aria-label="Previous page: Accordion Panels"', consent_block)
+        self.assertIn('aria-label="Next page: Image Gallery"', consent_block)
+
         gallery_block = self.read_output("blocks/image-gallery.html")
-        self.assertIn('aria-label="Previous page: Accordion Panels"', gallery_block)
+        self.assertIn('aria-label="Previous page: Consent"', gallery_block)
         self.assertIn('aria-label="Next page: Sidebar (Floating)"', gallery_block)
 
         inset_block = self.read_output("blocks/sidebar-inset.html")
