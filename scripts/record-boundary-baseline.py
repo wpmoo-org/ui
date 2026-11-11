@@ -133,11 +133,17 @@ def record_boundary_baseline(root: Path = ROOT) -> dict:
         "npmPackFiles": sorted(entry["path"] for entry in pack["files"]),
         "distFiles": package_dist_files,
         "siteDistFiles": site_dist_files,
+        # Each digest sits on its own "sha256" line, away from its path:
+        # secret scanners read a password-* path beside a 64-digit value on
+        # one line as a credential.
         "coreOutputs": {
-            relative: package_hashes[relative]
+            relative: {"sha256": package_hashes[relative]}
             for relative in sorted(CORE_OUTPUTS)
         },
-        "siteOutputs": site_hashes,
+        "siteOutputs": {
+            relative: {"sha256": digest}
+            for relative, digest in site_hashes.items()
+        },
     }
 
 
