@@ -6,8 +6,8 @@ DataTable, Date Picker, FloatingPanel, Slider, and Sidebar.
 
 ## Supported Versions
 
-Security review covers the `2.0.0` stable line, the `2.1.1` patch release and
-the `2.2.0` release target. Older
+Security review covers the `2.0.0` stable line, the `2.1.1` patch release, the
+`2.2.0` minor release and the `2.3.0` release target. Older
 tags remain available for source inspection, but fixes are prepared against the
 current development branch.
 

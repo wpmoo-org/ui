@@ -4394,10 +4394,7 @@ class CatalogContractTests(CatalogTestCase):
         release_links.feed(active_release)
         hrefs = {link.get("href") for link in release_links.links}
         for feature_path in (
-            "../blocks/image-gallery/",
-            "../blocks/video-dialog/",
-            "../components/item/",
-            "../sitemap/",
+            "../blocks/consent/",
         ):
             with self.subTest(feature_path=feature_path):
                 self.assertIn(feature_path, hrefs)
