@@ -512,15 +512,41 @@ class ButtonTests(CatalogTestCase):
                 ):
                     self.render_button(call)
 
-    def test_anchor_button_carries_role_button(self) -> None:
-        output = self.render_button('button("Link", element="a", href="#")')
-        self.assertIn('role="button"', output)
+    def test_navigating_anchor_button_keeps_the_native_link_role(self) -> None:
+        for call in (
+            'button("Link", element="a", href="/landing")',
+            'button("Docs", element="a", href="/docs", tooltip="Open documentation")',
+        ):
+            with self.subTest(call=call):
+                output = self.render_button(call)
+                self.assertNotIn("role=", output)
+                self.assertIn('href="', output)
+
+    def test_trigger_anchor_button_carries_role_button(self) -> None:
+        for call in (
+            'button("Open", element="a", href="#", dialog_target="dialog-basic")',
+            'button("Open", element="a", href="#", sheet_target="sheet-basic")',
+            'button("Close", element="a", href="#", dismiss="modal")',
+            'button("Show", element="a", href="#", toast_target="toast-basic")',
+            'button("Info", element="a", href="#", popover_content="Text")',
+        ):
+            with self.subTest(call=call):
+                self.assertIn('role="button"', self.render_button(call))
 
     def test_disabled_anchor_button_gets_bootstrap_disabled_class(self) -> None:
         output = self.render_button('button("Link", element="a", disabled=true)')
         self.assertIn('class="btn btn-primary disabled"', output)
+        self.assertIn('role="link"', output)
         self.assertIn('aria-disabled="true"', output)
         self.assertIn('tabindex="-1"', output)
+        self.assertNotIn("href=", output)
+
+    def test_disabled_trigger_anchor_button_keeps_role_button(self) -> None:
+        output = self.render_button(
+            'button("Open", element="a", disabled=true, dialog_target="dialog-basic")'
+        )
+        self.assertIn('role="button"', output)
+        self.assertIn('aria-disabled="true"', output)
         self.assertNotIn("href=", output)
 
     def test_buttons_without_visible_labels_require_an_accessible_name(self) -> None:
