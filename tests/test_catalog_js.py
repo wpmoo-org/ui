@@ -51,6 +51,7 @@ LAZY_COMPONENT_MODULES = (
     "datepicker.js",
     "floating-panel.js",
     "image-gallery.js",
+    "consent.js",
     "slider.js",
 )
 

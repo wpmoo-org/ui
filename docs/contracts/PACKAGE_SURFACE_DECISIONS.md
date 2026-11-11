@@ -3,6 +3,19 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 2.3.0 Consent Block
+
+Consent adds the optional `@wpmoo/ui/consent.js` entrypoint with
+`ConsentManager`, `initConsent` and `consentRevision`; `ConsentManager` is also
+exported from the aggregate ESM. Importing the module does not scan the
+document. The block is composed from Card, Accordion, Switch, Button, Checkbox
+and Table and adds no CSS. Accordion items gain an optional `action` beside the
+trigger, and Button gains `consent_open` and `consent_grant`; both are additive
+and leave existing output unchanged. The stored record and the revision rule
+are public contracts that host adapters implement. Jinja recipes and the
+catalog page remain outside npm. Existing exports and peer ranges are preserved.
+These additions require a minor release; certification remains preview.
+
 ## 2.2.0 Item and Media Blocks
 
 Item adds the `.item` namespace for linked or static media/content/action rows.

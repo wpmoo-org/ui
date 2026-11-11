@@ -155,6 +155,10 @@ COMPONENT_SOURCE_FILES = {
 }
 BLOCK_MACROS_BY_FILE = {
     "accordion_panels.html.jinja": {"accordion_panels"},
+    "consent.html.jinja": {
+        "consent_card", "consent_placeholder", "consent_policy_table", "consent_trigger",
+        "_consent_check", "_consent_runtime", "_consent_service", "_consent_text", "_consent_type",
+    },
     "image_gallery.html.jinja": {"image_gallery", "image_gallery_photo_name", "image_gallery_thumbnail"},
     "video_dialog.html.jinja": {"video_dialog", "video_play", "video_play_icon"},
 }

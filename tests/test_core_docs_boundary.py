@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -32,6 +33,7 @@ CORE_OUTPUTS = {
     "dist/js/sheet.js",
     "dist/js/floating-panel.js",
     "dist/js/image-gallery.js",
+    "dist/js/consent.js",
     "dist/js/password-requirements.js",
     "dist/js/toc.js",
     "dist/js/overlay-scrollbar.js",
@@ -123,11 +125,11 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
     def test_core_outputs_match_recorded_hashes(self) -> None:
         self.assertEqual(set(self.fixture["coreOutputs"]), CORE_OUTPUTS)
-        for relative_path, expected_hash in self.fixture["coreOutputs"].items():
+        for relative_path, expected in self.fixture["coreOutputs"].items():
             with self.subTest(relative_path=relative_path):
                 output = ROOT / relative_path
                 self.assertTrue(output.is_file(), relative_path)
-                self.assertEqual(sha256(output), expected_hash)
+                self.assertEqual(sha256(output), expected["sha256"])
 
     def test_public_state_distribution_copy_is_recorded_in_boundary_baseline(self) -> None:
         package_copy = "dist/js/state.js"
@@ -138,8 +140,8 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         self.assertIn(public_copy, self.fixture["siteDistFiles"])
         self.assertIn(public_copy, self.fixture["siteOutputs"])
         self.assertEqual(
-            self.fixture["siteOutputs"][public_copy],
-            self.fixture["siteOutputs"][catalog_copy],
+            self.fixture["siteOutputs"][public_copy]["sha256"],
+            self.fixture["siteOutputs"][catalog_copy]["sha256"],
         )
 
     def test_release_manifest_distribution_is_recorded_in_boundary_baseline(self) -> None:
@@ -171,6 +173,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/sheet.js",
             "js/floating-panel.js",
             "js/image-gallery.js",
+            "js/consent.js",
             "js/password-requirements.js",
             "js/toc.js",
             "js/overlay-scrollbar.js",
@@ -208,6 +211,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/sheet.js",
             "js/floating-panel.js",
             "js/image-gallery.js",
+            "js/consent.js",
             "js/password-requirements.js",
             "js/moo-ui.js",
             "js/moo-ui.min.js",
@@ -503,6 +507,14 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         ):
             with self.subTest(section=section):
                 self.assertEqual(payload[section], self.fixture[section])
+
+    def test_no_baseline_line_pairs_a_path_with_its_digest(self) -> None:
+        """Digests stay on their own line, so a path such as password-* never
+        sits beside a 64-digit value that secret scanners read as a key."""
+        for line in FIXTURE.read_text(encoding="utf-8").splitlines():
+            if re.search(r"[0-9a-f]{64}", line):
+                with self.subTest(line=line.strip()[:60]):
+                    self.assertRegex(line.strip(), r'^"sha256": "[0-9a-f]{64}"$')
 
     def test_recorder_uses_the_active_python_interpreter(self) -> None:
         source = (ROOT / "scripts/record-boundary-baseline.py").read_text(

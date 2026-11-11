@@ -1,0 +1,20 @@
+{% extends "layouts/block-preview.html.jinja" %}
+{% from "blocks/consent_example.html.jinja" import render_consent_card_example, render_consent_placeholder_example, render_consent_trigger_example %}
+
+{% block title %}Consent RTL Preview — Moo UI{% endblock %}
+
+{% block content %}
+  <div dir="rtl">
+    {{ render_consent_card_example("consent-preview-rtl") }}
+    <div class="container py-4">
+      <h1 class="h3">Welcome</h1>
+      <p class="text-body-secondary">The card asks once per visitor. Optional categories stay off until the visitor turns them on.</p>
+      <div class="col-12 col-md-8 col-lg-6">
+        {{ render_consent_placeholder_example("consent-preview-rtl-video", root_path ~ "assets/images/gallery/dawn-hills-1600.webp") }}
+      </div>
+      <footer class="border-top mt-4 pt-3 small">
+        {{ render_consent_trigger_example("consent-preview-rtl") }}
+      </footer>
+    </div>
+  </div>
+{% endblock %}

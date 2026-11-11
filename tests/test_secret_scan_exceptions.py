@@ -38,6 +38,7 @@ class SecretScanExceptionTests(unittest.TestCase):
                 'd8c3e7abe100e981c1127b799bdb78bde2eb7cff': (18, 738, 758, 847, 885),
                 '9c6bc696481a93087f0e4f7e5fecc20c79a16e60': (18, 738, 758, 847, 885),
                 '7a44eea4f2d1acf6c0a1d362f55f2447bc0c9931': (19, 812, 833, 930, 969),
+                '5429a0e6348af3ce51f6fe7c39fcaa75d7b0cf56': (20, 823, 845, 946, 986),
             }.items()
             for line in lines
         }

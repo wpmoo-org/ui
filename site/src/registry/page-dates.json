@@ -1,15 +1,19 @@
 {
   "./": {
-    "updated": "2026-11-09",
-    "hash": "sha256:7cbe0f9f150a00cc"
+    "updated": "2026-11-11",
+    "hash": "sha256:a4093134339b601e"
   },
   "blocks/": {
-    "updated": "2026-11-09",
-    "hash": "sha256:ebf9802ce720fa68"
+    "updated": "2026-11-11",
+    "hash": "sha256:8c4071532f0688ac"
   },
   "blocks/accordion-panels/": {
     "updated": "2026-10-14",
     "hash": "sha256:b1bf4b3c415b91d4"
+  },
+  "blocks/consent/": {
+    "updated": "2026-11-11",
+    "hash": "sha256:c645d8a1b5160318"
   },
   "blocks/image-gallery/": {
     "updated": "2026-11-09",
@@ -28,8 +32,8 @@
     "hash": "sha256:83afe166bb0cce1a"
   },
   "changelog/": {
-    "updated": "2026-11-09",
-    "hash": "sha256:ff409cc13d10ba86"
+    "updated": "2026-11-11",
+    "hash": "sha256:6e0cb23ccefcdb2b"
   },
   "charts/": {
     "updated": "2026-10-20",
@@ -284,8 +288,8 @@
     "hash": "sha256:a02af8cbd99eea33"
   },
   "installation/": {
-    "updated": "2026-11-09",
-    "hash": "sha256:3c55a01551312319"
+    "updated": "2026-11-11",
+    "hash": "sha256:a3137676f64e1ce9"
   },
   "introduction/": {
     "updated": "2026-09-01",
@@ -300,12 +304,12 @@
     "hash": "sha256:3f0a12f6d6d68b34"
   },
   "skills/": {
-    "updated": "2026-11-09",
-    "hash": "sha256:e4e9d9c42c48c2b4"
+    "updated": "2026-11-11",
+    "hash": "sha256:ecb4948ec971cce0"
   },
   "support/": {
-    "updated": "2026-11-09",
-    "hash": "sha256:8c4cdd833443d453"
+    "updated": "2026-11-11",
+    "hash": "sha256:79d5c4c34485990e"
   },
   "utils/": {
     "updated": "2026-10-04",

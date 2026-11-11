@@ -785,6 +785,7 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                     "    'Datepicker',"
                     "    'FloatingPanel',"
                     "    'ImageGallery',"
+                    "    'ConsentManager',"
                     "    'Slider'"
                     "  ];"
                     "  for (const key of lifecycleClasses) {"

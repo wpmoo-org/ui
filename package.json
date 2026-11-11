@@ -1,6 +1,6 @@
 {
   "name": "@wpmoo/ui",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Bootstrap markup. shadcn feel. A frontend-framework-free component system for server-rendered apps.",
   "license": "MIT",
   "author": "WPMoo (https://wpmoo.org)",
@@ -43,6 +43,7 @@
     "./sheet.js": "./dist/js/sheet.js",
     "./floating-panel.js": "./dist/js/floating-panel.js",
     "./image-gallery.js": "./dist/js/image-gallery.js",
+    "./consent.js": "./dist/js/consent.js",
     "./chart.js": "./dist/js/chart.js",
     "./chart.min.js": "./dist/js/chart.min.js",
     "./datepicker.js": "./dist/js/datepicker.js",
@@ -76,6 +77,7 @@
     "dist/js/sheet.js",
     "dist/js/floating-panel.js",
     "dist/js/image-gallery.js",
+    "dist/js/consent.js",
     "dist/js/chart.js",
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",

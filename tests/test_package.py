@@ -115,6 +115,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/sheet.js",
     "dist/js/floating-panel.js",
     "dist/js/image-gallery.js",
+    "dist/js/consent.js",
     "dist/js/password-requirements.js",
     "dist/js/toc.js",
     "dist/js/overlay-scrollbar.js",
@@ -147,6 +148,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./sheet.js": "./dist/js/sheet.js",
     "./floating-panel.js": "./dist/js/floating-panel.js",
     "./image-gallery.js": "./dist/js/image-gallery.js",
+    "./consent.js": "./dist/js/consent.js",
     "./password-requirements.js": "./dist/js/password-requirements.js",
     "./toc.js": "./dist/js/toc.js",
     "./overlay-scrollbar.js": "./dist/js/overlay-scrollbar.js",
@@ -509,6 +511,7 @@ class PackageMetadataTests(unittest.TestCase):
                 "sheet.js",
                 "floating-panel.js",
                 "image-gallery.js",
+                "consent.js",
                 "password-requirements.js",
                 "toc.js",
                 "overlay-scrollbar.js",
@@ -735,6 +738,7 @@ import LegacyToc from "@wpmoo/ui/table-of-contents.js";
 import { initSheets } from "@wpmoo/ui/sheet.js";
 import FloatingPanel from "@wpmoo/ui/floating-panel.js";
 import ImageGallery, { initImageGalleries } from "@wpmoo/ui/image-gallery.js";
+import ConsentManager, { initConsent, consentRevision } from "@wpmoo/ui/consent.js";
 import PasswordRequirements from "@wpmoo/ui/password-requirements.js";
 import MooUI, {
   loadChart as AggregateLoadChart,
@@ -750,6 +754,7 @@ import MooUI, {
   initSheets as AggregateInitSheets,
   FloatingPanel as AggregateFloatingPanel,
   ImageGallery as AggregateImageGallery,
+  ConsentManager as AggregateConsentManager,
   PasswordRequirements as AggregatePasswordRequirements,
 } from "@wpmoo/ui/moo-ui.js";
 import MooUIMinified, {
@@ -805,6 +810,10 @@ if (
   typeof initImageGalleries !== "function" ||
   MooUI.ImageGallery !== AggregateImageGallery ||
   typeof AggregateImageGallery.getOrCreateInstance !== "function" ||
+  typeof ConsentManager.getOrCreateInstance !== "function" ||
+  typeof initConsent !== "function" ||
+  typeof consentRevision !== "function" ||
+  MooUI.ConsentManager !== AggregateConsentManager ||
   typeof AggregateChart.getOrCreateInstance !== "function" ||
   typeof AggregateDatepicker.getOrCreateInstance !== "function" ||
   typeof MooCalendar !== "function" ||
@@ -1035,6 +1044,7 @@ for (const specifier of [
             "sheet.js",
             "floating-panel.js",
             "image-gallery.js",
+            "consent.js",
             "password-requirements.js",
             "slider.js",
             "toc.js",

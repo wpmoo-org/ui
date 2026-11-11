@@ -1,0 +1,84 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "blocks/consent_example.html.jinja" import render_consent_card_example, render_consent_placeholder_example, render_consent_policy_example, render_consent_trigger_example %}
+{% from "includes/block-example.html.jinja" import render_block_example %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "components/card.html.jinja" import card %}
+{% from "components/item.html.jinja" import item, item_group %}
+{% from "components/kbd.html.jinja" import kbd %}
+{% from "components/table.html.jinja" import table %}
+
+{% set page_title = "Cookie Consent Banner for Bootstrap: GDPR-ready consent card" %}
+{% set page_description = "A self-hosted cookie consent banner for Bootstrap sites: consent per category, equal Accept all and Decline buttons, a settings link, embed placeholders and a cookie policy table, with no third-party service." %}
+
+{% block title %}Cookie Consent Banner for Bootstrap — Moo UI{% endblock %}
+
+{% macro guide_list(title, entries, icon) -%}
+  {% set media %}{{ render_icon(icon, "inline-start") }}{% endset %}
+  {% call card(title=title, size="sm", extra_class="h-100", header_class="ps-4 pb-3 border-bottom") %}
+    {% call item_group() %}
+      {% for text in entries %}
+        {{ item(description=text, media=media, size="sm", listitem=true, extra_class="border-0") }}
+      {% endfor %}
+    {% endcall %}
+  {% endcall %}
+{%- endmacro %}
+
+{% block content %}
+  {{ render_page_header("Consent", "A first-visit consent card with categories and services, a settings trigger, an embed placeholder and a policy table, composed from Card, Accordion, Switch, Button and Table.") }}
+  <div class="moo-component-examples">
+    {% set card_source %}{{ render_consent_card_example() }}
+{{ render_consent_trigger_example() }}
+{{ render_consent_placeholder_example("consent-video", "/images/video-poster.webp") }}{% endset %}
+    {{ render_block_example(
+      "consent",
+      "Consent card",
+      "Shown bottom-right until the visitor answers, without covering the page. Functional is always active; every other category with at least one service starts off. Accept all, Decline and Save choices carry equal weight. The preview also holds the two companions: the Cookie settings link in the footer reopens the card with the stored choices, and the video placeholder loads its embed once with Load content, or grants External media for the whole site with Always allow ticked. The choice is stored in a first-party cookie with a revision and a time stamp and asked again when a category or service changes.",
+      card_source,
+      preview_class="moo-example__preview--shell",
+      frame_src=site_href("blocks/previews/consent.html", root_path)
+    ) }}
+    <section class="moo-example" aria-labelledby="consent-guide-title" data-moo-component-guide>
+      <h2 class="h4" id="consent-guide-title" data-toc-label="About">About Consent in Moo UI</h2>
+      <p>Consent is a cookie consent banner you host yourself. It asks each visitor once which optional categories they allow, such as statistics, marketing or external media like videos and maps, and keeps everything optional switched off until they say yes. Sites describe their categories and services in one configuration; the same configuration renders the card, the settings dialog and the table on the cookie policy page, so the banner and the policy never disagree.</p>
+      <p>It runs on your own domain: the card is plain server-rendered Bootstrap markup and the small <code>consent.js</code> module stores the answer in a first-party cookie. No consent management platform, no script from another host and no request leaves the page before the visitor agrees. The Odoo and Astro adapters render it from their own settings and translations.</p>
+      <div class="row row-cols-1 row-cols-md-2 g-3 mt-1">
+        <div class="col">{{ guide_list("When to use it", [
+          "Your site loads anything that is not strictly necessary: analytics such as Matomo, embedded videos, maps, social media posts or advertising tags.",
+          "You want separate choices per category instead of a single accept or reject, as the GDPR and the German TDDDG expect.",
+          "You need a cookie policy page that lists every service, provider, purpose and lifetime, kept in step with the banner."
+        ], "circle-check") }}</div>
+        <div class="col">{{ guide_list("What it takes care of", [
+          "Optional categories start unchecked, and Decline is one click, as easy as Accept all.",
+          "The choice is stored with a revision and a time stamp and asked again when you add a category or service, or after twelve months.",
+          "Scripts, frames and images marked with data-consent-category load only after their category is granted; withdrawing consent removes their first-party cookies.",
+          "A footer link reopens the same card at any time, so visitors can change their mind."
+        ], "shield-check") }}</div>
+      </div>
+    </section>
+    {% set policy %}{{ render_consent_policy_example() }}{% endset %}
+    {{ render_block_example("consent-policy", "Policy table", "The same configuration as a table for the cookie policy page, one table per shown category.", policy) }}
+  </div>
+
+  <section class="mt-5" data-moo-component-guide-details>
+    <h2 class="h3 pb-3 mb-3 border-bottom" id="consent-how-it-works">How it works</h2>
+    <h3 class="h5">Configuration</h3>
+    <p>Each category has an id, a label, a description and its services. Each service names its provider and purpose and lists the cookies or storage it uses, with their lifetime. Only categories with at least one service are shown, and only <code>functional</code> is always active. The configuration's revision changes whenever a category or service is added or removed, which asks every visitor again.</p>
+    <h3 class="h5">Stored choice</h3>
+    <p>The answer is saved in a first-party cookie, <code>moo_consent</code> by default, holding a format version, the revision, the time of the choice and one entry per optional category. Your server can read it too, for example to leave a statistics snippet out of the page entirely.</p>
+    <h3 class="h5">Loading scripts and embeds after consent</h3>
+    <p>Mark a script as <code>type="text/plain"</code> with <code>data-consent-category</code>, or give a frame or image <code>data-consent-src</code> instead of <code>src</code>. The module activates them when the category is granted. Code can also ask directly with <code>granted("statistics")</code>, wait with <code>whenGranted()</code> or listen for the <code>moo:consent:change</code> event.</p>
+    <h3 class="h5">Accessibility</h3>
+    <p>On the first visit the card appears without taking focus or blocking the page. Opened from the settings link, focus moves into the card and stays there until it closes, then returns to the link. Every switch is a labelled native checkbox, and the card follows reduced motion, dark mode and right-to-left layouts.</p>
+
+    <h2 class="h3 pb-3 mb-3 mt-5 border-bottom" id="consent-keyboard-title">Keyboard interaction</h2>
+    {% set rows = [
+      [kbd("Tab") | string, "Moves between the category rows, switches, buttons and links. When the card is opened from the settings link, focus stays inside it."],
+      [kbd("Enter") | string ~ " / " ~ kbd("Space") | string, "Expands a category, toggles a switch or activates a button."],
+      [kbd("Esc") | string, "Closes the card opened from the settings link without changes, once a choice exists."]
+    ] %}
+    {{ table(["Key", "Action"], rows, row_header=true) }}
+
+    <h2 class="h3 pb-3 mb-3 mt-5 border-bottom" id="consent-legal-title">A note on the law</h2>
+    <p class="text-body-secondary">The block follows the common reading of the GDPR, the German TDDDG §25 and the CJEU Planet49 judgment: no pre-ticked boxes, refusing as easy as accepting, and a way to withdraw at any time. It is not legal advice; which services need consent on your site, and how your privacy policy describes them, is for you and your advisers to decide.</p>
+  </section>
+{% endblock %}

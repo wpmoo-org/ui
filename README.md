@@ -210,6 +210,26 @@ runs the slideshow and full-screen buttons, adds arrow keys and loads only the
 current photo and its neighbours. See the
 [Image Gallery block](https://ui.wpmoo.org/blocks/image-gallery/) for markup.
 
+For the Consent block, bind the card once per document. Gated scripts,
+frames and images carry `data-consent-category` and `data-consent-src` and
+are activated only after their category is granted:
+
+```js
+import { initConsent } from "@wpmoo/ui/consent.js";
+const consent = initConsent(document);
+consent?.whenGranted("statistics", () => loadStatistics());
+document.addEventListener("moo:consent:change", (event) => console.log(event.detail.choices));
+```
+
+Without the module the card stays hidden and nothing optional loads. The
+choice is stored in a first-party cookie with the configuration revision and
+a time stamp; `consentRevision(categories, reask)` computes that revision.
+Adding or removing a category or service asks again; for a material change
+to a service's provider, purpose or storage, raise `reask`. Withdrawal removes
+declared first-party cookies on the root path and storage keys; cookies set on
+another path or by another host cannot be removed by the page.
+See the [Consent block](https://ui.wpmoo.org/blocks/consent/) for markup.
+
 For an opt-in document overlay scrollbar, load the stylesheet first and pass
 the resolved page theme owner explicitly:
 
@@ -290,6 +310,12 @@ calm.
 
 ## Status And Support
 
+The `2.3.0` minor release adds the Consent block: a first-visit consent card
+with categories and services, a settings trigger, an embed placeholder and a
+policy table, with the optional `@wpmoo/ui/consent.js` module that stores the
+choice in a first-party cookie and loads gated scripts, frames and images only
+after consent. Accordion items gain an optional action beside the trigger.
+
 The `2.2.0` minor release adds the Item component, Image Gallery and Video
 Dialog blocks, and component usage guides. Image Gallery includes five layouts,
 a lazy-loaded lightbox, slideshow and full-screen controls through the optional
@@ -328,7 +354,7 @@ paths live in the [Installation guide](https://ui.wpmoo.org/installation/).
 Moo UI source code is MIT licensed. License details live in
 [LICENSE](LICENSE) and the [License page](https://ui.wpmoo.org/license/).
 Third-party distribution details and notices are kept separately in
-[THIRD_PARTY_NOTICES.md](https://github.com/wpmoo-org/ui/blob/v2.2.0/THIRD_PARTY_NOTICES.md).
+[THIRD_PARTY_NOTICES.md](https://github.com/wpmoo-org/ui/blob/v2.3.0/THIRD_PARTY_NOTICES.md).
 Catalog visual assets and their license are repository-only and are not
 included in the npm package. Asset terms live in the
-[visual asset license](https://github.com/wpmoo-org/ui/blob/v2.2.0/ASSET_LICENSE.md).
+[visual asset license](https://github.com/wpmoo-org/ui/blob/v2.3.0/ASSET_LICENSE.md).

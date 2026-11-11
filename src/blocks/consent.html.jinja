@@ -1,0 +1,220 @@
+{# Consent: a first-visit card that asks for consent per category, a
+   trigger that reopens it, a placeholder that stands in for an embed until
+   its category is granted, and a policy table of the same configuration.
+
+   Composed from Card, Accordion, Switch, Badge, Button, Checkbox, Table and
+   Bootstrap utilities; it adds no CSS. The optional consent.js module
+   (ConsentManager, initConsent) shows the card, stores the choice in a
+   first-party cookie and activates gated scripts, frames and images.
+
+   config:
+     revision    required; changes whenever a shown category or service changes
+     cookie      {name, days}; defaults moo_consent and 365
+     logo        optional {src, alt, width, height}
+     links       optional [{label, href}], for cookie policy, privacy, imprint
+     categories  [{id, label, description, required, services: [
+                   {id, name, provider, purpose, privacy_url,
+                    storage: [{name, type, lifetime}]}]}]
+
+   Only categories with at least one service are shown. Only the category
+   "functional" may be required; every other one starts unchecked. #}
+{% from "components/accordion.html.jinja" import accordion %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/card.html.jinja" import card %}
+{% from "components/checkbox.html.jinja" import checkbox %}
+{% from "components/switch.html.jinja" import switch %}
+{% from "components/table.html.jinja" import table %}
+
+{% set consent_default_labels = {
+  "title": "Manage consent",
+  "text": "We use cookies and similar technologies. Functional ones keep the site working; the others load only with your consent, which you can change at any time under Cookie settings.",
+  "accept_all": "Accept all",
+  "decline": "Decline",
+  "save": "Save choices",
+  "always_active": "Always active",
+  "provider": "Provider",
+  "purpose": "Purpose",
+  "storage": "Cookies and storage",
+  "privacy": "Privacy policy",
+  "service": "Service",
+  "links": "Legal information",
+  "types": {"cookie": "Cookie", "local": "Local storage", "session": "Session storage", "pixel": "Pixel"}
+} %}
+
+{% set consent_storage_types = ["cookie", "local", "session", "pixel"] %}
+
+{% macro _consent_text(labels, key) -%}
+  {{ labels[key] if labels and key in labels else consent_default_labels[key] }}
+{%- endmacro %}
+
+{% macro _consent_type(labels, type) -%}
+  {% set types = labels.types if labels and labels.types is defined else consent_default_labels.types %}
+  {{ types[type] if type in types else consent_default_labels.types[type] }}
+{%- endmacro %}
+
+{# Categories that are shown: those with at least one service. #}
+{% macro _consent_check(config) -%}
+  {% if config is not mapping %}{{ fail("Consent requires a config mapping") }}{% endif %}
+  {% if not config.revision | default("", true) | string | trim %}{{ fail("Consent config requires a revision") }}{% endif %}
+  {% set seen = namespace(ids=[]) %}
+  {% for category in config.categories | default([]) %}
+    {% if not category.id | default("", true) | trim %}{{ fail("Consent category id is required") }}{% endif %}
+    {% if category.id in seen.ids %}{{ fail("Consent category ids must be unique: " ~ category.id) }}{% endif %}
+    {% set seen.ids = seen.ids + [category.id] %}
+    {% if not category.label | default("", true) | trim %}{{ fail("Consent category label is required") }}{% endif %}
+    {% if category.required | default(false) and category.id != "functional" %}{{ fail("Only the functional consent category may be required") }}{% endif %}
+    {% for service in category.services | default([]) %}
+      {% if not service.id | default("", true) | trim or not service.name | default("", true) | trim %}{{ fail("Consent service id and name are required") }}{% endif %}
+      {% for item in service.storage | default([]) %}
+        {% if item.type not in consent_storage_types %}{{ fail("Unknown consent storage type: " ~ item.type) }}{% endif %}
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+{%- endmacro %}
+
+{% macro _consent_service(service, labels) -%}
+  <div class="border-top pt-2 mt-2">
+    <p class="fw-medium mb-1">{{ service.name }}</p>
+    <dl class="row small mb-0">
+      {% if service.provider | default("", true) %}
+        <dt class="col-4 fw-normal text-body-secondary">{{ _consent_text(labels, "provider") }}</dt>
+        <dd class="col-8 mb-1">{{ service.provider }}</dd>
+      {% endif %}
+      {% if service.purpose | default("", true) %}
+        <dt class="col-4 fw-normal text-body-secondary">{{ _consent_text(labels, "purpose") }}</dt>
+        <dd class="col-8 mb-1">{{ service.purpose }}</dd>
+      {% endif %}
+      {% if service.storage | default([]) %}
+        <dt class="col-4 fw-normal text-body-secondary">{{ _consent_text(labels, "storage") }}</dt>
+        <dd class="col-8 mb-1">
+          <ul class="list-unstyled mb-0">
+            {% for item in service.storage %}
+              <li><code>{{ item.name }}</code> <span class="text-body-secondary">{{ _consent_type(labels, item.type) | trim }}{% if item.lifetime | default("", true) %}, {{ item.lifetime }}{% endif %}</span></li>
+            {% endfor %}
+          </ul>
+        </dd>
+      {% endif %}
+      {% if service.privacy_url | default("", true) %}
+        <dt class="col-4 fw-normal text-body-secondary">{{ _consent_text(labels, "privacy") }}</dt>
+        <dd class="col-8 mb-1"><a href="{{ service.privacy_url }}" rel="noopener noreferrer" target="_blank">{{ service.provider | default(service.name, true) }}</a></dd>
+      {% endif %}
+    </dl>
+  </div>
+{%- endmacro %}
+
+{# The runtime part of the configuration: ids and the first-party names to
+   remove when a category is withdrawn. Texts stay in the markup. #}
+{% macro _consent_runtime(config, shown) -%}
+  {% set categories = [] %}
+  {% for category in shown %}
+    {% set storage = [] %}
+    {% for service in category.services %}
+      {% for item in service.storage | default([]) %}
+        {% if item.type in ["cookie", "local", "session"] %}{% set _ = storage.append({"name": item.name, "type": item.type}) %}{% endif %}
+      {% endfor %}
+    {% endfor %}
+    {% set entry = {"id": category.id, "required": category.required | default(false)} %}
+    {% if not entry.required %}{% set _ = entry.update({"storage": storage}) %}{% endif %}
+    {% set _ = categories.append(entry) %}
+  {% endfor %}
+  {% set cookie = config.cookie | default({}, true) %}
+  {{ {"revision": config.revision | string, "cookie": {"name": cookie.name | default("moo_consent", true), "days": cookie.days | default(365, true)}, "categories": categories} | tojson }}
+{%- endmacro %}
+
+{% macro consent_card(id, config, labels={}) -%}
+  {% if id is not string or not id | trim or id.split() | length != 1 %}{{ fail("Consent card id is required") }}{% endif %}
+  {{ _consent_check(config) }}
+  {% set shown = config.categories | default([]) | selectattr("services") | list %}
+  {% set items = [] %}
+  {% for category in shown %}
+    {% set content %}
+      {% if category.description | default("", true) %}<p class="small mb-1">{{ category.description }}</p>{% endif %}
+      {% for service in category.services %}{{ _consent_service(service, labels) }}{% endfor %}
+    {% endset %}
+    {% if category.required | default(false) %}
+      {% set action %}{{ switch(id ~ "-category-" ~ category.id, labelledby=id ~ "-categories-" ~ category.id ~ "-trigger", checked=true, disabled=true, extra_class="flex-shrink-0 mb-0") }}{% endset %}
+    {% else %}
+      {% set action %}{{ switch(id ~ "-category-" ~ category.id, labelledby=id ~ "-categories-" ~ category.id ~ "-trigger", extra_class="flex-shrink-0 mb-0") }}{% endset %}
+    {% endif %}
+    {% set _ = items.append({"id": category.id, "title": category.label, "content": content, "action": action}) %}
+  {% endfor %}
+  {% set footer %}
+    <div class="w-100">
+      <div class="row g-2">
+        {% for key, suffix in [("accept_all", "accept"), ("decline", "decline"), ("save", "save")] %}
+          <div class="col-12 col-sm">{{ button(_consent_text(labels, key), variant="outline", id=id ~ "-" ~ suffix, extra_class="w-100") }}</div>
+        {% endfor %}
+      </div>
+      {% if config.links | default([]) %}
+        <nav class="mt-2" aria-label="{{ _consent_text(labels, 'links') }}">
+          <ul class="list-unstyled d-flex flex-wrap column-gap-3 row-gap-1 small mb-0">
+            {% for link in config.links %}<li><a class="text-body-secondary" href="{{ link.href }}">{{ link.label }}</a></li>{% endfor %}
+          </ul>
+        </nav>
+      {% endif %}
+    </div>
+  {% endset %}
+  <aside id="{{ id }}" class="fixed-bottom row g-0 justify-content-end pe-none mh-100 overflow-auto" role="dialog" aria-modal="false" aria-labelledby="{{ id }}-title" aria-describedby="{{ id }}-text" data-consent hidden>
+    <div class="col-12 col-sm-9 col-md-7 col-lg-6 col-xl-5 col-xxl-4 p-3 pe-auto">
+      {% call card(footer=footer, extra_class="shadow") %}
+        <div class="d-flex align-items-center gap-2 mb-2">
+          {% if config.logo | default(none) %}<img src="{{ config.logo.src }}" alt="{{ config.logo.alt | default('') }}"{% if config.logo.width | default(none) %} width="{{ config.logo.width }}"{% endif %} height="{{ config.logo.height | default(24) }}" class="flex-shrink-0">{% endif %}
+          <h2 class="h6 mb-0" id="{{ id }}-title" tabindex="-1">{{ _consent_text(labels, "title") }}</h2>
+        </div>
+        <p class="small text-body-secondary" id="{{ id }}-text">{{ _consent_text(labels, "text") }}</p>
+        {% if items %}{{ accordion(id ~ "-categories", items, always_open=true) }}{% endif %}
+      {% endcall %}
+    </div>
+    <script type="application/json" data-consent-config>{{ _consent_runtime(config, shown) | trim }}</script>
+  </aside>
+{%- endmacro %}
+
+{# Reopens the card at any time, for example from the footer. #}
+{% macro consent_trigger(target, label="Cookie settings", variant="link", extra_class="") -%}
+  {% if not target | trim %}{{ fail("Consent trigger requires the card id") }}{% endif %}
+  {{ button(label, variant=variant, consent_open=target, extra_class=extra_class) }}
+{%- endmacro %}
+
+{# Stands in for an embed until its category is granted. Place it and the
+   gated element (data-consent-category, data-consent-src) inside one
+   element with data-consent-embed. "Load" activates this embed once;
+   with "always allow" ticked it grants the category and saves. #}
+{% macro consent_placeholder(id, category, title, text, load_label="Load content", remember_label="Always allow", privacy_url="", privacy_label="Privacy policy", extra_class="") -%}
+  {% if not id | trim or not category | trim %}{{ fail("Consent placeholder requires id and category") }}{% endif %}
+  {% if not title | trim %}{{ fail("Consent placeholder requires a title") }}{% endif %}
+  {# The hidden attribute sits on a plain wrapper: Bootstrap's d-flex would
+     override it. #}
+  <div class="h-100{% if extra_class %} {{ extra_class }}{% endif %}" data-consent-placeholder="{{ category }}">
+    <div class="d-flex align-items-center justify-content-center h-100 p-3">
+    {% call card(title=title, extra_class="w-100 mw-100") %}
+      <p class="small text-body-secondary">{{ text }}{% if privacy_url %} <a href="{{ privacy_url }}" rel="noopener noreferrer" target="_blank">{{ privacy_label }}</a>{% endif %}</p>
+      <div class="d-flex flex-wrap align-items-center gap-3">
+        {{ button(load_label, variant="default", consent_grant=category, id=id ~ "-load") }}
+        {{ checkbox(id ~ "-remember", label=remember_label, extra_class="mb-0", input_attrs='data-consent-remember') }}
+      </div>
+    {% endcall %}
+    </div>
+  </div>
+{%- endmacro %}
+
+{# The same configuration as a policy table, one per shown category. #}
+{% macro consent_policy_table(config, labels={}, heading_level=3) -%}
+  {{ _consent_check(config) }}
+  {% set heading = "h" ~ heading_level %}
+  <div class="w-100">
+  {% for category in config.categories | default([]) | selectattr("services") %}
+    <section class="mb-4" data-consent-policy="{{ category.id }}">
+      <{{ heading }}>{{ category.label }}{% if category.required | default(false) %} {{ badge(_consent_text(labels, "always_active"), variant="secondary") }}{% endif %}</{{ heading }}>
+      {% if category.description | default("", true) %}<p>{{ category.description }}</p>{% endif %}
+      {% set rows = [] %}
+      {% for service in category.services %}
+        {% set name_cell %}{{ service.name }}{% if service.privacy_url | default("", true) %}<br><a class="small" href="{{ service.privacy_url }}" rel="noopener noreferrer" target="_blank">{{ _consent_text(labels, "privacy") }}</a>{% endif %}{% endset %}
+        {% set storage_cell %}{% for item in service.storage | default([]) %}<code>{{ item.name }}</code> <span class="text-body-secondary">{{ _consent_type(labels, item.type) | trim }}{% if item.lifetime | default("", true) %}, {{ item.lifetime }}{% endif %}</span>{% if not loop.last %}<br>{% endif %}{% endfor %}{% endset %}
+        {% set _ = rows.append([name_cell, service.provider | default("") | e, service.purpose | default("") | e, storage_cell]) %}
+      {% endfor %}
+      {{ table([_consent_text(labels, "service"), _consent_text(labels, "provider"), _consent_text(labels, "purpose"), _consent_text(labels, "storage")], rows, row_header=true, small=true) }}
+    </section>
+  {% endfor %}
+  </div>
+{%- endmacro %}

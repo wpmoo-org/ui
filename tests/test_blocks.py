@@ -117,6 +117,11 @@ class BlocksTests(CatalogTestCase):
                     "label": "Image Gallery",
                     "status": "ready",
                 },
+                {
+                    "slug": "consent",
+                    "label": "Consent",
+                    "status": "ready",
+                },
             ],
         )
 

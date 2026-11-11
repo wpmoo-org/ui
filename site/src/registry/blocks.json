@@ -23,5 +23,10 @@
     "slug": "image-gallery",
     "label": "Image Gallery",
     "status": "ready"
+  },
+  {
+    "slug": "consent",
+    "label": "Consent",
+    "status": "ready"
   }
 ]
