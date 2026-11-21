@@ -82,10 +82,13 @@ $moo-primary-dark: $moo-border !default;
 $moo-primary-foreground-dark: $dark !default;
 $moo-foreground-dark: $light !default;
 $moo-muted-foreground-dark: #a1a1aa !default;
-// Same derivation as $moo-ring above, at a lower white weight -- dark
-// surfaces need a darker-than-light-mode ring to read as mid-tone against a
-// dark background instead of a near-white glow.
-$moo-ring-dark: color-mix(in srgb, $white 40%, $primary) !default;
+// Same derivation as $moo-ring above, at a lower white weight than a
+// near-white glow. The focus ring renders this token at 50% alpha over the
+// dark surface (foundations/_focus.scss), so 40% white (about 1.8:1 against
+// the dark surfaces) was too faint; 72% white keeps the rendered ring at or
+// above WCAG 2.1 non-text contrast (3:1) on every dark surface up to the
+// muted surface (#27272a). Light mode is unchanged.
+$moo-ring-dark: color-mix(in srgb, $white 72%, $primary) !default;
 // Reference dark --destructive token.
 $moo-destructive-dark: #ff6467 !default;
 $moo-destructive-surface-dark: color-mix(in srgb, $moo-destructive-dark 20%, transparent) !default;

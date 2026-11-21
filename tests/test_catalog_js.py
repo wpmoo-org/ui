@@ -590,6 +590,92 @@ console.log(JSON.stringify(Object.fromEntries(themeColors.map((themeColor) => {
                 self.assertGreaterEqual(tokens["contrast"], 4.5)
         self.assertEqual(cases["yellow"]["primary"], "rgb(250, 204, 21)")
 
+    def test_theme_builder_primary_hover_and_active_keep_label_readable(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import {
+  THEME_BUILDER_OPTIONS,
+  primaryStateColors,
+  resolveThemeBuilderTokens,
+} from "./site/src/js/catalog/theme-builder-schema.js";
+
+const parseRgb = (value) => value.startsWith("#")
+  ? [1, 3, 5].map((i) => parseInt(value.slice(i, i + 2), 16))
+  : value.match(/\\d+/g).map(Number);
+const luminance = (rgb) => {
+  const c = rgb.map((v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+};
+const ratio = (a, b) => {
+  const [hi, lo] = [luminance(parseRgb(a)), luminance(parseRgb(b))].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+const colors = Object.fromEntries(THEME_BUILDER_OPTIONS.themeColor
+  .filter((name) => name !== "neutral")
+  .map((themeColor) => {
+    const t = resolveThemeBuilderTokens({ themeColor });
+    const fg = t["--moo-primary-foreground"];
+    return [themeColor, {
+      hover: t["--moo-primary-hover"],
+      active: t["--moo-primary-active"],
+      hoverRatio: t["--moo-primary-hover"] && ratio(t["--moo-primary-hover"], fg),
+      activeRatio: t["--moo-primary-active"] && ratio(t["--moo-primary-active"], fg),
+    }];
+  }));
+const vectors = [
+  ["#171717", "#ffffff"],
+  ["#016db7", "#ffffff"],
+  ["#2563eb", "#ffffff"],
+  ["#a8d1f0", "#0a0a0a"],
+  ["#4a90d9", "#ffffff"],
+  ["#7aa7d9", "#ffffff"],
+  ["#767676", "#777777"],
+  ["#ffffff", "#ffffff"],
+].map(([p, f]) => {
+  const s = primaryStateColors(p, f);
+  return [p, f, s.hover, s.active,
+    Number(ratio(s.hover, f).toFixed(2)), Number(ratio(s.active, f).toFixed(2))];
+});
+console.log(JSON.stringify({ colors, vectors, neutral: resolveThemeBuilderTokens({ themeColor: "neutral" }) }));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads(result.stdout.splitlines()[-1])
+        self.assertNotIn("--moo-primary-hover", data["neutral"])
+        self.assertGreaterEqual(len(data["colors"]), 12)
+        for theme_color, tokens in data["colors"].items():
+            with self.subTest(theme_color=theme_color):
+                self.assertTrue(tokens["hover"] and tokens["active"])
+                self.assertGreaterEqual(tokens["hoverRatio"], 4.5)
+                self.assertGreaterEqual(tokens["activeRatio"], 4.5)
+        self.assertEqual(
+            data["vectors"],
+            [
+                ["#171717", "#ffffff", "#454545", "#585858", 9.59, 7.11],
+                ["#016db7", "#ffffff", "#0164a8", "#015c9a", 6.2, 7.0],
+                ["#2563eb", "#ffffff", "#225bd8", "#1f53c5", 5.91, 6.77],
+                ["#a8d1f0", "#0a0a0a", "#b9daf3", "#c0def4", 13.56, 14.14],
+                ["#4a90d9", "#ffffff", "#3e79b6", "#386da5", 4.55, 5.39],
+                ["#7aa7d9", "#ffffff", "#537294", "#496482", 5.0, 6.13],
+                ["#767676", "#777777", "#050505", "#050505", 4.55, 4.55],
+                ["#ffffff", "#ffffff", "#ffffff", "#ffffff", 1.0, 1.0],
+            ],
+        )
+
     def test_theme_builder_ignores_legacy_style_axis(self) -> None:
         result = subprocess.run(
             [
