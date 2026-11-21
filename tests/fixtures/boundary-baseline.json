@@ -1,16 +1,16 @@
 {
   "coreOutputs": {
     "dist/assets/css/moo-ui.css": {
-      "sha256": "19a105850a5e260627d2ca4f82dde1b8710a366b34b56acb17e10714d7c927e1"
+      "sha256": "33ce2e078d10afed5bcacc6b17b09ea4a653f2b5b339d6adf29244e35cb35d00"
     },
     "dist/assets/css/moo-ui.min.css": {
-      "sha256": "861a369513f6a755fabe98e41a90c72992c0d346dab533edd7cb203ce7848aac"
+      "sha256": "7001caa663666f0afa46ab883b15292027d88d5133198bd3d0f77f3e00a0176e"
     },
     "dist/assets/css/moo.css": {
-      "sha256": "c453c04fb7cbe533619e38d936f10d6fae191612d154eb5c4839664e0a9c16ae"
+      "sha256": "7c0cfcc933b8cb493e950324fcd3fcdef5cfa20214fe86fbb6c6da768328d646"
     },
     "dist/assets/css/moo.min.css": {
-      "sha256": "8677d66415755af5e7bbf1bbb0035397ddcd9461551d5b78a6c77ee0022a5bce"
+      "sha256": "b28ae2f1d2111210e7a87d45ab6f79cbbffbecb1e860f8cc8f6f0a02da0c1184"
     },
     "dist/js/chart.js": {
       "sha256": "1372a027d447958febf5faf9a3903e2f5d4b6e01c9df7dda983b7e399c4c1b53"
@@ -73,7 +73,7 @@
       "sha256": "1d2a40d14e96de2cd45b544c96493f75bbee5b40d51ce1e0331877bce3076c95"
     },
     "dist/release-manifest.json": {
-      "sha256": "242697a614c447b6a424dbd018c784462ecb55f728e2e1bbfc73c9997d40315f"
+      "sha256": "1ac0b8838f301240187b3bf4b380f195cea36308a80d07f5134e42b7bb4dea2e"
     }
   },
   "distFiles": [
@@ -191,6 +191,7 @@
     "scss/foundations/_focus.scss",
     "scss/foundations/_globals.scss",
     "scss/foundations/_scope.scss",
+    "scss/foundations/_typography_website.scss",
     "scss/layouts/_app.scss",
     "scss/layouts/_page_grid.scss",
     "scss/layouts/app/sidebar/_base.scss",
@@ -219,7 +220,8 @@
     "scss/utilities/_scroll_fade.scss",
     "scss/utilities/_scroll_fade_primitives.scss",
     "scss/utilities/_scroll_smooth.scss",
-    "scss/utilities/_text_alignment.scss"
+    "scss/utilities/_text_alignment.scss",
+    "scss/utilities/_text_measure.scss"
   ],
   "package": {
     "exports": {
@@ -702,6 +704,7 @@
     "site-dist/utils/index.html",
     "site-dist/utils/overlay-scrollbar/index.html",
     "site-dist/utils/scroll-fade/index.html",
+    "site-dist/utils/text-measure/index.html",
     "site-dist/vendor/@kurkle/color/LICENSE.md",
     "site-dist/vendor/@kurkle/color/dist/color.esm.js",
     "site-dist/vendor/bootstrap/dist/js/bootstrap.bundle.min.js",
@@ -1917,6 +1920,9 @@
     },
     "site-dist/utils/scroll-fade/index.html": {
       "sha256": "e6d8953588085a28885eaca56cad48da2dc2be74c0b1e668045b79e8beb079e5"
+    },
+    "site-dist/utils/text-measure/index.html": {
+      "sha256": "76f5b04e693096f7c2b44e254a42088d9b94e5361d9e15dada376a9917dbc07b"
     },
     "site-dist/vendor/@kurkle/color/LICENSE.md": {
       "sha256": "89ba0032731489153d552db918b727feb05128cf9eca20092875a9ad14147671"

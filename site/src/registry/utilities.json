@@ -13,5 +13,10 @@
     "slug": "overlay-scrollbar",
     "label": "Overlay Scrollbar",
     "status": "ready"
+  },
+  {
+    "slug": "text-measure",
+    "label": "Text Measure",
+    "status": "ready"
   }
 ]

@@ -528,6 +528,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "_scroll_fade_primitives.scss",
                 "_scroll_smooth.scss",
                 "_text_alignment.scss",
+                "_text_measure.scss",
             },
         )
         self.assertEqual(
@@ -623,6 +624,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "utilities/motion_primitives",
                 "utilities/overlay_scrollbar_native",
                 "foundations/backdrop",
+                "foundations/typography_website",
                 "foundations/scope",
             ],
         )
@@ -645,6 +647,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "foundations/globals",
                 "foundations/backdrop",
                 "themes/root",
+                "foundations/typography_website",
                 "foundations/scope",
             ],
         )
@@ -678,6 +681,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "foundations/focus",
                 "foundations/globals",
                 "foundations/scope",
+                "foundations/typography_website",
             },
         )
         self.assertEqual(
@@ -690,6 +694,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "../utilities/border",
                 "../utilities/scroll_fade",
                 "../utilities/scroll_smooth",
+                "../utilities/text_measure",
                 "../utilities/motion",
                 "../layouts/app",
                 "../layouts/page_grid",

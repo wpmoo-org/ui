@@ -1,0 +1,70 @@
+// Opt-in website typography profile. The attribute sits on the document's
+// resolved owner (`.moo-ui[data-bs-theme][data-moo-typography="website"]`); the
+// rules below also reach independent nested owners and every descendant, so a
+// dark header owner inside the document keeps the website type. Absent the
+// attribute (the app profile) nothing here matches.
+//
+// Body size and line height are owner tokens, and every resolved owner re-emits
+// them (`moo-core-scales`), so a nested owner would otherwise reset them. The
+// second selector below re-applies the profile on nested owners; its higher
+// specificity beats the owner reset.
+//
+// Element rules use `:where()` on the owner so they carry only the weight of the
+// heading/class selector itself: Bootstrap's bare element rules lose to them,
+// while component-owned sizes (.card-title and similar, imported after this
+// partial inside the scope) win ties instead of being flattened.
+$moo-website: '.moo-ui[data-moo-typography="website"]';
+$moo-website-where: ':where(.moo-ui[data-moo-typography="website"])';
+
+#{$moo-website}[data-bs-theme],
+#{$moo-website} .moo-ui[data-bs-theme] {
+  --#{$prefix}body-font-size: #{$moo-website-font-size};
+  --#{$prefix}body-line-height: #{$moo-website-line-height};
+  --moo-small-font-size: #{$moo-website-small-font-size};
+}
+
+#{$moo-website-where} :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6,
+  .display-1, .display-2, .display-3, .display-4, .display-5, .display-6) {
+  line-height: #{$moo-website-heading-line-height};
+  text-wrap: balance;
+}
+
+@each $level, $range in $moo-website-heading-fluid-sizes {
+  #{$moo-website-where} :is(#{$level}, .#{$level}) {
+    font-size: moo-fluid-size(nth($range, 1), nth($range, 2));
+  }
+}
+
+@each $level, $size in $moo-website-heading-fixed-sizes {
+  #{$moo-website-where} :is(#{$level}, .#{$level}) {
+    font-size: #{$size};
+  }
+}
+
+@each $level, $range in $moo-website-display-fluid-sizes {
+  #{$moo-website-where} .display-#{$level} {
+    font-size: moo-fluid-size(nth($range, 1), nth($range, 2));
+  }
+}
+
+#{$moo-website-where} .lead {
+  font-size: #{$moo-website-lead-font-size};
+}
+
+#{$moo-website-where} p {
+  text-wrap: pretty;
+}
+
+// German copy hyphenates; the language comes from html or any ancestor, and a
+// descendant with another lang is excluded by :lang() on the text element.
+#{$moo-website-where} :is(p, li, dd, blockquote, figcaption):lang(de) {
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+// Hyphenation is inherited, so a non-German island inside German copy (a span
+// or a nested blockquote carrying its own lang) must reset it.
+#{$moo-website-where} :is(p, li, dd, blockquote, figcaption):lang(de) [lang]:not(:lang(de)) {
+  hyphens: manual;
+  overflow-wrap: normal;
+}

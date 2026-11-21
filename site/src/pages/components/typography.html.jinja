@@ -128,6 +128,20 @@
       lead
     ) }}
 
+    {% set website_profile %}
+      <div class="moo-ui" data-bs-theme="light" data-moo-typography="website" lang="de">
+        <h2>Verlässliche Betriebsführung</h2>
+        <p class="lead text-measure">Ein ruhiger Textfluss mit größerer Schrift, großzügigem Zeilenabstand und sauberer Silbentrennung.</p>
+        <p class="text-measure mb-0">Donaudampfschifffahrtsgesellschaftskapitäne und Selbstverständlichkeiten werden bei Bedarf getrennt, damit schmale Spalten ohne Löcher im Textbild auskommen.</p>
+      </div>
+    {% endset %}
+    {{ render_component_example("typography", "Typography",
+      "website-profile",
+      "Website profile",
+      "Set <code>data-moo-typography=\"website\"</code> on the resolved owner for marketing pages: 1rem body text, 1.6 line height, a larger heading scale, balanced headings, and automatic hyphenation for German copy. Without the attribute the compact app profile applies.",
+      website_profile
+    ) }}
+
     {% set inline_elements %}
       <div class="d-grid gap-2">
         <p class="mb-0">Use <mark>mark</mark> to highlight text for reference.</p>

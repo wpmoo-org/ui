@@ -2778,7 +2778,11 @@ class CatalogContractTests(CatalogTestCase):
         self.assert_page_actions_region(utility_header)
         self.assert_page_actions_region(utility)
         self.assertIn('aria-label="Previous page: Overlay Scrollbar"', utility)
-        self.assertIn('aria-label="Next page: Support &amp; Evidence"', utility)
+        self.assertIn('aria-label="Next page: Text Measure"', utility)
+
+        last_utility = self.read_output("utils/text-measure.html")
+        self.assertIn('aria-label="Previous page: Scroll Fade"', last_utility)
+        self.assertIn('aria-label="Next page: Support &amp; Evidence"', last_utility)
 
         block = self.read_output("blocks/sidebar-floating.html")
         block_header_start = block.index('<header class="moo-component-header')
@@ -2818,7 +2822,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('aria-label="Next page: Overlay Scrollbar"', border)
 
         support = self.read_output("support.html")
-        self.assertIn('aria-label="Previous page: Scroll Fade"', support)
+        self.assertIn('aria-label="Previous page: Text Measure"', support)
         overlay = self.read_output("utils/overlay-scrollbar.html")
         overlay_pagination = re.search(
             r'<nav class="moo-doc-pagination" aria-label="Docs pagination">(?P<body>.*?)</nav>',
