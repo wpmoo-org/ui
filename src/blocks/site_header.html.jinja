@@ -1,0 +1,132 @@
+{# Site header: the top bar of a marketing or institutional website. A brand
+   (text, logo, or both), a main navigation with optional dropdowns, a small
+   utility row above it from the breakpoint up, and a slot for header
+   actions. Below the breakpoint the navigation moves into an offcanvas
+   drawer, main list first.
+
+   Composed from Bootstrap's Navbar and Offcanvas structure, the Moo Button,
+   Close button, Navigation item and Dropdown menu macros, and Bootstrap
+   utilities; it adds no CSS.
+
+   id            required; prefix for the drawer id (id ~ "-drawer")
+   aria_label    required; the name of the single <nav> landmark
+   brand         {label, href, logo: {src, alt, width, height}, show_label}
+                 label is the accessible name of the home link. Without a
+                 logo the label is the visible brand text. With a logo only
+                 the image shows and its alt (default: label) names the
+                 link; with show_label the label shows next to the logo and
+                 the image is decorative (alt="").
+   items         main links: {label, href, active, disabled, drawer_only,
+                 children: [{label, href, active, disabled}]}
+   utility_items small secondary links, same keys except children. From the
+                 breakpoint up they form a row above the main row. DOM order
+                 stays main list first, utility list second.
+   breakpoint    "lg" (default) or "xl"
+   surface       "default" follows the surrounding Moo theme; "dark" makes
+                 the bar a nested dark Moo owner (see below)
+   container     Bootstrap container class, default "container"
+   menu_label    toggler name and drawer name, default "Menu"
+   close_label   drawer close button name, default "Close"
+   extra_class   classes for the <nav>, for example "sticky-top"
+
+   Every href (brand, items, children, utility items) must be a relative
+   path, a fragment, or use http, https, mailto or tel; anything else fails.
+
+   Known limits. Escape inside the drawer closes the whole drawer, even with
+   a dropdown open: that is Bootstrap's own Offcanvas and Dropdown
+   composition. The dark surface is a fixed nested owner, so a theme toggle
+   placed in the actions slot changes only the header; keep a theme toggle
+   outside the header or point it at the document owner.
+
+   drawer_only on an item adds d-{breakpoint}-none, so it shows only in the
+   drawer. The caller body renders at the row end, beside the toggler.
+
+   Dark surface: Moo builds Bootstrap with $enable-dark-mode off, so
+   data-bs-theme="dark" on its own would not change any token. A nested
+   .moo-ui[data-bs-theme="dark"] is a resolved owner with an independent
+   token context (docs/contracts/THEME_PRESETS.md), which gives the bar, the
+   inline links, the drawer and the close button the dark palette. #}
+{% from "components/button.html.jinja" import button %}
+{% from "components/close_button.html.jinja" import close_button %}
+{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}
+{% from "components/navigation.html.jinja" import nav_item %}
+
+{% set site_header_breakpoints = ["lg", "xl"] %}
+{% set site_header_surfaces = ["default", "dark"] %}
+{% set site_header_schemes = ["http", "https", "mailto", "tel"] %}
+
+{# Allows relative paths, fragments and http, https, mailto and tel. Control
+   characters are refused too, because browsers drop them inside a scheme. #}
+{% macro _site_header_check_href(href) -%}
+  {% set value = (href | string | trim) %}
+  {% for character in ["\t", "\n", "\r"] %}
+    {% if character in value %}{{ fail("Site header href contains a control character") }}{% endif %}
+  {% endfor %}
+  {% set head = value.split("/")[0].split("?")[0].split("#")[0] %}
+  {% if ":" in head and head.split(":")[0] | lower not in site_header_schemes %}{{ fail("Site header href scheme is not allowed: " ~ head.split(":")[0]) }}{% endif %}
+{%- endmacro %}
+
+{% macro _site_header_brand(brand, extra_class="") -%}
+  {% set _ = _site_header_check_href(brand.href | default("/", true)) %}
+  {% set logo = brand.logo | default(none) %}
+  {% set show_label = brand.show_label | default(false) or not logo %}
+  <a class="navbar-brand{% if logo %} d-flex align-items-center gap-2{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}" href="{{ brand.href | default('/', true) }}">
+    {%- if logo -%}
+      <img src="{{ logo.src }}" alt="{{ '' if show_label else logo.alt | default(brand.label, true) }}"{% if logo.width | default(none) %} width="{{ logo.width }}"{% endif %}{% if logo.height | default(none) %} height="{{ logo.height }}"{% endif %} class="flex-shrink-0">
+    {%- endif -%}
+    {%- if show_label -%}{% if logo %}<span>{{ brand.label }}</span>{% else %}{{ brand.label }}{% endif %}{%- endif -%}
+  </a>
+{%- endmacro %}
+
+{% macro _site_header_item(item, breakpoint) -%}
+  {% if not item.label | default("", true) | trim %}{{ fail("Site header item label is required") }}{% endif %}
+  {% set _ = _site_header_check_href(item.href | default("#", true)) %}
+  {% for child in item.children | default([]) %}{% set _ = _site_header_check_href(child.href | default("#", true)) %}{% endfor %}
+  {% set item_class = ("d-" ~ breakpoint ~ "-none") if item.drawer_only | default(false) else "" %}
+  {% if item.children | default([]) %}
+    {% set state = namespace(active=item.active | default(false)) %}
+    {% for child in item.children %}{% if child.active | default(false) %}{% set state.active = true %}{% endif %}{% endfor %}
+    {% call dropdown(item.label, trigger="nav-link", active=state.active, disabled=item.disabled | default(false), extra_class=item_class) %}
+      {% for child in item.children %}
+        {{ dropdown_item(child.label, href=child.href | default("#", true), active=child.active | default(false), disabled=child.disabled | default(false)) }}
+      {% endfor %}
+    {% endcall %}
+  {% else %}
+    {{ nav_item(item.label, href=item.href | default("#", true), active=item.active | default(false), disabled=item.disabled | default(false), item_class=item_class) }}
+  {% endif %}
+{%- endmacro %}
+
+{% macro site_header(id, aria_label, brand, items=[], utility_items=[], breakpoint="lg", surface="default", container="container", menu_label="Menu", close_label="Close", extra_class="") -%}
+  {% if id is not string or not id | trim or id.split() | length != 1 %}{{ fail("Site header id is required") }}{% endif %}
+  {% if not aria_label | trim %}{{ fail("Site header aria_label is required") }}{% endif %}
+  {% if brand is not mapping or not brand.label | default("", true) | trim %}{{ fail("Site header brand label is required") }}{% endif %}
+  {% if brand.logo | default(none) and not brand.logo.src | default("", true) %}{{ fail("Site header logo requires src") }}{% endif %}
+  {% if breakpoint not in site_header_breakpoints %}{{ fail("Unknown site header breakpoint: " ~ breakpoint) }}{% endif %}
+  {% if surface not in site_header_surfaces %}{{ fail("Unknown site header surface: " ~ surface) }}{% endif %}
+  {% set drawer_id = id ~ "-drawer" %}
+  <nav id="{{ id }}" class="navbar navbar-expand-{{ breakpoint }} bg-body-tertiary border-bottom{% if surface == 'dark' %} moo-ui{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}" aria-label="{{ aria_label }}"{% if surface == "dark" %} data-bs-theme="dark"{% endif %}>
+    <div class="{{ container }}">
+      {{ _site_header_brand(brand) }}
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="{{ drawer_id }}" aria-label="{{ menu_label }}">
+        <div class="offcanvas-header">
+          <div class="offcanvas-title">{{ _site_header_brand(brand, "me-0") }}</div>
+          {{ close_button(aria_label=close_label, dismiss="offcanvas") }}
+        </div>
+        <div class="offcanvas-body d-flex flex-column flex-{{ breakpoint }}-column-reverse align-items-{{ breakpoint }}-end gap-3 gap-{{ breakpoint }}-0">
+          <ul class="navbar-nav">
+            {% for item in items %}{{ _site_header_item(item, breakpoint) }}{% endfor %}
+          </ul>
+          {% if utility_items %}
+            <ul class="navbar-nav small">
+              {% for item in utility_items %}{{ _site_header_item(item, breakpoint) }}{% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2 ms-auto">
+        {% if caller is defined %}{{ caller() | trim | safe }}{% endif %}
+        {{ button("", variant="ghost", size="icon", icon_start="menu", aria_label=menu_label, sheet_target=drawer_id, aria_controls=drawer_id, extra_class="d-" ~ breakpoint ~ "-none") }}
+      </div>
+    </div>
+  </nav>
+{%- endmacro %}

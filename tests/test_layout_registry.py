@@ -160,6 +160,7 @@ BLOCK_MACROS_BY_FILE = {
         "_consent_check", "_consent_runtime", "_consent_service", "_consent_text", "_consent_type",
     },
     "image_gallery.html.jinja": {"image_gallery", "image_gallery_photo_name", "image_gallery_thumbnail"},
+    "site_header.html.jinja": {"site_header", "_site_header_brand", "_site_header_check_href", "_site_header_item"},
     "video_dialog.html.jinja": {"video_dialog", "video_play", "video_play_icon"},
 }
 

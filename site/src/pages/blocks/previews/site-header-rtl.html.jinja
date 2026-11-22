@@ -1,0 +1,10 @@
+{% extends "layouts/block-preview.html.jinja" %}
+{% from "blocks/site_header_example.html.jinja" import render_site_header_page %}
+
+{% block title %}Site Header RTL Preview — Moo UI{% endblock %}
+
+{% block content %}
+  <div dir="rtl">
+    {{ render_site_header_page("logo", root_path, "site-header-rtl-preview") }}
+  </div>
+{% endblock %}

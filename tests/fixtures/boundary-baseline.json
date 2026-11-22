@@ -438,6 +438,7 @@
     "site-dist/assets/images/readme/toast-light.svg",
     "site-dist/assets/images/sidebar-structure-classes.webp",
     "site-dist/assets/images/sidebar-structure.webp",
+    "site-dist/assets/images/site-header/logo.svg",
     "site-dist/assets/js/bootstrap.bundle.min.js",
     "site-dist/assets/js/bootstrap.bundle.min.js.map",
     "site-dist/assets/js/catalog-direction-state.js",
@@ -505,11 +506,16 @@
     "site-dist/blocks/previews/overlay-scrollbar/index.html",
     "site-dist/blocks/previews/sidebar-floating/index.html",
     "site-dist/blocks/previews/sidebar-inset/index.html",
+    "site-dist/blocks/previews/site-header-dark/index.html",
+    "site-dist/blocks/previews/site-header-logo/index.html",
+    "site-dist/blocks/previews/site-header-rtl/index.html",
+    "site-dist/blocks/previews/site-header/index.html",
     "site-dist/blocks/previews/toc/index.html",
     "site-dist/blocks/previews/video-dialog-rtl/index.html",
     "site-dist/blocks/previews/video-dialog/index.html",
     "site-dist/blocks/sidebar-floating/index.html",
     "site-dist/blocks/sidebar-inset/index.html",
+    "site-dist/blocks/site-header/index.html",
     "site-dist/blocks/video-dialog/index.html",
     "site-dist/changelog/index.html",
     "site-dist/charts/index.html",
@@ -1126,6 +1132,9 @@
     "site-dist/assets/images/sidebar-structure.webp": {
       "sha256": "4ac048be0006debecec8aec27a164fb29f5c36945d2b297a12b013deaeb6e92f"
     },
+    "site-dist/assets/images/site-header/logo.svg": {
+      "sha256": "073b8f7298c9163ec6067617fbb3078ea3e69129d0d69efb098063754c546cc1"
+    },
     "site-dist/assets/js/bootstrap.bundle.min.js": {
       "sha256": "0833b2e9c3a26c258476c46266e6877fc75218625162e0460be9a3a098a61c6c"
     },
@@ -1327,6 +1336,18 @@
     "site-dist/blocks/previews/sidebar-inset/index.html": {
       "sha256": "ce31a5fe4a9500a4edda13cd7376da63c4f1cd90bbacb28e088f1ac39b5d4534"
     },
+    "site-dist/blocks/previews/site-header-dark/index.html": {
+      "sha256": "96e80ff9631d5b23e96d789d5a0f22e697a633c4c41fb8d7ec5b65aaddbfb271"
+    },
+    "site-dist/blocks/previews/site-header-logo/index.html": {
+      "sha256": "773f1bcee01a934ba9ffb24030da43fbe8fd5ade40b582e0f20f8e5fd93e55a2"
+    },
+    "site-dist/blocks/previews/site-header-rtl/index.html": {
+      "sha256": "211bde2333faff0bd59fe7eda7a2e000793d98f15e79ad5265c530dcdf69a72b"
+    },
+    "site-dist/blocks/previews/site-header/index.html": {
+      "sha256": "36853e72a97089a9cdc2a8c8d6f1c2a39347294f23ffb80c687c947c21f1a37b"
+    },
     "site-dist/blocks/previews/toc/index.html": {
       "sha256": "ffa012dfc8ee450400f51b0a3c9bf5c4e85c39c889919b4896707f48e64d431d"
     },
@@ -1341,6 +1362,9 @@
     },
     "site-dist/blocks/sidebar-inset/index.html": {
       "sha256": "f72bce17265bcbe283aace04c49593f1e20e4a2a42a27b6abbc0d2f3ef935a34"
+    },
+    "site-dist/blocks/site-header/index.html": {
+      "sha256": "a9461b6f71d6a286305b4477c3594c339bffee2950b35e331e4fce423a288448"
     },
     "site-dist/blocks/video-dialog/index.html": {
       "sha256": "1e27d27e56657e4667372e5c8980cf0cd038956b8ac35c3c3727247bb3e43af8"

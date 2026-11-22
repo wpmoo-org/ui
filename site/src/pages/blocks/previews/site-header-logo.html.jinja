@@ -1,0 +1,8 @@
+{% extends "layouts/block-preview.html.jinja" %}
+{% from "blocks/site_header_example.html.jinja" import render_site_header_page %}
+
+{% block title %}Site Header Logo Preview — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_site_header_page("logo", root_path, "site-header-logo-preview") }}
+{% endblock %}

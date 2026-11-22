@@ -122,6 +122,11 @@ class BlocksTests(CatalogTestCase):
                     "label": "Consent",
                     "status": "ready",
                 },
+                {
+                    "slug": "site-header",
+                    "label": "Site Header",
+                    "status": "ready",
+                },
             ],
         )
 
