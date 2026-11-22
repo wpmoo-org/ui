@@ -167,11 +167,8 @@ label.btn {
 .btn-primary {
   --bs-btn-color: var(--moo-primary-foreground);
   --bs-btn-bg: var(--moo-primary);
-  // Bootstrap declares the hover/active fills on this selector, so a theme
-  // owner reaches them only through the optional tokens; the fallbacks keep
-  // today's mixes (see $moo-btn-primary-hover-bg).
-  --bs-btn-hover-bg: var(--moo-primary-hover, #{$moo-btn-primary-hover-bg});
-  --bs-btn-active-bg: var(--moo-primary-active, #{$moo-btn-primary-active-bg});
+  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-primary) 80%, var(--moo-surface));
+  --bs-btn-active-bg: color-mix(in srgb, var(--moo-primary) 72%, var(--moo-surface));
 }
 
 .btn-secondary {

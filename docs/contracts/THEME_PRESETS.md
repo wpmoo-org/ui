@@ -172,10 +172,8 @@ inventory.
   "--moo-muted-foreground",
   "--moo-muted-surface",
   "--moo-primary",
-  "--moo-primary-active",
   "--moo-primary-foreground",
   "--moo-primary-foreground-dark",
-  "--moo-primary-hover",
   "--moo-ring",
   "--moo-sidebar",
   "--moo-sidebar-accent",
@@ -235,70 +233,8 @@ Neither profile emits catalog selectors or an inline style attribute on a host
 document element.
 
 `--moo-primary-foreground-dark` is retained for compatibility with hosts that
-already distinguish dark-mode action foregrounds. Brand action colors set by a
-preset (or a host theme) are mode-independent, so it intentionally matches
-`--moo-primary-foreground`. Moo's compiled default neutral primary is not a
-mode-independent brand color: it inverts in dark mode (the light `#171717`
-primary would be about 1.1:1 on the `#0a0a0a` dark surface), so a preset must
-not assume the default behaves like a brand color in dark mode.
-
-## Primary Hover and Active
-
-`--moo-primary-hover` and `--moo-primary-active` are optional public tokens for
-the fills of `.btn-primary` in its hover and active states. Bootstrap declares
-`--bs-btn-hover-bg` on `.btn-primary` itself, so a theme owner cannot set it
-from outside; the tokens are the supported override point. Moo does not declare
-them on the owner. When absent, the button falls back to
-`color-mix(in srgb, var(--moo-primary) 80%, var(--moo-surface))` (72% for
-active), derived from `--moo-primary` where the button is used, in light and
-dark, so a descendant `--moo-primary` override still re-derives both fills.
-
-Floor rule: a preset that overrides the pair must keep the label
-(`--moo-primary-foreground`) at WCAG 2.1 AA 4.5:1 against both fills. A fixed
-mix toward the surface lowers contrast on mid-tone brand colors (`#016db7`
-with a white label: base 5.42:1, 80% mix 3.76:1, 72% mix 3.23:1), so the
-exporter derives the pair as follows. Inputs and outputs are `#rrggbb`; every
-sRGB mix rounds each channel to 8 bits; contrast is the WCAG 2.1 relative
-luminance ratio; `surface` defaults to `#ffffff`.
-
-1. `hover0` = mix(primary 80%, surface 20%); `active0` = mix(primary 72%,
-   surface 28%).
-2. `anchor` is `#000000` when the label is lighter than the primary (relative
-   luminance), else `#ffffff`.
-3. If contrast(`hover0`, label) >= 4.5, `hover` = `hover0`. Otherwise `hover` =
-   mix(primary, anchor, t) for the smallest t in 0.08, 0.16, ..., 0.96 that
-   reaches 4.5; if no step passes, t = 0.96.
-4. If `hover` kept `hover0` and contrast(`active0`, label) >= 4.5, `active` =
-   `active0`. Otherwise `active` = mix(primary, anchor, t) for the smallest t
-   from t_hover + 0.08 (t_hover is 0 when `hover0` was kept) in 0.08 steps,
-   capped at 0.96, that reaches 4.5; if none passes, t = 0.96. When `hover`
-   already sits at 0.96, `active` therefore equals `hover`.
-
-When the primary itself cannot reach 4.5:1 against the label, the search can
-end at t = 0.96 without reaching the floor; the base color keeps its existing
-best-effort selection and the floor is not guaranteed.
-
-Owner reset: every resolved Moo owner (light and dark block) declares both
-tokens as `initial`, so a preset set on an outer owner is not inherited by an
-independent nested owner with its own primary and label; that owner's button
-uses the fallback. A preset that targets the nested owner overrides the reset
-at the same selector scope as its `--moo-primary`.
-
-Test vectors (label `#ffffff` unless noted):
-
-| Primary | Label | Hover (ratio) | Active (ratio) |
-| --- | --- | --- | --- |
-| `#171717` | `#ffffff` | `#454545` (9.59) | `#585858` (7.11) |
-| `#016db7` | `#ffffff` | `#0164a8` (6.20) | `#015c9a` (7.00) |
-| `#2563eb` | `#ffffff` | `#225bd8` (5.91) | `#1f53c5` (6.77) |
-| `#a8d1f0` | `#0a0a0a` | `#b9daf3` (13.56) | `#c0def4` (14.14) |
-| `#4a90d9` | `#ffffff` | `#3e79b6` (4.55) | `#386da5` (5.39) |
-| `#7aa7d9` | `#ffffff` | `#537294` (5.00) | `#496482` (6.13) |
-| `#767676` | `#777777` | `#050505` (4.55) | `#050505` (4.55) |
-| `#ffffff` | `#ffffff` | `#ffffff` (1.00) | `#ffffff` (1.00) |
-
-The exporter's link color (`--bs-link-color`, `--bs-link-hover-color`) is
-unchanged and does not follow these tokens.
+already distinguish dark-mode action foregrounds. RC.4 action colors are
+mode-independent, so it intentionally matches `--moo-primary-foreground`.
 
 ## Adapter Guidance
 

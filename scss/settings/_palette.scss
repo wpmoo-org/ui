@@ -25,54 +25,6 @@ $display-font-sizes: (
 ) !default;
 $display-font-weight: $headings-font-weight !default;
 
-// Opt-in website typography profile (foundations/_typography_website.scss),
-// active under .moo-ui[data-moo-typography="website"]. Bootstrap's own
-// $font-size-base / $h1-font-size ... knobs keep the app profile; this profile
-// is a second, scoped set, so default output is unchanged.
-//
-// Fluid sizes are (min max) pairs in rem. moo-fluid-size() derives
-// clamp(min, A rem + B vw, max) so the size equals min at a 320px viewport and
-// max at 1400px (16px root):
-//   B = (max - min) / (1400 - 320) * 100          [vw, with min/max in px]
-//   A = (min - B / 100 * 320) / 16                [rem]
-// Zoom rule (WCAG 1.4.4): every fluid entry keeps max <= 2.5 x min, which
-// guarantees 200% enlargement; text-only resize scales the rem parts.
-@function moo-fluid-size($min, $max, $min-vw: 320, $max-vw: 1400) {
-  $min-px: $min / 1rem * 16;
-  $max-px: $max / 1rem * 16;
-  $b: ($max-px - $min-px) / ($max-vw - $min-vw) * 100;
-  $a: ($min-px - $b / 100 * $min-vw) / 16;
-  $a: round($a * 10000) / 10000;
-  $b: round($b * 10000) / 10000;
-  @return unquote("clamp(#{$min}, #{$a}rem + #{$b}vw, #{$max})");
-}
-
-$moo-website-font-size: 1rem !default;
-$moo-website-line-height: 1.6 !default;
-$moo-website-small-font-size: 0.875rem !default;
-$moo-website-lead-font-size: 1.25rem !default;
-$moo-website-heading-line-height: 1.2 !default;
-$moo-website-heading-fluid-sizes: (
-  h1: (2rem 3rem),
-  h2: (1.75rem 2.25rem),
-  h3: (1.375rem 1.75rem)
-) !default;
-$moo-website-heading-fixed-sizes: (
-  h4: 1.25rem,
-  h5: 1.125rem,
-  h6: 1rem
-) !default;
-$moo-website-display-fluid-sizes: (
-  1: (2.75rem 4.5rem),
-  2: (2.5rem 4rem),
-  3: (2.25rem 3.5rem),
-  4: (2rem 3rem),
-  5: (1.75rem 2.5rem),
-  6: (1.5rem 2rem)
-) !default;
-// Readable line length for .text-measure, usable in any profile.
-$moo-text-measure: 68ch !default;
-
 // Moo's runtime palette is emitted by both the standalone :root build and the
 // scoped Odoo core build. Keep values centralized here so the two entrypoints
 // cannot drift while still using their own selector ownership.
@@ -130,13 +82,10 @@ $moo-primary-dark: $moo-border !default;
 $moo-primary-foreground-dark: $dark !default;
 $moo-foreground-dark: $light !default;
 $moo-muted-foreground-dark: #a1a1aa !default;
-// Same derivation as $moo-ring above, at a lower white weight than a
-// near-white glow. The focus ring renders this token at 50% alpha over the
-// dark surface (foundations/_focus.scss), so 40% white (about 1.8:1 against
-// the dark surfaces) was too faint; 72% white keeps the rendered ring at or
-// above WCAG 2.1 non-text contrast (3:1) on every dark surface up to the
-// muted surface (#27272a). Light mode is unchanged.
-$moo-ring-dark: color-mix(in srgb, $white 72%, $primary) !default;
+// Same derivation as $moo-ring above, at a lower white weight -- dark
+// surfaces need a darker-than-light-mode ring to read as mid-tone against a
+// dark background instead of a near-white glow.
+$moo-ring-dark: color-mix(in srgb, $white 40%, $primary) !default;
 // Reference dark --destructive token.
 $moo-destructive-dark: #ff6467 !default;
 $moo-destructive-surface-dark: color-mix(in srgb, $moo-destructive-dark 20%, transparent) !default;

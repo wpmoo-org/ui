@@ -1,6 +1,0 @@
-// Readable line length. Opt-in utility usable in any profile; the website
-// profile does not cap every paragraph because cards, columns and tables
-// already set their own width and a global cap would fight them.
-.text-measure {
-  max-inline-size: #{$moo-text-measure};
-}

@@ -244,15 +244,6 @@ $moo-tooltip-motion-easing: cubic-bezier(0.16, 1, 0.3, 1) !default;
 $moo-tooltip-motion-scale: 0.95 !default;
 $moo-tooltip-motion-translate: 0.25rem !default;
 
-// Fallbacks for the optional public tokens --moo-primary-hover/-active.
-// Bootstrap declares --bs-btn-hover-bg / --bs-btn-active-bg on .btn-primary
-// itself (vendor/bootstrap/scss/_buttons.scss), so a theme owner cannot set
-// them; a --moo-* token is the only reachable override. The token is not
-// declared on the owner: absent, the button derives the mix from --moo-primary
-// where it is used, so a descendant --moo-primary override still re-derives
-// hover/active. Presets set the tokens to keep the label at 4.5:1.
-$moo-btn-primary-hover-bg: color-mix(in srgb, var(--moo-primary) 80%, var(--moo-surface)) !default;
-$moo-btn-primary-active-bg: color-mix(in srgb, var(--moo-primary) 72%, var(--moo-surface)) !default;
 $btn-font-weight: 500 !default;
 $btn-font-size: 0.875rem !default;
 $btn-line-height: 1.25rem !default;

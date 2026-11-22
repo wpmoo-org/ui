@@ -528,7 +528,6 @@ console.log(JSON.stringify(Object.fromEntries(
                 "_scroll_fade_primitives.scss",
                 "_scroll_smooth.scss",
                 "_text_alignment.scss",
-                "_text_measure.scss",
             },
         )
         self.assertEqual(
@@ -624,7 +623,6 @@ console.log(JSON.stringify(Object.fromEntries(
                 "utilities/motion_primitives",
                 "utilities/overlay_scrollbar_native",
                 "foundations/backdrop",
-                "foundations/typography_website",
                 "foundations/scope",
             ],
         )
@@ -647,7 +645,6 @@ console.log(JSON.stringify(Object.fromEntries(
                 "foundations/globals",
                 "foundations/backdrop",
                 "themes/root",
-                "foundations/typography_website",
                 "foundations/scope",
             ],
         )
@@ -681,7 +678,6 @@ console.log(JSON.stringify(Object.fromEntries(
                 "foundations/focus",
                 "foundations/globals",
                 "foundations/scope",
-                "foundations/typography_website",
             },
         )
         self.assertEqual(
@@ -694,7 +690,6 @@ console.log(JSON.stringify(Object.fromEntries(
                 "../utilities/border",
                 "../utilities/scroll_fade",
                 "../utilities/scroll_smooth",
-                "../utilities/text_measure",
                 "../utilities/motion",
                 "../layouts/app",
                 "../layouts/page_grid",
@@ -1133,43 +1128,3 @@ console.log(JSON.stringify(Object.fromEntries(
         self.assertIn("--bs-box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);", css)
         self.assertIn("--bs-border-radius-xl: 0.75rem;", css)
         self.assertIn("--bs-focus-ring-width: 2px;", css)
-
-    def test_dark_focus_ring_reaches_non_text_contrast_on_dark_surfaces(self) -> None:
-        palette = (SCSS / "settings/_palette.scss").read_text(encoding="utf-8")
-        focus = (SCSS / "foundations/_focus.scss").read_text(encoding="utf-8")
-        match = re.search(
-            r"\$moo-ring-dark: color-mix\(in srgb, \$white (\d+)%, \$primary\) !default;",
-            palette,
-        )
-        self.assertIsNotNone(match, "dark ring must derive from $primary")
-        # The shared focus rule renders the ring at 50% alpha over the surface.
-        self.assertIn("color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent)", focus)
-
-        def channel(value: int) -> float:
-            c = value / 255
-            return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
-
-        def luminance(rgb: tuple[int, ...]) -> float:
-            r, g, b = (channel(v) for v in rgb)
-            return 0.2126 * r + 0.7152 * g + 0.0722 * b
-
-        def ratio(a: tuple[int, ...], b: tuple[int, ...]) -> float:
-            hi, lo = sorted((luminance(a), luminance(b)), reverse=True)
-            return (hi + 0.05) / (lo + 0.05)
-
-        # Documented constants: $primary (#171717), dark surfaces from
-        # settings/_palette.scss; input bg is mix(#27272a 50%, #0a0a0a).
-        primary = (0x17, 0x17, 0x17)
-        weight = int(match.group(1)) / 100
-        ring = tuple(round(255 * weight + p * (1 - weight)) for p in primary)
-        surfaces = {
-            "body": (0x0A, 0x0A, 0x0A),
-            "sidebar": (0x1C, 0x1C, 0x1F),
-            "tertiary": (0x20, 0x20, 0x24),
-            "muted": (0x27, 0x27, 0x2A),
-            "input": (0x19, 0x19, 0x1A),
-        }
-        for name, surface in surfaces.items():
-            rendered = tuple(round(0.5 * r + 0.5 * s) for r, s in zip(ring, surface))
-            with self.subTest(surface=name):
-                self.assertGreaterEqual(ratio(rendered, surface), 3.0)

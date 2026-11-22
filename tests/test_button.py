@@ -137,36 +137,18 @@ class ButtonTests(CatalogTestCase):
 
     def test_primary_button_uses_reference_primary_theme_tokens(self) -> None:
         scss = (ROOT / "scss/components/_button.scss").read_text(encoding="utf-8")
-        primary = scss.split(".btn-primary {", 1)[1].split("\n}", 1)[0]
+        primary = scss.split(".btn-primary {", 1)[1].split("}", 1)[0]
 
         self.assertIn("--bs-btn-color: var(--moo-primary-foreground);", primary)
         self.assertIn("--bs-btn-bg: var(--moo-primary);", primary)
         self.assertIn(
-            "--bs-btn-hover-bg: var(--moo-primary-hover, "
-            "#{$moo-btn-primary-hover-bg});",
+            "--bs-btn-hover-bg: color-mix(in srgb, var(--moo-primary) 80%, var(--moo-surface));",
             primary,
         )
         self.assertIn(
-            "--bs-btn-active-bg: var(--moo-primary-active, "
-            "#{$moo-btn-primary-active-bg});",
+            "--bs-btn-active-bg: color-mix(in srgb, var(--moo-primary) 72%, var(--moo-surface));",
             primary,
         )
-        settings = (ROOT / "scss/settings/_component_variables.scss").read_text(
-            encoding="utf-8"
-        )
-        for knob, weight in (("hover", 80), ("active", 72)):
-            self.assertIn(
-                f"$moo-btn-primary-{knob}-bg: color-mix(in srgb, "
-                f"var(--moo-primary) {weight}%, var(--moo-surface)) !default;",
-                settings,
-            )
-
-    def test_owner_blocks_reset_primary_state_tokens(self) -> None:
-        theme = (ROOT / "scss/themes/_theme.scss").read_text(encoding="utf-8")
-        for mixin in ("moo-core-light", "moo-core-dark"):
-            body = theme.split(f"@mixin {mixin} {{", 1)[1].split("\n}\n", 1)[0]
-            for token in ("--moo-primary-hover", "--moo-primary-active"):
-                self.assertIn(f"{token}: initial;", body, f"{mixin} must reset {token}")
 
     def test_danger_button_uses_reference_destructive_surface_tokens(self) -> None:
         scss = (ROOT / "scss/components/_button.scss").read_text(encoding="utf-8")

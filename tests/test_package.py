@@ -72,7 +72,6 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/foundations/_focus.scss",
     "scss/foundations/_globals.scss",
     "scss/foundations/_scope.scss",
-    "scss/foundations/_typography_website.scss",
     "scss/layouts/_app.scss",
     "scss/layouts/_page_grid.scss",
     "scss/layouts/app/sidebar/_base.scss",
@@ -102,7 +101,6 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/utilities/_scroll_fade_primitives.scss",
     "scss/utilities/_scroll_smooth.scss",
     "scss/utilities/_text_alignment.scss",
-    "scss/utilities/_text_measure.scss",
 }
 EXPECTED_PACKAGE_FILES = {
     "dist/assets/css/moo-ui.css",

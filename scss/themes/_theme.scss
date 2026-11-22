@@ -100,10 +100,6 @@ $moo-theme-colors-border-subtle-dark: (
   --moo-paragraph-margin-bottom: #{$paragraph-margin-bottom};
 }
 
-// Every resolved owner resets the optional --moo-primary-hover/-active tokens
-// (guaranteed-invalid value), so a preset set on an outer owner is not inherited
-// by an independent nested owner with its own primary; .btn-primary then uses
-// its var() fallback. A preset targeting this owner overrides the reset.
 @mixin moo-core-light {
   color-scheme: light;
   color: var(--#{$prefix}body-color);
@@ -113,8 +109,6 @@ $moo-theme-colors-border-subtle-dark: (
   --moo-border: #{$moo-border};
   --moo-primary: #{$moo-primary};
   --moo-primary-foreground: #{$moo-primary-foreground};
-  --moo-primary-hover: initial;
-  --moo-primary-active: initial;
   --moo-foreground: #{$moo-foreground};
   --moo-muted-foreground: #{$moo-muted-foreground};
   --moo-disabled-foreground: #{$moo-disabled-foreground};
@@ -188,8 +182,6 @@ $moo-theme-colors-border-subtle-dark: (
   --moo-border: #{$moo-border-dark};
   --moo-primary: #{$moo-primary-dark};
   --moo-primary-foreground: #{$moo-primary-foreground-dark};
-  --moo-primary-hover: initial;
-  --moo-primary-active: initial;
   --moo-foreground: #{$moo-foreground-dark};
   --moo-muted-foreground: #{$moo-muted-foreground-dark};
   --moo-disabled-foreground: #{$moo-disabled-foreground-dark};

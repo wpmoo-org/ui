@@ -46,10 +46,8 @@ export const PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST = [
   "--moo-muted-foreground",
   "--moo-muted-surface",
   "--moo-primary",
-  "--moo-primary-active",
   "--moo-primary-foreground",
   "--moo-primary-foreground-dark",
-  "--moo-primary-hover",
   "--moo-ring",
   "--moo-sidebar",
   "--moo-sidebar-accent",
@@ -415,10 +413,6 @@ function colorTokensFromSeed(name, seed) {
   const hover = scale[Math.min(primaryStep + 100, 900)];
   const ring = scale[primaryStep > 600 ? primaryStep - 200 : 400];
   const foreground = rgbValue(foregroundColor);
-  const stateColors = primaryStateColors(
-    rgbHex(primary),
-    rgbHex(foregroundColor)
-  );
 
   return {
     "--bs-primary": rgbValue(primary),
@@ -429,8 +423,6 @@ function colorTokensFromSeed(name, seed) {
     "--moo-primary": rgbValue(primary),
     "--moo-primary-foreground": foreground,
     "--moo-primary-foreground-dark": foreground,
-    "--moo-primary-hover": stateColors.hover,
-    "--moo-primary-active": stateColors.active,
     "--moo-ring": rgbValue(ring),
   };
 }
@@ -455,52 +447,6 @@ function actionPrimaryStep(scale, foreground) {
     const contrast = contrastRatio(scale[step], foreground);
     return contrast > best.contrast ? { step, contrast } : best;
   }, { step: ACTION_PRIMARY_STEPS[0], contrast: -Infinity }).step;
-}
-
-// Hover and active fills of the primary action, reproducible by other
-// adapters (documented step by step in THEME_PRESETS.md). All inputs and
-// outputs are #rrggbb; channels round to 8 bits after every sRGB mix.
-//  1. hover0/active0 mix the primary 80% / 72% with the surface (today's CSS).
-//  2. The anchor is black for a light label and white for a dark label.
-//  3. hover keeps hover0 when it reaches 4.5:1 against the label, else it mixes
-//     the primary toward the anchor by the smallest t in 0.08, 0.16, ..., 0.96
-//     that reaches the floor (fallback: the last step).
-//  4. active keeps active0 only when hover kept hover0 and active0 reaches the
-//     floor; otherwise it mixes toward the anchor from t_hover + 0.08 (t_hover
-//     is 0 when hover0 was kept) in 0.08 steps until the floor is reached.
-export function primaryStateColors(primaryHex, foregroundHex, surfaceHex = "#ffffff") {
-  const primary = hexToRgb(primaryHex);
-  const foreground = hexToRgb(foregroundHex);
-  const surface = hexToRgb(surfaceHex);
-  const anchor =
-    relativeLuminance(foreground) > relativeLuminance(primary)
-      ? [0, 0, 0]
-      : [255, 255, 255];
-  const passes = (rgb) =>
-    contrastRatio(rgb, foreground) >= ACTION_PRIMARY_MIN_CONTRAST;
-  const toward = (k) => mixRgb(anchor, primary, k * 8);
-  const lastK = 12;
-  const searchFrom = (k) => {
-    let at = Math.min(Math.max(k, 1), lastK);
-    while (at < lastK && !passes(toward(at))) {
-      at += 1;
-    }
-    return at;
-  };
-
-  const hover0 = mixRgb(surface, primary, 20);
-  const active0 = mixRgb(surface, primary, 28);
-  const hoverKept = passes(hover0);
-  const hoverK = hoverKept ? 0 : searchFrom(1);
-  const hover = hoverKept ? hover0 : toward(hoverK);
-  const active =
-    hoverKept && passes(active0) ? active0 : toward(searchFrom(hoverK + 1));
-
-  return { hover: rgbHex(hover), active: rgbHex(active) };
-}
-
-function rgbHex(rgb) {
-  return `#${rgb.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
 }
 
 function chartTokens(values) {
