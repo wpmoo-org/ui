@@ -10,12 +10,28 @@
 
    id            required; prefix for the drawer id (id ~ "-drawer")
    aria_label    required; the name of the single <nav> landmark
-   brand         {label, href, logo: {src, alt, width, height}, show_label}
+   brand         {label, href, mark, subtitle, dir,
+                  logo: {src, alt, width, height}, show_label}
                  label is the accessible name of the home link. Without a
                  logo the label is the visible brand text. With a logo only
                  the image shows and its alt (default: label) names the
                  link; with show_label the label shows next to the logo and
                  the image is decorative (alt="").
+                 mark is an icon name rendered by the ready Sidebar brand
+                 mark macro (the same tile as the catalog brand) before the
+                 label; it is decorative and the label is always visible.
+                 subtitle is optional plain text under the label, part of
+                 the link name. Rules: mark and logo are mutually
+                 exclusive, and subtitle needs a visible label (no logo, or
+                 a logo with show_label, or a mark).
+                 A lockup (a mark or logo together with visible text)
+                 follows the page direction by default: in right-to-left
+                 pages the mark sits right of the text. dir ("ltr", "rtl"
+                 or "auto") fixes the lockup order on an inner span, for a
+                 logo that must keep its form, while the brand link itself
+                 keeps the page direction and stays at the start edge.
+                 Any other value fails. A text-only or logo-only brand
+                 gets no dir attribute.
    items         main links: {label, href, active, disabled, drawer_only,
                  children: [{label, href, active, disabled}]}
    utility_items small secondary links, same keys except children. From the
@@ -52,6 +68,7 @@
 {% from "components/close_button.html.jinja" import close_button %}
 {% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}
 {% from "components/navigation.html.jinja" import nav_item %}
+{% from "components/sidebar.html.jinja" import sidebar_brand_mark %}
 
 {% set site_header_breakpoints = ["lg", "xl"] %}
 {% set site_header_surfaces = ["default", "dark"] %}
@@ -71,12 +88,34 @@
 {% macro _site_header_brand(brand, extra_class="") -%}
   {% set _ = _site_header_check_href(brand.href | default("/", true)) %}
   {% set logo = brand.logo | default(none) %}
+  {% set mark = brand.mark | default("", true) %}
+  {% set subtitle = brand.subtitle | default("", true) %}
   {% set show_label = brand.show_label | default(false) or not logo %}
-  <a class="navbar-brand{% if logo %} d-flex align-items-center gap-2{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}" href="{{ brand.href | default('/', true) }}">
-    {%- if logo -%}
+  {% set lockup = (logo or mark) and show_label %}
+  {% set content %}
+    {%- if mark -%}
+      {{ sidebar_brand_mark(mark) }}
+    {%- elif logo -%}
       <img src="{{ logo.src }}" alt="{{ '' if show_label else logo.alt | default(brand.label, true) }}"{% if logo.width | default(none) %} width="{{ logo.width }}"{% endif %}{% if logo.height | default(none) %} height="{{ logo.height }}"{% endif %} class="flex-shrink-0">
     {%- endif -%}
-    {%- if show_label -%}{% if logo %}<span>{{ brand.label }}</span>{% else %}{{ brand.label }}{% endif %}{%- endif -%}
+    {%- if show_label -%}
+      {%- if subtitle -%}
+        <span class="d-flex flex-column lh-sm fs-6"><span>{{ brand.label }}</span><span class="small text-body-secondary">{{ subtitle }}</span></span>
+      {%- elif logo or mark -%}
+        <span>{{ brand.label }}</span>
+      {%- else -%}
+        {{ brand.label }}
+      {%- endif -%}
+    {%- endif -%}
+  {% endset %}
+  {# The link carries the navbar-brand margin, so it must keep the page
+     direction; a fixed lockup order lives on an inner span. #}
+  <a class="navbar-brand{% if lockup %} d-flex align-items-center{% elif logo %} d-flex align-items-center gap-2{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}" href="{{ brand.href | default('/', true) }}">
+    {%- if lockup -%}
+      <span class="d-inline-flex align-items-center gap-2"{% if brand.dir | default("", true) %} dir="{{ brand.dir }}"{% endif %}>{{ content | trim }}</span>
+    {%- else -%}
+      {{ content | trim }}
+    {%- endif -%}
   </a>
 {%- endmacro %}
 
@@ -103,6 +142,9 @@
   {% if not aria_label | trim %}{{ fail("Site header aria_label is required") }}{% endif %}
   {% if brand is not mapping or not brand.label | default("", true) | trim %}{{ fail("Site header brand label is required") }}{% endif %}
   {% if brand.logo | default(none) and not brand.logo.src | default("", true) %}{{ fail("Site header logo requires src") }}{% endif %}
+  {% if brand.dir | default("", true) and brand.dir not in ["ltr", "rtl", "auto"] %}{{ fail("Unknown site header brand dir: " ~ brand.dir) }}{% endif %}
+  {% if brand.mark | default("", true) and brand.logo | default(none) %}{{ fail("Site header brand mark and logo are mutually exclusive") }}{% endif %}
+  {% if brand.subtitle | default("", true) and brand.logo | default(none) and not brand.show_label | default(false) %}{{ fail("Site header brand subtitle requires a visible label") }}{% endif %}
   {% if breakpoint not in site_header_breakpoints %}{{ fail("Unknown site header breakpoint: " ~ breakpoint) }}{% endif %}
   {% if surface not in site_header_surfaces %}{{ fail("Unknown site header surface: " ~ surface) }}{% endif %}
   {% set drawer_id = id ~ "-drawer" %}
@@ -130,7 +172,7 @@
           {% endif %}
         </div>
       </div>
-      {{ button("", variant="ghost", size="icon", icon_start="menu", aria_label=menu_label, sheet_target=drawer_id, aria_controls=drawer_id, extra_class="ms-auto d-" ~ breakpoint ~ "-none") }}
+      {{ button("", variant="ghost", size="icon", icon_start="menu", aria_label=menu_label, sheet_target=drawer_id, aria_controls=drawer_id, extra_class="d-" ~ breakpoint ~ "-none") }}
     </div>
   </nav>
 {%- endmacro %}

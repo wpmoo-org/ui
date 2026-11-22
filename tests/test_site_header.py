@@ -4,7 +4,7 @@ import re
 from html.parser import HTMLParser
 
 from build import create_environment
-from tests.helpers import CatalogTestCase
+from tests.helpers import DIST, CatalogTestCase
 
 ITEMS = (
     '[{"label": "Home", "href": "/", "active": true},'
@@ -138,6 +138,96 @@ class SiteHeaderTests(CatalogTestCase):
         self.assertTrue(imgs and all(i["alt"] == "" for i in imgs))
         self.assertIn("<span>School</span>", both_html)
 
+    def test_mark_and_subtitle(self) -> None:
+        html = header('brand={"label": "Moo UI", "href": "/", "mark": "blocks", "subtitle": "Component system"}')
+        root = dom(html)
+        brands = []
+
+        def collect(node):
+            if "navbar-brand" in node.classes:
+                brands.append(node)
+            for child in node.children:
+                collect(child)
+
+        collect(root)
+        self.assertEqual(len(brands), 2)  # bar and drawer header
+        for brand in brands:
+            self.assertTrue({"d-flex", "align-items-center"} <= brand.classes)
+            lockup = brand.children[0]
+            self.assertEqual(lockup.tag, "span")
+            self.assertTrue({"d-inline-flex", "align-items-center", "gap-2"} <= lockup.classes)
+            mark = lockup.children[0]
+            self.assertTrue({"sidebar-brand-mark", "sidebar-brand-mark--primary"} <= mark.classes)
+            self.assertEqual(brand.find(lambda n: n.tag == "img"), None)
+            text = lockup.children[1]
+            self.assertTrue({"d-flex", "flex-column", "lh-sm"} <= text.classes)
+            self.assertEqual(len(text.children), 2)
+            self.assertTrue({"small", "text-body-secondary"} <= text.children[1].classes)
+        self.assertIn("Moo UI", html)
+        self.assertIn("Component system", html)
+
+    def test_lockup_follows_page_direction_unless_fixed(self) -> None:
+        def brand_dirs(html):
+            found = []
+
+            def walk(node):
+                if "navbar-brand" in node.classes:
+                    # The link keeps the page direction; a lockup's dir sits on an inner span.
+                    self.assertNotIn("dir", node.attrs)
+                    inner = [c.attrs.get("dir") for c in node.children if c.tag == "span" and "d-inline-flex" in c.classes]
+                    found.append(inner[0] if inner else None)
+                for child in node.children:
+                    walk(child)
+
+            walk(dom(html))
+            return found
+
+        cases = {
+            "mark": 'brand={"label": "A", "mark": "blocks"}',
+            "mark and subtitle": 'brand={"label": "A", "mark": "blocks", "subtitle": "S"}',
+            "logo and label": 'brand={"label": "A", "show_label": true, "logo": ' + LOGO + "}",
+        }
+        for name, args in cases.items():
+            with self.subTest(case=name):
+                self.assertEqual(brand_dirs(header(args)), [None, None])  # bar and drawer follow the page
+        for name, args in {
+            "text only": 'brand={"label": "A"}',
+            "logo only": 'brand={"label": "A", "logo": ' + LOGO + "}",
+            "text only with dir": 'brand={"label": "A", "dir": "rtl"}',
+        }.items():
+            with self.subTest(case=name):
+                self.assertEqual(brand_dirs(header(args)), [None, None])
+        for value in ("ltr", "rtl", "auto"):
+            with self.subTest(override=value):
+                html = header('brand={"label": "A", "mark": "blocks", "dir": "%s"}' % value)
+                self.assertEqual(brand_dirs(html), [value, value])
+        for bad in ("up", "LTR"):
+            with self.subTest(bad=bad):
+                with self.assertRaises(Exception):
+                    header('brand={"label": "A", "mark": "blocks", "dir": "%s"}' % bad)
+
+    def test_mark_without_subtitle_and_subtitle_with_label_logo(self) -> None:
+        html = header('brand={"label": "Moo UI", "mark": "blocks"}')
+        self.assertIn("sidebar-brand-mark", html)
+        self.assertIn("<span>Moo UI</span>", html)
+        self.assertNotIn("text-body-secondary", html)
+        both = header('brand={"label": "A", "subtitle": "Sub", "show_label": true, "logo": ' + LOGO + "}")
+        self.assertIn("Sub", both)
+        self.assertNotIn("sidebar-brand-mark", both)
+        plain = header('brand={"label": "A", "subtitle": "Sub"}')
+        self.assertIn("Sub", plain)
+
+    def test_mark_and_subtitle_rules_fail(self) -> None:
+        cases = {
+            "mark and logo": 'brand={"label": "A", "mark": "blocks", "logo": ' + LOGO + "}",
+            "subtitle with logo only": 'brand={"label": "A", "subtitle": "Sub", "logo": ' + LOGO + "}",
+            "mark without label": 'brand={"label": "", "mark": "blocks"}',
+        }
+        for name, args in cases.items():
+            with self.subTest(case=name):
+                with self.assertRaises(Exception):
+                    header(args)
+
     def test_logo_alt_defaults_to_label(self) -> None:
         html = header('brand={"label": "School", "logo": {"src": "/l.svg"}}')
         self.assertIn('alt="School"', html)
@@ -269,9 +359,9 @@ class SiteHeaderTests(CatalogTestCase):
         self.assertIn("offcanvas", drawer.classes)
         self.assertEqual(toggler.attrs["data-bs-toggle"], "offcanvas")
         self.assertEqual(toggler.attrs["aria-controls"], drawer.attrs["id"])
-        self.assertTrue({"ms-auto", "d-lg-none"} <= toggler.classes)
+        self.assertTrue({"d-lg-none"} <= toggler.classes and "ms-auto" not in toggler.classes)
         xl = dom(header('breakpoint="xl"')).find(lambda n: n.tag == "nav").children[0].children[2]
-        self.assertTrue({"ms-auto", "d-xl-none"} <= xl.classes)
+        self.assertTrue({"d-xl-none"} <= xl.classes and "ms-auto" not in xl.classes)
 
     def test_extra_class_and_container(self) -> None:
         html = header('extra_class="sticky-top", container="container-xl"')
@@ -355,3 +445,87 @@ class AdditiveMacroParameterTests(CatalogTestCase):
             '{% from "components/navigation.html.jinja" import nav_item %}{{ nav_item("A") }}'
         ).render()
         self.assertEqual(re.search(r'<li class="([^"]*)"', default).group(1), "nav-item")
+
+
+def _css_rules(css: str) -> dict[str, list[str]]:
+    """Map each selector (whitespace-normalised) to its declaration blocks."""
+    flat = " ".join(re.sub(r"/\*.*?\*/", "", css, flags=re.S).split())
+    rules: dict[str, list[str]] = {}
+    for selectors, body in re.findall(r"([^{}]+)\{([^{}]*)\}", flat):
+        for selector in re.split(r",(?![^()]*\))", selectors):
+            rules.setdefault(selector.strip(), []).append(body.strip())
+    return rules
+
+
+class SiteHeaderRtlCssContractTests(CatalogTestCase):
+    """The built stylesheet keeps the accepted logical/RTL navbar rules."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.rules = _css_rules((DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8"))
+
+    def declared(self, selector: str, declaration: str) -> bool:
+        return any(declaration in body for body in self.rules.get(selector, []))
+
+    def test_brand_end_margin_is_logical(self) -> None:
+        self.assertTrue(self.declared(".navbar-brand", "margin-inline-end: var(--bs-navbar-brand-margin-end)"))
+
+    def test_navbar_nav_has_no_inline_start_padding(self) -> None:
+        self.assertTrue(self.declared(".navbar-nav", "padding-inline-start: 0"))
+
+    def test_dropdown_caret_gap_follows_inline_direction(self) -> None:
+        for selector in (
+            ".dropdown-toggle::after",
+            ".dropup .dropdown-toggle::after",
+            ".dropend .dropdown-toggle::after",
+        ):
+            with self.subTest(selector=selector):
+                self.assertTrue(self.declared(selector, "margin-inline-start: 0.255em"))
+        self.assertTrue(self.declared(".dropdown-toggle:empty::after", "margin-inline-start: 0"))
+
+    def test_offcanvas_header_close_button_sits_at_inline_end(self) -> None:
+        self.assertTrue(self.declared(".offcanvas-header .btn-close", "margin-inline-start: auto"))
+        self.assertTrue(
+            self.declared(
+                ".offcanvas-header .btn-close",
+                "margin-inline-end: calc(-.5 * var(--bs-offcanvas-padding-x))",
+            )
+        )
+
+    def test_split_button_caret_keeps_zero_gap(self) -> None:
+        for selector in (
+            ".dropdown-toggle-split::after",
+            ".dropup .dropdown-toggle-split::after",
+            ".dropend .dropdown-toggle-split::after",
+        ):
+            with self.subTest(selector=selector):
+                self.assertTrue(self.declared(selector, "margin-inline-start: 0"))
+
+    def test_navbar_drawer_flips_to_the_physical_left_in_rtl(self) -> None:
+        guard = ":where(.navbar *):where(:dir(rtl)):where(:not(.sheet, .sidebar))"
+        border = "solid var(--bs-offcanvas-border-color)"
+        for infix in ("", "-lg", "-xl"):
+            end = f".offcanvas{infix}.offcanvas-end{guard}"
+            start = f".offcanvas{infix}.offcanvas-start{guard}"
+            closed = ":not(.showing):not(.show)"
+            with self.subTest(infix=infix or "base"):
+                self.assertTrue(self.declared(end, "left: 0"))
+                self.assertTrue(self.declared(end, "right: auto"))
+                self.assertTrue(self.declared(end + closed, "transform: translateX(-100%)"))
+                self.assertTrue(self.declared(end + ".hiding", "transform: translateX(-100%)"))
+                self.assertTrue(self.declared(start, "right: 0"))
+                self.assertTrue(self.declared(start, "left: auto"))
+                self.assertTrue(self.declared(start + closed, "transform: translateX(100%)"))
+                # The border faces the content: opposite the anchored edge.
+                self.assertTrue(self.declared(end, "border-left: 0"))
+                self.assertTrue(self.declared(end, "border-right: var(--bs-offcanvas-border-width) " + border))
+                self.assertTrue(self.declared(start, "border-right: 0"))
+                self.assertTrue(self.declared(start, "border-left: var(--bs-offcanvas-border-width) " + border))
+
+    def test_navbar_drawer_flip_excludes_sheet_and_sidebar_drawers(self) -> None:
+        flipped = [s for s in self.rules if ":where(:dir(rtl))" in s and "offcanvas" in s]
+        self.assertTrue(flipped)
+        for selector in flipped:
+            with self.subTest(selector=selector):
+                self.assertIn(":where(:not(.sheet, .sidebar))", selector)

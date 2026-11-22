@@ -21,7 +21,7 @@
 ] %}
 
 {% macro render_site_header_text_example(id="site-header-text") -%}
-  {% call site_header(id, "Main navigation", {"label": "Moo School", "href": "#home"}, items=site_header_example_items[:5]) %}
+  {% call site_header(id, "Main navigation", {"label": "Moo UI", "href": "#home", "mark": "blocks", "subtitle": "Component system"}, items=site_header_example_items[:5]) %}
     {{ button("Apply", size="sm", element="a", href="#apply") }}
   {% endcall %}
 {%- endmacro %}
@@ -29,7 +29,7 @@
 {% macro render_site_header_logo_example(root_path, id="site-header-logo") -%}
   {% call site_header(
     id, "Main navigation",
-    {"label": "Moo School", "href": "#home", "show_label": true, "logo": {"src": root_path ~ "assets/images/site-header/logo.svg", "alt": "Moo School", "width": 32, "height": 32}},
+    {"label": "Moo UI", "href": "#home", "show_label": true, "logo": {"src": root_path ~ "assets/images/site-header/logo.svg", "alt": "Moo UI", "width": 32, "height": 32}},
     items=site_header_example_items, utility_items=site_header_example_utility
   ) %}
     {{ button("Apply", size="sm", element="a", href="#apply") }}
@@ -39,16 +39,23 @@
 {% macro render_site_header_dark_example(root_path, id="site-header-dark") -%}
   {% call site_header(
     id, "Main navigation",
-    {"label": "Moo School", "href": "#home", "logo": {"src": root_path ~ "assets/images/site-header/logo.svg", "alt": "Moo School", "width": 32, "height": 32}},
+    {"label": "Moo UI", "href": "#home", "mark": "blocks"},
     items=site_header_example_items, utility_items=site_header_example_utility, surface="dark", breakpoint="xl"
   ) %}
     {{ button("Apply", variant="outline", size="sm", element="a", href="#apply") }}
   {% endcall %}
 {%- endmacro %}
 
+{% macro render_site_header_rtl_example(id="site-header-rtl") -%}
+  {% call site_header(id, "Main navigation", {"label": "Moo UI", "href": "#home", "mark": "blocks", "subtitle": "Component system"}, items=site_header_example_items[:5]) %}
+    {{ button("Apply", size="sm", element="a", href="#apply") }}
+  {% endcall %}
+{%- endmacro %}
+
 {% macro render_site_header_page(kind, root_path, id) -%}
   {% if kind == "text" %}{{ render_site_header_text_example(id) }}
   {% elif kind == "logo" %}{{ render_site_header_logo_example(root_path, id) }}
+  {% elif kind == "rtl" %}{{ render_site_header_rtl_example(id) }}
   {% else %}{{ render_site_header_dark_example(root_path, id) }}{% endif %}
   <main class="container py-4">
     <h1 class="h3">Welcome</h1>

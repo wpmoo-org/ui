@@ -45,7 +45,15 @@ COMPONENT_SELECTOR_PREFIXES = {
     # Dropdown also exposes directional wrappers such as .dropend;
     # the mobile sidebar placement rule retunes the native dropdown
     # surface while staying in the dropdown partial.
-    "dropdown": ("dropdown", "dropend", "active"),
+    # .dropup is Bootstrap Dropdown's own directional wrapper.
+    "dropdown": ("dropdown", "dropend", "dropup", "active"),
+    # Navbar mirrors Bootstrap's _navbar.scss, which styles the navbar
+    # drawer: .offcanvas and its transition states, plus the .sheet and
+    # .sidebar drawers the RTL flip excludes.
+    "navbar": ("navbar", "offcanvas", "showing", "show", "hiding", "sheet", "sidebar"),
+    # Offcanvas mirrors Bootstrap's _offcanvas.scss; its header owns the
+    # native .btn-close placement.
+    "offcanvas": ("offcanvas", "btn-close"),
     "input": ("form-control", "form-select"),
     # Table owns Bootstrap's static table family and the horizontal
     # scroll-fade helper used beside responsive table wrappers. The

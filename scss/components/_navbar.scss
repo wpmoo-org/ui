@@ -1,0 +1,66 @@
+/* Navbar */
+// Mirrors Bootstrap's own _navbar.scss, which also styles .offcanvas inside
+// .navbar-expand-*.
+// Navbar inline-direction fixes. Moo ships Bootstrap's LTR build, whose
+// navbar rules use physical sides, so a right-to-left page needs these
+// logical counterparts. Each pairs a physical reset with its logical
+// replacement, which resolves to the same physical side in LTR.
+.navbar-brand {
+  margin-right: 0;
+  margin-inline-end: var(--#{$prefix}navbar-brand-margin-end);
+}
+
+.navbar-nav {
+  padding-inline-start: 0;
+}
+
+// The navbar drawer anchors to the inline-end edge in either direction, as
+// Bootstrap's RTL build does. Only drawers inside a navbar are flipped:
+// Sheet (.sheet) and the Sidebar drawer (.sidebar) keep their physical
+// placement. The border faces the content: the edge opposite the anchor. :where() keeps
+// the specificity at Bootstrap's own, and the hidden transform applies only
+// while the drawer is closed or closing, so Bootstrap's .showing and .show
+// states still win and the navbar-expand inline state (!important) is
+// unaffected.
+@mixin moo-navbar-offcanvas-rtl($selector) {
+  $guard: ":where(.navbar *):where(:dir(rtl)):where(:not(.sheet, .sidebar))";
+  $end: "#{$selector}.offcanvas-end#{$guard}";
+  $start: "#{$selector}.offcanvas-start#{$guard}";
+
+  #{$end} {
+    right: auto;
+    left: 0;
+    border-right: var(--#{$prefix}offcanvas-border-width) solid var(--#{$prefix}offcanvas-border-color);
+    border-left: 0;
+  }
+
+  #{$end}:not(.showing):not(.show),
+  #{$end}.hiding {
+    transform: translateX(-100%);
+  }
+
+  #{$start} {
+    right: 0;
+    left: auto;
+    border-right: 0;
+    border-left: var(--#{$prefix}offcanvas-border-width) solid var(--#{$prefix}offcanvas-border-color);
+  }
+
+  #{$start}:not(.showing):not(.show),
+  #{$start}.hiding {
+    transform: translateX(100%);
+  }
+}
+
+@include moo-navbar-offcanvas-rtl(".offcanvas");
+
+@each $breakpoint in map-keys($grid-breakpoints) {
+  $next: breakpoint-next($breakpoint, $grid-breakpoints);
+  $infix: breakpoint-infix($next, $grid-breakpoints);
+
+  @if $infix != "" {
+    @include media-breakpoint-down($next) {
+      @include moo-navbar-offcanvas-rtl(".offcanvas#{$infix}");
+    }
+  }
+}

@@ -252,3 +252,23 @@
   }
 
 }
+
+// The caret gap follows the inline direction. Bootstrap's LTR build puts
+// it on the physical left; the logical start side is the same side in LTR.
+.dropdown-toggle::after,
+.dropup .dropdown-toggle::after,
+.dropend .dropdown-toggle::after {
+  margin-left: 0;
+  margin-inline-start: $caret-spacing;
+}
+
+.dropdown-toggle:empty::after {
+  margin-inline-start: 0;
+}
+
+// Split buttons keep Bootstrap's zero caret gap.
+.dropdown-toggle-split::after,
+.dropup .dropdown-toggle-split::after,
+.dropend .dropdown-toggle-split::after {
+  margin-inline-start: 0;
+}

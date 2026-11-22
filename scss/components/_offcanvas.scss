@@ -1,0 +1,12 @@
+/* Offcanvas */
+// Mirrors Bootstrap's _offcanvas.scss. Kept out of _sheet.scss, whose rules
+// are deliberately scoped to .offcanvas.sheet; this one applies to every
+// offcanvas header, including the navbar and Sidebar drawers.
+
+// Offcanvas header: Bootstrap's LTR build pushes the button to the physical
+// right with an auto left margin. The logical pair resolves to the same
+// physical margins in LTR and mirrors in RTL.
+.offcanvas-header .btn-close {
+  margin-inline-start: auto;
+  margin-inline-end: calc(-.5 * var(--#{$prefix}offcanvas-padding-x));
+}

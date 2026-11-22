@@ -1,16 +1,16 @@
 {
   "coreOutputs": {
     "dist/assets/css/moo-ui.css": {
-      "sha256": "74ace06833227d1579e40f92dd5c13c0b804416b06f62354a37e53bff26eb0eb"
+      "sha256": "9e56f1ccf1bfc64a19b5a75df8139cca50d45a6b40997620d2dc8a6a6a373bed"
     },
     "dist/assets/css/moo-ui.min.css": {
-      "sha256": "55bfce3129c1d9f85943dd2cd8b38e4445b29d0264dab6168ef7520e3930baf4"
+      "sha256": "fc29e21e5179fb4faaa4c91566d6e9a0735ec23fa0f3e4ee62d7dfbedd725e56"
     },
     "dist/assets/css/moo.css": {
-      "sha256": "4ac09fbfd732da01c9f173721cf98fc3506eb3f8074cdd1b2e9272c1a18f9943"
+      "sha256": "33554a40c51fd89b144af2b456f28f9c12b5ad11062b2fdb6ddc6c1f1ebb6ab9"
     },
     "dist/assets/css/moo.min.css": {
-      "sha256": "f62d24ae3784104f01355fee4a2590f39f361ea0b1875d488c288d4edc8be8c7"
+      "sha256": "174cc032cd83d8d8c7626af1c9335b833194e5b46c35884206f12dfaa7ff4dab"
     },
     "dist/js/chart.js": {
       "sha256": "1372a027d447958febf5faf9a3903e2f5d4b6e01c9df7dda983b7e399c4c1b53"
@@ -73,7 +73,7 @@
       "sha256": "1d2a40d14e96de2cd45b544c96493f75bbee5b40d51ce1e0331877bce3076c95"
     },
     "dist/release-manifest.json": {
-      "sha256": "8c18fdb44f2773a188abd56684af8bbe6fd1709ea1e3357dfabaf70800268541"
+      "sha256": "70cbf339ea813417c97bff72e97834c1117d0058ee915ad07a77170d3e086830"
     }
   },
   "distFiles": [
@@ -162,7 +162,9 @@
     "scss/components/_item.scss",
     "scss/components/_kbd.scss",
     "scss/components/_menubar.scss",
+    "scss/components/_navbar.scss",
     "scss/components/_navigation.scss",
+    "scss/components/_offcanvas.scss",
     "scss/components/_pagination.scss",
     "scss/components/_popover.scss",
     "scss/components/_progress.scss",
@@ -758,16 +760,16 @@
       "sha256": "b6145a590303b6f118616a082471129155324476da22fbbe8f5dcc04844465c6"
     },
     "site-dist/assets/css/moo-ui.css": {
-      "sha256": "74ace06833227d1579e40f92dd5c13c0b804416b06f62354a37e53bff26eb0eb"
+      "sha256": "9e56f1ccf1bfc64a19b5a75df8139cca50d45a6b40997620d2dc8a6a6a373bed"
     },
     "site-dist/assets/css/moo-ui.min.css": {
-      "sha256": "55bfce3129c1d9f85943dd2cd8b38e4445b29d0264dab6168ef7520e3930baf4"
+      "sha256": "fc29e21e5179fb4faaa4c91566d6e9a0735ec23fa0f3e4ee62d7dfbedd725e56"
     },
     "site-dist/assets/css/moo.css": {
-      "sha256": "4ac09fbfd732da01c9f173721cf98fc3506eb3f8074cdd1b2e9272c1a18f9943"
+      "sha256": "33554a40c51fd89b144af2b456f28f9c12b5ad11062b2fdb6ddc6c1f1ebb6ab9"
     },
     "site-dist/assets/css/moo.min.css": {
-      "sha256": "f62d24ae3784104f01355fee4a2590f39f361ea0b1875d488c288d4edc8be8c7"
+      "sha256": "174cc032cd83d8d8c7626af1c9335b833194e5b46c35884206f12dfaa7ff4dab"
     },
     "site-dist/assets/fonts/geist/Geist-Variable.woff2": {
       "sha256": "a369fcf5628ea2aa4e1b9e2ec6a5b3624e365bda588e1f0f2f12b564f728fbb8"
@@ -1133,7 +1135,7 @@
       "sha256": "4ac048be0006debecec8aec27a164fb29f5c36945d2b297a12b013deaeb6e92f"
     },
     "site-dist/assets/images/site-header/logo.svg": {
-      "sha256": "073b8f7298c9163ec6067617fbb3078ea3e69129d0d69efb098063754c546cc1"
+      "sha256": "d1ccfb9923533c13a41ccee358ed099feddbd374d6cb70d69ad3a42949a817db"
     },
     "site-dist/assets/js/bootstrap.bundle.min.js": {
       "sha256": "0833b2e9c3a26c258476c46266e6877fc75218625162e0460be9a3a098a61c6c"
@@ -1337,16 +1339,16 @@
       "sha256": "ce31a5fe4a9500a4edda13cd7376da63c4f1cd90bbacb28e088f1ac39b5d4534"
     },
     "site-dist/blocks/previews/site-header-dark/index.html": {
-      "sha256": "3c5d504cb78e9373ecde859bcf4ba5e17e9d7438dd70ee5dc788fd4fba218697"
+      "sha256": "141c03603b7360a809ae9a071ec1c6233c135455e158ab928d7391d3c7e9989c"
     },
     "site-dist/blocks/previews/site-header-logo/index.html": {
-      "sha256": "6dac4a2cc5218409ed712eb551594dda807f85e2284e0a7692db0b055fcfe543"
+      "sha256": "3ae0de8f58257ddc34701ae9702b5975954285ab81be507bd78b0cc4c7061d01"
     },
     "site-dist/blocks/previews/site-header-rtl/index.html": {
-      "sha256": "c1c5f28a695589e4cb4fb51218b052c5d6497c25f95808cd5825a73ecc91c88f"
+      "sha256": "14b3172deae849445b335143991afcf2bb668909b2ece77f7f5a22789c7d0b7d"
     },
     "site-dist/blocks/previews/site-header/index.html": {
-      "sha256": "186e82cbdae19aa04d0dd34ff6ce559b0cb7ae1d4a964dc9a3abea92b6c0f490"
+      "sha256": "d4fcbc80e17e9c229667001662a7f4ac0076b91db4d336975f8ac88b4105fb1c"
     },
     "site-dist/blocks/previews/toc/index.html": {
       "sha256": "ffa012dfc8ee450400f51b0a3c9bf5c4e85c39c889919b4896707f48e64d431d"
@@ -1364,7 +1366,7 @@
       "sha256": "f72bce17265bcbe283aace04c49593f1e20e4a2a42a27b6abbc0d2f3ef935a34"
     },
     "site-dist/blocks/site-header/index.html": {
-      "sha256": "0a34c56e8e7a9568bf11b22e0450e07dc4a6a25a8d7ad331a2f18e0bb2dc7cde"
+      "sha256": "f4edb9c82c90e41347210c1d2c8ab044abd3af4b42ca5a4cf8375daa4d9d800b"
     },
     "site-dist/blocks/video-dialog/index.html": {
       "sha256": "1e27d27e56657e4667372e5c8980cf0cd038956b8ac35c3c3727247bb3e43af8"
@@ -1529,16 +1531,16 @@
       "sha256": "19cc1440687751cbbd83bc3e8b3f81e894cb26611f48048a6295b6fa1ffe0018"
     },
     "site-dist/dist/assets/css/moo-ui.css": {
-      "sha256": "74ace06833227d1579e40f92dd5c13c0b804416b06f62354a37e53bff26eb0eb"
+      "sha256": "9e56f1ccf1bfc64a19b5a75df8139cca50d45a6b40997620d2dc8a6a6a373bed"
     },
     "site-dist/dist/assets/css/moo-ui.min.css": {
-      "sha256": "55bfce3129c1d9f85943dd2cd8b38e4445b29d0264dab6168ef7520e3930baf4"
+      "sha256": "fc29e21e5179fb4faaa4c91566d6e9a0735ec23fa0f3e4ee62d7dfbedd725e56"
     },
     "site-dist/dist/assets/css/moo.css": {
-      "sha256": "4ac09fbfd732da01c9f173721cf98fc3506eb3f8074cdd1b2e9272c1a18f9943"
+      "sha256": "33554a40c51fd89b144af2b456f28f9c12b5ad11062b2fdb6ddc6c1f1ebb6ab9"
     },
     "site-dist/dist/assets/css/moo.min.css": {
-      "sha256": "f62d24ae3784104f01355fee4a2590f39f361ea0b1875d488c288d4edc8be8c7"
+      "sha256": "174cc032cd83d8d8c7626af1c9335b833194e5b46c35884206f12dfaa7ff4dab"
     },
     "site-dist/dist/js/chart.js": {
       "sha256": "1372a027d447958febf5faf9a3903e2f5d4b6e01c9df7dda983b7e399c4c1b53"
@@ -1601,7 +1603,7 @@
       "sha256": "1d2a40d14e96de2cd45b544c96493f75bbee5b40d51ce1e0331877bce3076c95"
     },
     "site-dist/dist/release-manifest.json": {
-      "sha256": "8c18fdb44f2773a188abd56684af8bbe6fd1709ea1e3357dfabaf70800268541"
+      "sha256": "70cbf339ea813417c97bff72e97834c1117d0058ee915ad07a77170d3e086830"
     },
     "site-dist/examples/auth/forgot-password/index.html": {
       "sha256": "3b89bf32cd686842807a35287426ff8db0d0de425ba94c4df01b8eabc54cdc71"
