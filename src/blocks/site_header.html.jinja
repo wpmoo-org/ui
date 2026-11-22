@@ -39,7 +39,9 @@
    outside the header or point it at the document owner.
 
    drawer_only on an item adds d-{breakpoint}-none, so it shows only in the
-   drawer. The caller body renders at the row end, beside the toggler.
+   drawer. The caller body (header actions) ends the main row from the
+   breakpoint up, so the utility row spans above it to the same edge; below
+   the breakpoint it follows the main links inside the drawer.
 
    Dark surface: Moo builds Bootstrap with $enable-dark-mode off, so
    data-bs-theme="dark" on its own would not change any token. A nested
@@ -113,9 +115,14 @@
           {{ close_button(aria_label=close_label, dismiss="offcanvas") }}
         </div>
         <div class="offcanvas-body d-flex flex-column flex-{{ breakpoint }}-column-reverse align-items-{{ breakpoint }}-end gap-3 gap-{{ breakpoint }}-0">
-          <ul class="navbar-nav">
-            {% for item in items %}{{ _site_header_item(item, breakpoint) }}{% endfor %}
-          </ul>
+          <div class="d-flex flex-column flex-{{ breakpoint }}-row align-items-{{ breakpoint }}-center gap-3 gap-{{ breakpoint }}-2">
+            <ul class="navbar-nav">
+              {% for item in items %}{{ _site_header_item(item, breakpoint) }}{% endfor %}
+            </ul>
+            {% if caller is defined %}
+              <div class="d-flex align-items-center gap-2">{{ caller() | trim | safe }}</div>
+            {% endif %}
+          </div>
           {% if utility_items %}
             <ul class="navbar-nav small">
               {% for item in utility_items %}{{ _site_header_item(item, breakpoint) }}{% endfor %}
@@ -123,10 +130,7 @@
           {% endif %}
         </div>
       </div>
-      <div class="d-flex align-items-center gap-2 ms-auto">
-        {% if caller is defined %}{{ caller() | trim | safe }}{% endif %}
-        {{ button("", variant="ghost", size="icon", icon_start="menu", aria_label=menu_label, sheet_target=drawer_id, aria_controls=drawer_id, extra_class="d-" ~ breakpoint ~ "-none") }}
-      </div>
+      {{ button("", variant="ghost", size="icon", icon_start="menu", aria_label=menu_label, sheet_target=drawer_id, aria_controls=drawer_id, extra_class="ms-auto d-" ~ breakpoint ~ "-none") }}
     </div>
   </nav>
 {%- endmacro %}

@@ -40,6 +40,54 @@ class _Tags(HTMLParser):
         self.tags.append((tag, dict(attrs)))
 
 
+VOID = {"img", "input", "br", "hr", "meta", "link"}
+
+
+class Node:
+    def __init__(self, tag: str, attrs: dict[str, str | None]) -> None:
+        self.tag = tag
+        self.attrs = attrs
+        self.children: list[Node] = []
+
+    @property
+    def classes(self) -> set[str]:
+        return set((self.attrs.get("class") or "").split())
+
+    def find(self, predicate):
+        if predicate(self):
+            return self
+        for child in self.children:
+            found = child.find(predicate)
+            if found is not None:
+                return found
+        return None
+
+
+class _Tree(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.root = Node("root", {})
+        self.stack = [self.root]
+
+    def handle_starttag(self, tag, attrs):
+        node = Node(tag, dict(attrs))
+        self.stack[-1].children.append(node)
+        if tag not in VOID:
+            self.stack.append(node)
+
+    def handle_endtag(self, tag):
+        for index in range(len(self.stack) - 1, 0, -1):
+            if self.stack[index].tag == tag:
+                del self.stack[index:]
+                return
+
+
+def dom(html: str) -> Node:
+    parser = _Tree()
+    parser.feed(html)
+    return parser.root
+
+
 def tags(html: str) -> list[tuple[str, dict[str, str | None]]]:
     parser = _Tags()
     parser.feed(html)
@@ -179,11 +227,51 @@ class SiteHeaderTests(CatalogTestCase):
         self.assertIn("moo-ui", classes(dark_nav))
         self.assertEqual(dark_nav["data-bs-theme"], "dark")
 
-    def test_caller_content_at_row_end_after_drawer(self) -> None:
-        html = header(body='<a class="btn" id="action-slot" href="/apply">Apply</a>')
-        self.assertIn('id="action-slot"', html)
-        self.assertGreater(html.index("action-slot"), html.index('id="hdr-drawer"'))
-        self.assertLess(html.index("action-slot"), html.index('data-bs-toggle="offcanvas"'))
+    def test_actions_sit_in_drawer_body_row_after_main_list(self) -> None:
+        html = header(
+            "items=" + ITEMS + ", utility_items=" + UTILITY,
+            body='<a class="btn" id="action-slot" href="/apply">Apply</a>',
+        )
+        root = dom(html)
+        body = root.find(lambda n: "offcanvas-body" in n.classes)
+        self.assertIsNotNone(body)
+        row = body.children[0]
+        self.assertTrue({"d-flex", "flex-column", "flex-lg-row", "align-items-lg-center"} <= row.classes)
+        # Row children, in DOM order: the main list, then the actions wrapper.
+        self.assertEqual([c.tag for c in row.children], ["ul", "div"])
+        self.assertIn("navbar-nav", row.children[0].classes)
+        actions = row.children[1]
+        self.assertTrue({"d-flex", "align-items-center"} <= actions.classes)
+        self.assertIsNotNone(actions.find(lambda n: n.attrs.get("id") == "action-slot"))
+        # The utility list follows the row wrapper, still inside the body.
+        self.assertEqual([c.tag for c in body.children], ["div", "ul"])
+        self.assertIn("small", body.children[1].classes)
+        # Nothing of the caller body leaks outside the drawer body.
+        self.assertEqual(html.count("action-slot"), 1)
+
+    def test_no_actions_wrapper_without_caller(self) -> None:
+        html = render(
+            '{% from "blocks/site_header.html.jinja" import site_header %}'
+            '{{ site_header("hdr", "Main navigation", {"label": "School"}, items=' + ITEMS + ") }}"
+        )
+        body = dom(html).find(lambda n: "offcanvas-body" in n.classes)
+        row = body.children[0]
+        self.assertEqual([c.tag for c in row.children], ["ul"])
+
+    def test_toggler_is_a_direct_container_child_after_the_drawer(self) -> None:
+        root = dom(header("items=" + ITEMS))
+        nav = root.find(lambda n: n.tag == "nav")
+        container = nav.children[0]
+        self.assertIn("container", container.classes)
+        tags_in_order = [(c.tag, c.attrs.get("data-bs-toggle")) for c in container.children]
+        self.assertEqual([t for t, _ in tags_in_order], ["a", "div", "button"])
+        drawer, toggler = container.children[1], container.children[2]
+        self.assertIn("offcanvas", drawer.classes)
+        self.assertEqual(toggler.attrs["data-bs-toggle"], "offcanvas")
+        self.assertEqual(toggler.attrs["aria-controls"], drawer.attrs["id"])
+        self.assertTrue({"ms-auto", "d-lg-none"} <= toggler.classes)
+        xl = dom(header('breakpoint="xl"')).find(lambda n: n.tag == "nav").children[0].children[2]
+        self.assertTrue({"ms-auto", "d-xl-none"} <= xl.classes)
 
     def test_extra_class_and_container(self) -> None:
         html = header('extra_class="sticky-top", container="container-xl"')
